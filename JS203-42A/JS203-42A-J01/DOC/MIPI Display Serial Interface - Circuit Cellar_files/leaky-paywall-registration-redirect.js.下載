@@ -1,0 +1,11 @@
+( function( $ )  {
+
+	$(document).ready( function() {
+
+		$('.leaky-paywall-redirect-after-register-close').click(function() {
+			$('#leaky-paywall-redirect-after-register-confirmation').slideUp();
+		});
+
+	});
+
+})( jQuery );

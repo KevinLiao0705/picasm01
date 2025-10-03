@@ -1,0 +1,422 @@
+
+
+/*
+        JS203_42A_B01 MAIN,SIP
+        JS203_42A_C01 FXO,FXS,T1
+        JS203_42A_H01 VOIP
+        JS203_42A_E01 MAG
+        JS203_42A_K01 RECORD
+
+*/
+
+;=======================PIN1 
+.EQU SLOTID2_I			,PORTA
+.EQU SLOTID2_IO			,TRISA
+.EQU SLOTID2_I_P		,7
+.EQU SLOTID2_IO_P		,7
+;=======================PIN2 
+.EQU RS485_CTL_O		,LATB
+.EQU RS485_CTL_IO		,TRISB
+.EQU RS485_CTL_O_P		,14
+.EQU RS485_CTL_IO_P		,14
+;=======================PIN3 
+.EQU RS485_TX_I			,PORTB
+.EQU RS485_TX_IO		,TRISB
+.EQU RS485_TX_I_P		,15
+.EQU RS485_TX_IO_P		,15
+;=======================PIN4 
+.EQU RS485_RX_O			,LATG
+.EQU RS485_RX_IO		,TRISG
+.EQU RS485_RX_O_P		,6
+.EQU RS485_RX_IO_P		,6
+;=======================PIN5 
+.EQU SER_TX1_I			,PORTG
+.EQU SER_TX1_IO			,TRISG
+.EQU SER_TX1_I_P		,7
+.EQU SER_TX1_IO_P		,7
+.EQU ROIP4_TX_I			,PORTG  ;H01 SPARE
+.EQU ROIP4_TX_IO		,TRISG
+.EQU ROIP4_TX_I_P		,7
+.EQU ROIP4_TX_IO_P		,7
+;=======================PIN6 
+.EQU SER_RX1_O			,LATG
+.EQU SER_RX1_IO			,TRISG
+.EQU SER_RX1_O_P		,8
+.EQU SER_RX1_IO_P		,8
+.EQU ROIP4_RX_O			,LATG   ;H01 SPARE
+.EQU ROIP4_RX_IO		,TRISG
+.EQU ROIP4_RX_O_P		,8
+.EQU ROIP4_RX_IO_P		,8
+
+;=======================PIN7	MCLR 
+;=======================PIN8 
+.EQU SLOTID3_I			,PORTG
+.EQU SLOTID3_IO			,TRISG
+.EQU SLOTID3_I_P		,9
+.EQU SLOTID3_IO_P		,9
+;=======================PIN9	VSS 
+;=======================PIN10 	VDD
+;=======================PIN11 
+;.EQU MCURX1_I			,PORTA
+;.EQU MCURX1_IO			,TRISA
+;.EQU MCURX1_I_P		,12
+;.EQU MCURX1_IO_P		,12
+;=======================PIN12 
+;.EQU MCURX2_I			,PORTA
+;.EQU MCURX2_IO			,TRISA
+;.EQU MCURX2_I_P		,11
+;.EQU MCURX2_IO_P		,11
+;=======================PIN13 
+.EQU TP4_O			,LATA   ;H01
+.EQU TP4_IO			,TRISA
+.EQU TP4_O_P		        ,0
+.EQU TP4_IO_P		        ,0
+;=======================PIN14 
+.EQU PW_DET_I			,PORTA  
+.EQU PW_DET_IO			,TRISA
+.EQU PW_DET_I_P			,1
+.EQU PW_DET_IO_P		,1
+;=======================PIN15 
+.EQU SLOTID4_I			,LATB
+.EQU SLOTID4_IO			,TRISB
+.EQU SLOTID4_I_P		,0
+.EQU SLOTID4_IO_P		,0
+;=======================PIN16 
+.EQU SW_EN_O			,LATB
+.EQU SW_EN_IO			,TRISB
+.EQU SW_EN_O_P			,1
+.EQU SW_EN_IO_P			,1
+;=======================PIN17	PGC 
+;=======================PIN18 	PGD
+;=======================PIN19	VDD 
+;=======================PIN20 	VSS
+;=======================PIN21 
+.EQU DB0_O		,LATC
+.EQU DB0_I		,PORTC
+.EQU DB0_IO		,TRISC
+.EQU DB0_O_P		,0
+.EQU DB0_I_P		,0
+.EQU DB0_IO_P		,0
+;=======================PIN22 
+.EQU DB1_O		,LATC
+.EQU DB1_I		,PORTC
+.EQU DB1_IO		,TRISC
+.EQU DB1_O_P		,1
+.EQU DB1_I_P		,1
+.EQU DB1_IO_P		,1
+;=======================PIN23 
+.EQU DB2_O		,LATC
+.EQU DB2_I		,PORTC
+.EQU DB2_IO		,TRISC
+.EQU DB2_O_P		,2
+.EQU DB2_I_P		,2
+.EQU DB2_IO_P		,2
+;=======================PIN24 
+.EQU TP1_O		,LATC   ;H01
+.EQU TP1_IO		,TRISC
+.EQU TP1_O_P		,11
+.EQU TP1_IO_P		,11
+;=======================PIN25	VSS 
+;=======================PIN26 	VDD
+;=======================PIN27 
+.EQU T1_LED_D1P_I	,PORTE  ;C01
+.EQU T1_LED_D1P_IO	,TRISE
+.EQU T1_LED_D1P_I_P	,12
+.EQU T1_LED_D1P_IO_P	,12
+.EQU TP2_O		,LATE   ;H01
+.EQU TP2_IO		,TRISE
+.EQU TP2_O_P		,12
+.EQU TP2_IO_P		,12
+;=======================PIN28 
+.EQU T1_LED_D1N_I	,PORTE  ;C01
+.EQU T1_LED_D1N_IO	,TRISE
+.EQU T1_LED_D1N_I_P	,13
+.EQU T1_LED_D1N_IO_P	,13
+.EQU TP3_O		,LATE   ;H01
+.EQU TP3_IO		,TRISE
+.EQU TP3_O_P		,13
+.EQU TP3_IO_P		,13
+;=======================PIN29 
+.EQU LAN_LINK1000_I	,PORTE  ;B01
+.EQU LAN_LINK1000_IO	,TRISE
+.EQU LAN_LINK1000_I_P	,14
+.EQU LAN_LINK1000_IO_P	,14
+.EQU T1_LED_D2P_I	,PORTE  ;C01
+.EQU T1_LED_D2P_IO	,TRISE
+.EQU T1_LED_D2P_I_P	,14
+.EQU T1_LED_D2P_IO_P	,14
+;=======================PIN30 
+.EQU LAN_LINK100_I	,PORTE  ;B01  
+.EQU LAN_LINK100_IO	,TRISE
+.EQU LAN_LINK100_I_P	,15
+.EQU LAN_LINK100_IO_P	,15
+.EQU T1_LED_D2N_I	,PORTE  ;C01
+.EQU T1_LED_D2N_IO	,TRISE
+.EQU T1_LED_D2N_I_P	,15
+.EQU T1_LED_D2N_IO_P	,15
+.EQU ROIP3_TX_I		,PORTE  ;H01 SPARE
+.EQU ROIP3_TX_IO	,TRISE
+.EQU ROIP3_TX_I_P	,15
+.EQU ROIP3_TX_IO_P	,15
+;=======================PIN31 
+.EQU LAN_LINK_ACK_I	,PORTE  ;B01
+.EQU LAN_LINK_ACK_IO	,TRISE
+.EQU LAN_LINK_ACK_I_P	,8
+.EQU LAN_LINK_ACK_IO_P	,8
+.EQU T1_LED_D3P_I	,PORTA  ;C01
+.EQU T1_LED_D3P_IO	,TRISA
+.EQU T1_LED_D3P_I_P	,8
+.EQU T1_LED_D3P_IO_P	,8
+.EQU ROIP2_TX_I		,PORTA  ;H01
+.EQU ROIP2_TX_IO	,TRISA
+.EQU ROIP2_TX_I_P	,8
+.EQU ROIP2_TX_IO_P	,8
+.EQU MCURX2_I		,PORTA
+.EQU MCURX2_IO		,TRISA
+.EQU MCURX2_I_P		,8
+.EQU MCURX2_IO_P	,8
+;=======================PIN32 
+.EQU SUS_S4_I	        ,PORTB  ;B01
+.EQU SUS_S4_IO	        ,TRISB
+.EQU SUS_S4_I_P	        ,4 
+.EQU SUS_S4_IO_P	,4 
+.EQU T1_LED_D3N_I	,PORTB  ;C01
+.EQU T1_LED_D3N_IO	,TRISB
+.EQU T1_LED_D3N_I_P	,4 
+.EQU T1_LED_D3N_IO_P	,4 
+.EQU IIC_CLK_O	        ,LATB   ;E01
+.EQU IIC_CLK_IO	        ,TRISB
+.EQU IIC_CLK_O_P	,4 
+.EQU IIC_CLK_IO_P	,4 
+.EQU ROIP2_RX_O		,LATB   ;H01
+.EQU ROIP2_RX_IO	,TRISB
+.EQU ROIP2_RX_O_P	,4
+.EQU ROIP2_RX_IO_P	,4
+.EQU MCUTX2_O		,LATB
+.EQU MCUTX2_IO		,TRISB
+.EQU MCUTX2_O_P		,4
+.EQU MCUTX2_IO_P	,4
+.EQU MAGTX_O		,LATB
+.EQU MAGTX_IO		,TRISB
+.EQU MAGTX_O_P		,4
+.EQU MAGTX_IO_P	,4
+;=======================PIN33 
+.EQU T1_LED_D4P_I	,PORTA  ;C01
+.EQU T1_LED_D4P_IO	,TRISA
+.EQU T1_LED_D4P_I_P	,4 
+.EQU T1_LED_D4P_IO_P	,4 
+.EQU IIC_SDA_I	        ,PORTA  ;E01
+.EQU IIC_SDA_IO	        ,TRISA
+.EQU IIC_SDA_I_P	,4 
+.EQU IIC_SDA_IO_P	,4 
+.EQU ROIP1_RX_O		,LATA   ;H01
+.EQU ROIP1_RX_IO	,TRISA
+.EQU ROIP1_RX_O_P	,4
+.EQU ROIP1_RX_IO_P	,4
+.EQU MCUTX1_O		,LATA
+.EQU MCUTX1_IO		,TRISA
+.EQU MCUTX1_O_P		,4
+.EQU MCUTX1_IO_P	,4
+.EQU MAGRX_I		,PORTA
+.EQU MAGRX_IO		,TRISA
+.EQU MAGRX_I_P		,4
+.EQU MAGRX_IO_P	        ,4
+
+
+;=======================PIN34 
+.EQU T1_LED_D4N_I	,PORTA  ;C01
+.EQU T1_LED_D4N_IO	,TRISA
+.EQU T1_LED_D4N_I_P	,9 
+.EQU T1_LED_D4N_IO_P	,9 
+.EQU ROIP1_TX_I		,PORTA  ;H01
+.EQU ROIP1_TX_IO	,TRISA
+.EQU ROIP1_TX_I_P	,9
+.EQU ROIP1_TX_IO_P	,9
+.EQU MCURX1_I		,PORTA
+.EQU MCURX1_IO		,TRISA
+.EQU MCURX1_I_P		,9
+.EQU MCURX1_IO_P	,9
+;=======================PIN35
+.EQU DB3_O		,LATC
+.EQU DB3_I		,PORTC
+.EQU DB3_IO		,TRISC
+.EQU DB3_O_P		,3
+.EQU DB3_I_P		,3
+.EQU DB3_IO_P		,3
+;=======================PIN36
+.EQU DB4_O		,LATC
+.EQU DB4_I		,PORTC
+.EQU DB4_IO		,TRISC
+.EQU DB4_O_P		,4
+.EQU DB4_I_P		,4
+.EQU DB4_IO_P		,4
+;=======================PIN37 
+.EQU DB5_O		,LATC
+.EQU DB5_I		,PORTC
+.EQU DB5_IO		,TRISC
+.EQU DB5_O_P		,5
+.EQU DB5_I_P		,5
+.EQU DB5_IO_P		,5
+;=======================PIN38 	VDD
+;=======================PIN39 	OSC1
+;=======================PIN40 	OSC2
+;=======================PIN41 	VSS
+;=======================PIN42 
+.EQU POWER_EN_O		,LATD
+.EQU POWER_EN_IO	,TRISD
+.EQU POWER_EN_O_P	,8 
+.EQU POWER_EN_IO_P	,8 
+;=======================PIN43
+.EQU LEDRX_I		,PORTB  ;TO LED PANEL
+.EQU LEDRX_IO		,TRISB
+.EQU LEDRX_I_P		,5 
+.EQU LEDRX_IO_P	        ,5 
+.EQU SPI_DI_I		,PORTB
+.EQU SPI_DI_IO		,TRISB
+.EQU SPI_DI_I_P		,5 
+.EQU SPI_DI_IO_P	,5 
+
+;=======================PIN44 
+.EQU LEDTX_O		,LATB   ;TO LED PANEL
+.EQU LEDTX_IO		,TRISB
+.EQU LEDTX_O_P		,6 
+.EQU LEDTX_IO_P	,6 
+.EQU SPI_DO_O		,LATB
+.EQU SPI_DO_IO	        ,TRISB
+.EQU SPI_DO_O_P	        ,7 
+.EQU SPI_DO_IO_P	,7 
+;=======================PIN45
+;.EQU I2C_SCK_I		,PORTC
+;.EQU I2C_SCK_IO	,TRISC
+;.EQU I2C_SCK_I_P	,10 
+;.EQU I2C_SCK_IO_P	,10 
+;=======================PIN46
+.EQU SPI_SCL_O		,LATB
+.EQU SPI_SCL_IO	        ,TRISB
+.EQU SPI_SCL_O_P	,7 
+.EQU SPI_SCL_IO_P	,7 
+;=======================PIN47 
+.EQU MCU_LED_O		,LATC
+.EQU MCU_LED_IO	        ,TRISC
+.EQU MCU_LED_O_P	,13 
+.EQU MCU_LED_IO_P	,13 
+;=======================PIN48
+.EQU SPI_CS_O		,LATB
+.EQU SPI_CS_IO		,TRISB
+.EQU SPI_CS_O_P		,8 
+.EQU SPI_CS_IO_P	,8 
+;=======================PIN49
+.EQU PWRON_O		,LATB   ;ELSE
+.EQU PWRON_IO		,TRISB
+.EQU PWRON_O_P		,9
+.EQU PWRON_IO_P		,9
+.EQU ROIP3_RX_O		,LATB   ;H01 SPARE
+.EQU ROIP3_RX_IO	,TRISB
+.EQU ROIP3_RX_O_P	,9
+.EQU ROIP3_RX_IO_P	,9
+;=======================PIN50 
+.EQU DB6_O		,LATC
+.EQU DB6_I		,PORTC
+.EQU DB6_IO		,TRISC
+.EQU DB6_O_P		,6
+.EQU DB6_I_P		,6
+.EQU DB6_IO_P		,6
+;=======================PIN51 
+.EQU DB7_O		,LATC
+.EQU DB7_I		,PORTC
+.EQU DB7_IO		,TRISC
+.EQU DB7_O_P		,7
+.EQU DB7_I_P		,7
+.EQU DB7_IO_P		,7
+;=======================PIN52
+.EQU RESET_O		,LATC   ;H01 ELSE
+.EQU RESET_IO		,TRISC
+.EQU RESET_O_P		,8 
+.EQU RESET_IO_P		,8 
+;=======================PIN53
+;.EQU NC53_O		,LATD
+;.EQU NC53_IO		,TRISD
+;.EQU NC53_O_P		,5
+;.EQU NC53_IO_P		,5
+;=======================PIN54
+;.EQU NC54_I		,PORTD
+;.EQU NC54_IO		,TRISD
+;.EQU NC54_I_P		,6
+;.EQU NC54_IO_P		,6
+;=======================PIN55
+;.EQU PWM_O		,LATC	
+;.EQU PWM_IO		,TRISC
+;.EQU PWM_O_P		,9 
+;.EQU PWM_IO_P		,9 
+;=======================PIN56 	VCAP
+;=======================PIN57	VDD
+;=======================PIN58
+.EQU ROIP6_TX_I		,PORTF  ;H01 SPARE
+.EQU ROIP6_TX_IO	,TRISF
+.EQU ROIP6_TX_I_P	,0
+.EQU ROIP6_TX_IO_P	,0
+;=======================PIN59
+.EQU TP2_O		,LATF   ;H01 ELSE
+.EQU TP2_IO		,TRISF
+.EQU TP2_O_P		,1
+.EQU TP2_IO_P		,1
+.EQU ROIP6_RX_O		,LATF   ;H01 SPARE
+.EQU ROIP6_RX_IO	,TRISF
+.EQU ROIP6_RX_O_P	,1
+.EQU ROIP6_RX_IO_P	,1
+;=======================PIN60
+.EQU TP3_O		,LATB   ;H01 ELSE
+.EQU TP3_IO		,TRISB
+.EQU TP3_O_P		,10
+.EQU TP3_IO_P		,10
+;=======================PIN61
+.EQU TP4_O		,LATB
+.EQU TP4_IO		,TRISB
+.EQU TP4_O_P		,11 
+.EQU TP4_IO_P		,11 
+.EQU ROIP5_RX_O		,LATB   ;H01 SPARE
+.EQU ROIP5_RX_IO	,TRISB
+.EQU ROIP5_RX_O_P	,11
+.EQU ROIP5_RX_IO_P	,11
+
+.IFDEF REC_CARD_DK
+;=======================PIN62
+.EQU SLOTID0_I		,PORTB	
+.EQU SLOTID0_IO		,TRISB
+.EQU SLOTID0_I_P	,12 
+.EQU SLOTID0_IO_P	,12 
+;=======================PIN63
+.EQU SLOTID1_I		,PORTB
+.EQU SLOTID1_IO		,TRISB
+.EQU SLOTID1_I_P	,13
+.EQU SLOTID1_IO_P	,13
+
+;=======================PIN64
+;.EQU SLOTID1_I		,PORTA
+;.EQU SLOTID1_IO	,TRISA
+;.EQU SLOTID1_I_P	,10
+;.EQU SLOTID1_IO_P	,10
+;======================================================
+.ELSE
+;=======================PIN62
+.EQU TP5_O		,LATB
+.EQU TP5_IO		,TRISB
+.EQU TP5_O_P		,12 
+.EQU TP5_IO_P		,12 
+.EQU ROIP5_TX_I		,PORTB  ;H01 SPARE
+.EQU ROIP5_TX_IO	,TRISB
+.EQU ROIP5_TX_I_P	,12
+.EQU ROIP5_TX_IO_P	,12
+
+;=======================PIN63
+.EQU SLOTID0_I		,PORTB	
+.EQU SLOTID0_IO		,TRISB
+.EQU SLOTID0_I_P	,13 
+.EQU SLOTID0_IO_P	,13 
+;=======================PIN64
+.EQU SLOTID1_I		,PORTA
+.EQU SLOTID1_IO		,TRISA
+.EQU SLOTID1_I_P	,10
+.EQU SLOTID1_IO_P	,10
+;======================================================
+.ENDIF

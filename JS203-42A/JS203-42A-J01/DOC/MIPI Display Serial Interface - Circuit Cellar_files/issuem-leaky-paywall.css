@@ -1,0 +1,661 @@
+/* CSS Document */
+.leaky_paywall_message_wrap {
+	position: relative;
+	width: 100%;
+	margin: -5em auto 2em;
+	padding: 6em 0 0;
+	background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.5) 0.5em, #fff 5.5em, #fff 100%);
+}
+
+#leaky_paywall_message {
+	box-shadow: 0 0 0.5em 0.25em rgba(0,0,0,0.125);
+    padding: 1.375em;
+    border: .5em solid #FFFFFF;
+    -webkit-border-radius: .5em;
+	-moz-border-radius: .5em;
+	border-radius: .5em;
+	background-color: #e3e3e3;
+	color: #333333;
+	font-size: 1em;
+    line-height: 1.625;
+}
+
+#leaky_paywall_message a {
+	color: inherit;
+	font-weight: 600;
+}
+
+#leaky_paywall_message a:visited,
+#leaky_paywall_message a:hover,
+#leaky_paywall_message a:active,
+#leaky_paywall_message a:focus {
+	color: inherit;
+}
+
+.leaky_paywall_subscription_options {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+
+.leaky_paywall_subscription_option {
+	margin-bottom: 1em;
+	width: 32%;
+	padding: 1em;
+    border: .25em solid #e3e3e3;
+    -webkit-border-radius: .25em;
+	-moz-border-radius: .25em;
+	border-radius: .25em;
+	background: #ffffff;
+	color: #333;
+	font-size: 1em;
+    line-height: 1.625;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.leaky_paywall_subscription_option .leaky-paywall-subscription-current-level {
+	color: #007711;
+    font-size: 14px;
+	text-transform: uppercase;
+}
+
+@media (max-width: 990px) {
+	.leaky_paywall_subscription_option {
+		width: 48%;
+	}
+}
+
+@media (max-width: 600px) {
+	.leaky_paywall_subscription_option {
+		width: 95%;
+	}
+ }
+
+.leaky_paywall_subscription_option.current-level {
+    border: 2px solid #007711;
+    box-shadow: 0 0 20px #3e8e51;
+}
+
+.leaky_paywall_subscription_current_level {
+	color: #3e8e51;
+	padding: 5px;
+}
+
+.leaky_paywall_subscription_option h3 {
+	margin-bottom: 5px;
+}
+
+.leaky_paywall_subscription_allowed_content {
+	border-top: 1px solid #cccccc;
+	border-bottom: 1px solid #cccccc;
+	margin: 1em 0;
+	padding: 1em 0;
+}
+
+.leaky_paywall_subscription_allowed_content p {
+	margin: 0 0 .75em;
+	line-height: 1.2;
+}
+
+.leaky_paywall_subscription_allowed_content p:last-child {
+	margin-bottom: 0;
+}
+
+.leaky_paywall_subscription_price p {
+	margin-bottom: 1em;
+	line-height: 1.2;
+}
+
+.leaky_paywall_subscription_limit_details {
+	display: block;
+	width: 100%;
+	margin-top	30px;
+	color: #666;
+}
+
+.leaky-paywall-payment-button {
+	display: inline-block;
+	margin: 5px;
+}
+
+.leaky-paywall-free-button {
+	background: #4fd934;
+	background-image: -webkit-linear-gradient(top, #4fd934, #2bb857);
+	background-image: -moz-linear-gradient(top, #4fd934, #2bb857);
+	background-image: -ms-linear-gradient(top, #4fd934, #2bb857);
+	background-image: -o-linear-gradient(top, #4fd934, #2bb857);
+	background-image: linear-gradient(to bottom, #4fd934, #2bb857);
+	-webkit-border-radius: 5;
+	-moz-border-radius: 5;
+	border-radius: 5px;
+	color: #ffffff !important;
+	padding: 5px 20px 5px 20px;
+	border: solid #2bb857 1px;
+	text-decoration: none !important;
+	text-shadow: 0 -1px 0 rgba(0,0,0,0.25);
+}
+
+.paypal-description {
+	font-size: .8em;
+}
+
+.leaky-paywall-field-label {
+	display: block;
+}
+
+.leaky-paywall-payment-button a {
+	display: block;
+	min-height: 20px;
+	background: #32A3E4;
+	color: #fff;
+	padding: 7px 15px;
+	border-radius: 4px;
+	text-decoration: none;
+}
+
+.leaky-paywall-payment-button a:hover {
+	color: #fff;
+	background: #52B2E9;
+}
+
+.leaky_paywall_message {
+	border-radius: 4px;
+	margin-bottom: 1em;
+}
+
+.leaky_paywall_message.error {
+	background: #F8D7DA;
+	border: 1px solid #f5c6cb;
+	padding: 10px;
+}
+
+.leaky_paywall_message.error p {
+	margin-bottom: 5px;
+	margin-top: 0;
+	font-size: .875em;
+	color: #721c24;
+}
+
+.leaky_paywall_message.success {
+	background: #D4EDDA;
+	border: 1px solid #c3e6cb;;
+	padding: 10px;
+}
+
+.leaky_paywall_message.success p {
+	margin-bottom: 5px;
+	font-size: .875em;
+	color: #155724;
+}
+
+.leaky-paywall-payment-form .form-row label {
+	display: block;
+}
+
+.leaky-paywall-payment-method-container {
+	margin-bottom: 20px;
+}
+
+.leaky-paywall-payment-method-container img {
+	margin-left: 20px;
+}
+
+.leaky-paywall-test-mode-wrapper {
+	border: 1px solid red;
+	padding: 10px;
+	margin-bottom: 10px;
+}
+
+.leaky-paywall-test-mode-text {
+	color: red;
+}
+
+#leaky-paywall-update-credit-card label {
+	display: block;
+}
+
+#leaky-paywall-credit-card-form .exp-month, #leaky-paywall-update-credit-card .exp-month {
+	width: 75px;
+}
+
+#leaky-paywall-credit-card-form .exp-year, #leaky-paywall-update-credit-card .exp-year {
+	width: 125px;
+}
+
+.leaky-paywall-subscriber-info {
+	margin-bottom: 20px;
+}
+
+#leaky-paywall-profile .issuem-leaky-paywall-field-input {
+	min-width: 300px;
+}
+
+#leaky-paywall-login-form {
+	border: 1px solid #ddd;
+	padding: 20px;
+	max-width: 300px;
+	box-shadow: 0 1px 3px rgba(0,0,0,.13);
+}
+
+#leaky-paywall-login-form #loginform label {
+	display: block;
+}
+
+#leaky-paywall-login-form #loginform .input {
+	width: 98%;
+}
+
+#leaky-paywall-account-wrapper {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+#leaky-paywall-account-wrapper .leaky-paywall-account-navigation-wrapper {
+	width: 30%;
+	background: #000;
+}
+
+#leaky-paywall-account-wrapper .leaky-paywall-account-navigation-wrapper ul {
+	margin: 0;
+	padding: 0;
+}
+
+#leaky-paywall-account-wrapper .leaky-paywall-account-navigation-wrapper ul li {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+#leaky-paywall-account-wrapper .leaky-paywall-account-navigation-wrapper a {
+	color: #fff;
+	padding: 10px 10px 10px 20px;
+	margin: 0;
+	text-decoration: none;
+	display: block;
+	background: #000;
+	color: #929496;
+}
+
+#leaky-paywall-account-wrapper .leaky-paywall-account-navigation-wrapper a.active {
+	color: #fff;
+}
+
+#leaky-paywall-account-wrapper .leaky-paywall-account-navigation-wrapper a:hover {
+	 background: #666;
+	 color: #fff;
+}
+
+#leaky-paywall-account-wrapper .leaky-paywall-account-details-wrapper {
+	width: 70%;
+	border: 1px solid #ddd;
+	padding: 20px;
+}
+
+#leaky-paywall-account-wrapper .leaky-paywall-account-page-title {
+	margin-top: 0;
+}
+
+.leaky-paywall-account-table {
+	width: 100%;
+	border-collapse: collapse;
+	border-spacing: 0;
+	margin-bottom: 20px;
+}
+
+.leaky-paywall-account-table tr {
+	border-bottom: 1px solid #d9dadc;
+}
+
+.leaky-paywall-account-table td {
+	width: 50%;
+}
+
+.leaky-paywall-account-table td.profile-table-label {
+	color: #9E9E9E;
+}
+
+.leaky-paywall-account-table td.profile-table-value {
+	color: #000;
+}
+
+#leaky-paywall-account-edit-profile-form input {
+	width: 300px;
+}
+
+.leaky-paywall-input-error {
+	color: red;
+	font-size: 12px;
+}
+
+#leaky-paywall-registration-next {
+	min-width: 200px;
+}
+
+#leaky-paywall-payment-form #checkout {
+	min-width: 200px;
+	display: inline-block;
+    text-align: center;
+    word-break: break-word;
+    background-color: #016B83;
+    color: #fff;
+    border: 1px solid #204AA7;
+	border-radius: 3px;
+    padding: 1rem 2rem;
+    margin-top: 1rem;
+    text-decoration: none;
+    font-size: medium;
+    cursor: pointer;
+	text-transform: uppercase;
+	font-weight: normal;
+}
+
+#leaky-paywall-submit, #leaky-paywall-registration-next {
+	min-width: 200px;
+	display: inline-block;
+    text-align: center;
+    word-break: break-word;
+    background-color: #016B83;
+    color: #fff;
+    border: 1px solid #204AA7;
+	border-radius: 3px;
+    padding: 1rem 2rem;
+    margin-top: 1rem;
+    text-decoration: none;
+    font-size: medium;
+    cursor: pointer;
+	text-transform: uppercase;
+}
+
+#leaky-paywall-submit:hover, #leaky-paywall-registration-next:hover {
+	text-decoration: underline;
+}
+
+#card-element {
+	margin-bottom: 20px;
+	background: #E7E9EB;
+}
+
+#card-errors {
+	color: red;
+	font-size: 14px;
+	margin-bottom: 20px;
+}
+
+.leaky-paywall-form-steps {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	margin: 40px auto 20px;
+	border-bottom: 3px solid #ddd;
+	padding: 10px;
+}
+
+.leaky-paywall-form-steps .leaky-paywall-form-step {
+	width: 50%;
+	text-align: center;
+	padding: 3px;
+	text-transform: uppercase;
+	font-size: 14px;
+}
+
+.leaky-paywall-form-steps .leaky-paywall-form-step.active {
+
+	font-weight: bold;
+
+}
+
+.leaky-paywall-form-steps .leaky-paywall-form-step .step-number {
+	display: inline-block;
+	background: #ddd;
+	padding: 0 5px;
+	width: 30px;
+	color: #000;
+	text-align: center;
+	line-height: 30px;
+	vertical-align: middle;
+	border-radius: 3px;
+}
+
+.leaky-paywall-form-steps .leaky-paywall-form-step .step-title {
+	display: block;
+}
+
+.leaky-paywall-form-steps .leaky-paywall-form-step.active .step-number {
+	color: #fff;
+	background: #016B83;
+}
+
+.leaky-paywall-user-fields input {
+	width: 100%;
+	border: 1px solid var(--wp--preset--color--black);
+    border-radius: 0;
+    font-size: var(--wp--preset--font-size--small);
+    padding: 0.9rem 1.1rem;
+}
+
+.leaky-paywall-account-fields h3 {
+	margin-top: 20px;
+}
+
+.leaky-paywall-account-fields input {
+	width: 100%;
+	border: 1px solid var(--wp--preset--color--black);
+    border-radius: 0;
+    font-size: var(--wp--preset--font-size--small);
+    padding: 0.9rem 1.1rem;
+}
+
+.leaky-paywall-custom-reg-fields input, .leaky-paywall-custom-reg-fields textarea, .leaky-paywall-custom-reg-fields select {
+	width: 100%;
+	border: 1px solid var(--wp--preset--color--black);
+    border-radius: 0;
+    font-size: var(--wp--preset--font-size--small);
+    padding: 0.9rem 1.1rem;
+}
+
+.leaky-paywall-custom-reg-fields .checkboxes input {
+	width: auto;
+}
+
+.leaky-paywall-custom-reg-fields .checkboxes label {
+	display: inline-block;
+}
+
+.StripeElement {
+	background-color: white;
+	height: auto;
+	padding: 10px 12px;
+	border-radius: 4px;
+	border: 1px solid transparent;
+	box-shadow: 0 1px 3px 0 #e6ebf1;
+	-webkit-transition: box-shadow 150ms ease;
+	transition: box-shadow 150ms ease;
+}
+
+.StripeElement--focus {
+	box-shadow: 0 1px 3px 0 #cfd7df;
+}
+
+.StripeElement--invalid {
+	border-color: #fa755a;
+}
+
+.StripeElement--webkit-autofill {
+	background-color: #fefde5 !important;
+}
+
+
+/**************************\
+  Basic Modal Styles
+\**************************/
+
+.zeen101-modal {
+    display: none;
+}
+
+.zeen101-modal.is-open {
+	z-index: 99999;
+   display: block;
+}
+
+
+.zeen101-modal .modal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.zeen101-modal .modal__container {
+  background-color: #fff;
+  padding: 30px;
+  max-width: 500px;
+  max-height: 100vh;
+  border-radius: 4px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.zeen101-modal .modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  display: none;
+}
+
+.zeen101-modal .modal__title {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-weight: 600;
+  font-size: 1.25rem;
+  line-height: 1.25;
+  box-sizing: border-box;
+}
+
+.zeen101-modal .modal__close {
+  background: transparent;
+  border: 0;
+}
+
+.zeen101-modal .modal__header .modal__close:before { content: "\2715"; }
+
+.zeen101-modal .modal__content {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+  color: rgba(0,0,0,.8);
+}
+
+.zeen101-modal .modal__btn {
+  font-size: .875rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: .5rem;
+  padding-bottom: .5rem;
+  background-color: #e6e6e6;
+  color: rgba(0,0,0,.8);
+  border-radius: .25rem;
+  border-style: none;
+  border-width: 0;
+  cursor: pointer;
+  -webkit-appearance: button;
+  text-transform: none;
+  overflow: visible;
+  line-height: 1.15;
+  margin: 0;
+  will-change: transform;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  transition: -webkit-transform .25s ease-out;
+  transition: transform .25s ease-out;
+  transition: transform .25s ease-out,-webkit-transform .25s ease-out;
+}
+
+.zeen101-modal .modal__btn:focus, .modal__btn:hover {
+  -webkit-transform: scale(1.05);
+  transform: scale(1.05);
+}
+
+.zeen101-modal .modal__btn-primary, .zeen101-modal .modal__btn-primary:visited {
+  background: #32A3E4;
+  color: #fff;
+	padding: 10px;
+	text-decoration: none;
+	border-radius: 3px;
+	box-shadow: none;
+	font-size: 14px;
+	line-height: 1;
+}
+
+.zeen101-modal .modal__btn-secondary, .zeen101-modal .modal__btn-secondary:visited {
+	background: #ddd;
+	color: #000;
+	padding: 10px;
+	text-decoration: none;
+	border-radius: 3px;
+	border: 0;
+	box-shadow: none;
+	font-size: 14px;
+	line-height: 1;
+}
+
+.zeen101-modal .modal__btn-secondary:hover {
+	background: #ccc;
+	color: #000;
+}
+
+
+@keyframes mmfadeIn {
+    from { opacity: 0; }
+      to { opacity: 1; }
+}
+
+@keyframes mmfadeOut {
+    from { opacity: 1; }
+      to { opacity: 0; }
+}
+
+@keyframes mmslideIn {
+  from { transform: translateY(15%); }
+    to { transform: translateY(0); }
+}
+
+@keyframes mmslideOut {
+    from { transform: translateY(0); }
+    to { transform: translateY(-10%); }
+}
+
+.zeen101-modal[aria-hidden="false"] .modal__overlay {
+  animation: mmfadeIn .3s cubic-bezier(0.0, 0.0, 0.2, 1);
+}
+
+.zeen101-modal[aria-hidden="false"] .modal__container {
+  animation: mmslideIn .3s cubic-bezier(0, 0, .2, 1);
+}
+
+.zeen101-modal[aria-hidden="true"] .modal__overlay {
+  animation: mmfadeOut .3s cubic-bezier(0.0, 0.0, 0.2, 1);
+}
+
+.zeen101-modal[aria-hidden="true"] .modal__container {
+  animation: mmslideOut .3s cubic-bezier(0, 0, .2, 1);
+}
+
+.zeen101-modal .modal__container,
+.zeen101-modal .modal__overlay {
+  will-change: transform;
+}

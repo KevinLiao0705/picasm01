@@ -1,0 +1,42 @@
+.lp-coupon-form-div {
+	margin-top: 20px;
+}
+
+.lp-coupon-form-div .lp-coupon-input {
+	margin-bottom: 10px;
+}
+
+.lp-coupons-errors {
+	background: #FE9898;
+	border: 1px solid #FF0012;
+	padding: 10px;
+}
+
+.lp-coupons-errors .lp-coupons-error {
+	margin-bottom: 0;
+	color: #333;
+}
+
+.leaky-paywall-registration-coupon-wrapper {
+	margin-bottom: 20px;
+}
+
+.leaky-paywall-registration-coupon-wrapper .lp-remove-coupon {
+	color: #fff;
+	background: #ccc;
+	font-weight: bold;
+	border-radius: 50%;
+	height: 20px;
+	width: 20px;
+	font-size: 12px;
+	text-decoration: none;
+	display: inline-block;
+	text-align: center;
+	vertical-align: top;
+	line-height: 20px;
+}
+
+.leaky-paywall-registration-coupon-wrapper .lp-remove-coupon:hover {
+	background: #ddd;
+}
+

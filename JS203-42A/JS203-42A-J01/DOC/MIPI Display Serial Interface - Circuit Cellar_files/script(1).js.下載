@@ -1,0 +1,128 @@
+( function( $ )  {
+
+
+	$(document).ready( function() {
+        $('.manage-billing-link a').click(function(e) {
+            e.preventDefault();
+
+            $('.manage-billing-link').hide();
+
+            if ( $('#update-authorizenet-card-form').length > 0 ) {
+                $('#update-authorizenet-card-form').show();
+            } else {
+                $('#update-card-form').show();
+            }
+
+        });
+	});
+
+
+
+	$(window).on('load', function() {
+
+        if ( $('.leaky-paywall-profile-subscription-details').length > 0 || $('#leaky-paywall-account-wrapper').length > 0 ) {
+
+            console.log('on account');
+
+            lpWaitForElm('#leaky-paywall-cancel-form').then((elm) => {
+
+                $('#leaky-paywall-cancel-form').submit(function(e) {
+                    e.preventDefault();
+
+                    $('#leaky-paywall-cancel-errors').html('');
+                    $('#leaky-paywall-cancel-errors').hide();
+                    $('#leaky-paywall-cancel-form input[type="submit"]').attr('disabled', true ).val('Processing...');
+
+                    let reason = $('#leaky-paywall-cancel-form .cancel-reason').val() || '';
+
+                    let data = {
+                        action: 'leaky_paywall_cancel_form_process',
+                        reason: reason,
+                        _ajax_nonce: leaky_paywall_recurring._ajax_nonce,
+                    };
+
+                    $.post(leaky_paywall_recurring.ajaxurl, data, function(resp) {
+
+                        if ( resp.message == 'success' ) {
+
+                            console.log('subscription canceled');
+                            $('#leaky-paywall-cancel-modal .modal__container').html( resp.html );
+
+                        } else {
+                            $('#leaky-paywall-cancel-form input[type="submit"]').attr('disabled', false ).val('Please cancel my subscription');
+                            $('#leaky-paywall-cancel-errors').html(resp.html);
+                            $('#leaky-paywall-cancel-errors').show();
+                        }
+                    });
+
+                });
+            });
+
+            let stripe = Stripe(leaky_paywall_script_ajax.stripe_pk);
+            var elements = stripe.elements();
+            var cardElement = elements.create('card');
+
+            cardElement.mount('#update-card-element');
+
+            var form = document.getElementById('update-card-form');
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                //  $('#lp-card-errors').html('');
+
+                stripe.createPaymentMethod({
+                    type: 'card',
+                    card: cardElement,
+                }).then(function(result) {
+                    if (result.error) {
+                        // Handle errors (e.g., invalid card data).
+                        console.error(result.error);
+                        //  $('#lp-card-errors').html('<p>' + result.error.message + '</p>');
+
+                    } else {
+
+                        console.log(result);
+                        // Send the payment method ID to your server.
+                        var paymentMethodId = result.paymentMethod.id;
+                        // Now, send this ID to your server via AJAX or a form input.
+
+                        // For example:
+                        var hiddenInput = document.createElement('input');
+                        hiddenInput.setAttribute('type', 'hidden');
+                        hiddenInput.setAttribute('name', 'payment_method_id');
+                        hiddenInput.setAttribute('value', paymentMethodId);
+                        form.appendChild(hiddenInput);
+
+                        // Submit the form to your server for further processing.
+                        form.submit();
+                    }
+                });
+            });
+
+        }
+
+
+
+	});
+
+    function lpWaitForElm(selector) {
+    return new Promise(resolve => {
+        if (document.querySelector(selector)) {
+            return resolve(document.querySelector(selector));
+        }
+
+        const observer = new MutationObserver(mutations => {
+            if (document.querySelector(selector)) {
+                resolve(document.querySelector(selector));
+                observer.disconnect();
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
+}
+
+})( jQuery );

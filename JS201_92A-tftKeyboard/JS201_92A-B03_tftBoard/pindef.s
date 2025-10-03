@@ -1,0 +1,380 @@
+
+
+;======================================================
+;=======================PIN1 
+.EQU IO_WRITE_O			,LATA
+.EQU IO_WRITE_IO		,TRISA
+.EQU IO_WRITE_O_P		,7
+.EQU IO_WRITE_IO_P		,7
+;=======================PIN2 
+.EQU IO_DRIVER_O		,LATB
+.EQU IO_DRIVER_IO		,TRISB
+.EQU IO_DRIVER_O_P		,14
+.EQU IO_DRIVER_IO_P		,14
+;=======================PIN3 
+.EQU PS2_CLK_O			,LATB
+.EQU PS2_CLK_IO			,TRISB
+.EQU PS2_CLK_O_P		,15
+.EQU PS2_CLK_IO_P		,15
+;=======================PIN4 
+.EQU PS2_SDA_O			,LATG
+.EQU PS2_SDA_IO			,TRISG
+.EQU PS2_SDA_O_P		,6
+.EQU PS2_SDA_IO_P		,6
+;=======================PIN5 
+.EQU NC0_O			,LATG
+.EQU NC0_IO			,TRISG
+.EQU NC0_O_P			,7
+.EQU NC0_IO_P			,7
+;=======================PIN6 
+.EQU NC1_O			,LATG
+.EQU NC1_IO			,TRISG
+.EQU NC1_O_P			,8
+.EQU NC1_IO_P			,8
+;=======================PIN7	MCLR 
+;=======================PIN8 
+.EQU NC2_O			,LATG
+.EQU NC2_IO			,TRISG
+.EQU NC2_O_P			,9
+.EQU NC2_IO_P			,9
+;=======================PIN9	VSS 
+;=======================PIN10 	VDD
+;=======================PIN11 
+.EQU TP1_O			,LATA
+.EQU TP1_IO			,TRISA
+.EQU TP1_O_P			,12
+.EQU TP1_IO_P			,12
+;=======================PIN12 
+.EQU TP2_O			,LATA
+.EQU TP2_IO			,TRISA
+.EQU TP2_O_P			,11
+.EQU TP2_IO_P			,11
+;=======================PIN13 
+.EQU TP3_O			,LATA
+.EQU TP3_IO			,TRISA
+.EQU TP3_O_P			,0
+.EQU TP3_IO_P			,0
+;=======================PIN14 
+.EQU TP4_O			,LATA
+.EQU TP4_IO			,TRISA
+.EQU TP4_O_P			,1
+.EQU TP4_IO_P			,1
+;=======================PIN15 
+.EQU TP5_O			,LATB
+.EQU TP5_IO			,TRISB
+.EQU TP5_O_P			,0
+.EQU TP5_IO_P			,0
+;=======================PIN16 
+.EQU TP6_O			,LATB
+.EQU TP6_IO			,TRISB
+.EQU TP6_O_P			,1
+.EQU TP6_IO_P			,1
+;=======================PIN17	PGC 
+;=======================PIN18 	PGD
+;=======================PIN19	VDD 
+;=======================PIN20 	VSS
+;=======================PIN21 
+.EQU DB0_O		,LATC
+.EQU DB0_I		,PORTC
+.EQU DB0_IO		,TRISC
+.EQU DB0_O_P		,0
+.EQU DB0_I_P		,0
+.EQU DB0_IO_P		,0
+;=======================PIN22 
+.EQU DB1_O		,LATC
+.EQU DB1_I		,PORTC
+.EQU DB1_IO		,TRISC
+.EQU DB1_O_P		,1
+.EQU DB1_I_P		,1
+.EQU DB1_IO_P		,1
+;=======================PIN23 
+.EQU DB2_O		,LATC
+.EQU DB2_I		,PORTC
+.EQU DB2_IO		,TRISC
+.EQU DB2_O_P		,2
+.EQU DB2_I_P		,2
+.EQU DB2_IO_P		,2
+;=======================PIN24 
+.EQU NC3_O		,LATC
+.EQU NC3_IO		,TRISC
+.EQU NC3_O_P		,11
+.EQU NC3_IO_P		,11
+;=======================PIN25	VSS 
+;=======================PIN26 	VDD
+;=======================PIN27 
+.EQU NC4_O	,LATE
+.EQU NC4_IO	,TRISE
+.EQU NC4_O_P	,12
+.EQU NC4_IO_P	,12
+;=======================PIN28 
+.EQU NC5_O	,LATE
+.EQU NC5_IO	,TRISE
+.EQU NC5_O_P	,13
+.EQU NC5_IO_P	,13
+;=======================PIN29 
+.EQU NC6_O	,LATE
+.EQU NC6_IO	,TRISE
+.EQU NC6_O_P	,14
+.EQU NC6_IO_P	,14
+;=======================PIN30 ;TP3
+.EQU V5ADIN_I	,PORTE
+.EQU V5ADIN_IO	,TRISE
+.EQU V5ADIN_I_P	,15
+.EQU V5ADIN_IO_P	,15
+;=======================PIN31 ;TP4
+.EQU NC7_O	,LATA
+.EQU NC7_IO	,TRISA
+.EQU NC7_O_P	,8 
+.EQU NC7_IO_P	,8 
+;=======================PIN32 
+.EQU NC8_O	,LATB
+.EQU NC8_IO	,TRISB
+.EQU NC8_O_P	,4 
+.EQU NC8_IO_P	,4 
+;=======================PIN33 
+.EQU MCU_TX_O	,LATA
+.EQU MCU_TX_IO	,TRISA
+.EQU MCU_TX_O_P	,4 
+.EQU MCU_TX_IO_P	,4 
+;=======================PIN34 
+.EQU MCU_RX_I	,PORTA
+.EQU MCU_RX_IO	,TRISA
+.EQU MCU_RX_I_P	,9 
+.EQU MCU_RX_IO_P	,9 
+;=======================PIN35
+.EQU DB3_O		,LATC
+.EQU DB3_I		,PORTC
+.EQU DB3_IO		,TRISC
+.EQU DB3_O_P		,3
+.EQU DB3_I_P		,3
+.EQU DB3_IO_P		,3
+;=======================PIN36
+.EQU DB4_O		,LATC
+.EQU DB4_I		,PORTC
+.EQU DB4_IO		,TRISC
+.EQU DB4_O_P		,4
+.EQU DB4_I_P		,4
+.EQU DB4_IO_P		,4
+;=======================PIN37 
+.EQU DB5_O		,LATC
+.EQU DB5_I		,PORTC
+.EQU DB5_IO		,TRISC
+.EQU DB5_O_P		,5
+.EQU DB5_I_P		,5
+.EQU DB5_IO_P		,5
+;=======================PIN38 	VDD
+;=======================PIN39 	OSC1
+;=======================PIN40 	OSC2
+;=======================PIN41 	VSS
+;=======================PIN42 
+.EQU NC9_O		,LATD
+.EQU NC9_IO		,TRISD
+.EQU NC9_O_P		,8 
+.EQU NC9_IO_P		,8 
+;=======================PIN43
+.EQU UART_RX_I		,PORTB
+.EQU UART_RX_IO		,TRISB
+.EQU UART_RX_I_P	,5 
+.EQU UART_RX_IO_P	,5 
+;=======================PIN44 
+.EQU UART_TX_O		,LATB
+.EQU UART_TX_IO		,TRISB
+.EQU UART_TX_O_P	,6 
+.EQU UART_TX_IO_P	,6 
+;=======================PIN45
+.EQU NC10_O	,LATC
+.EQU NC10_IO	,TRISC
+.EQU NC10_O_P	,10 
+.EQU NC10_IO_P	,10 
+;=======================PIN46 TP8
+.EQU RS485DI_O	,LATB
+.EQU RS485DI_IO	,TRISB
+.EQU RS485DI_O_P	,7 
+.EQU RS485DI_IO_P	,7 
+;=======================PIN47 
+.EQU RS485CTL_O	,LATC
+.EQU RS485CTL_IO	,TRISC
+.EQU RS485CTL_O_P	,13 
+.EQU RS485CTL_IO_P	,13 
+;=======================PIN48
+.EQU RS485RO_I	,PORTB
+.EQU RS485RO_IO	,TRISB
+.EQU RS485RO_I_P	,8 
+.EQU RS485RO_IO_P	,8 
+;=======================PIN49
+.EQU FLASH_SCK_O	,LATB
+.EQU FLASH_SCK_IO	,TRISB
+.EQU FLASH_SCK_O_P	,9
+.EQU FLASH_SCK_IO_P	,9
+;=======================PIN50 
+.EQU DB6_O		,LATC
+.EQU DB6_I		,PORTC
+.EQU DB6_IO		,TRISC
+.EQU DB6_O_P		,6
+.EQU DB6_I_P		,6
+.EQU DB6_IO_P		,6
+;=======================PIN51 
+.EQU DB7_O		,LATC
+.EQU DB7_I		,PORTC
+.EQU DB7_IO		,TRISC
+.EQU DB7_O_P		,7
+.EQU DB7_I_P		,7
+.EQU DB7_IO_P		,7
+;=======================PIN52
+.EQU LED_O	,LATC
+.EQU LED_IO	,TRISC
+.EQU LED_O_P	,8 
+.EQU LED_IO_P	,8 
+;=======================PIN53
+.EQU KEYL_O		,LATD
+.EQU KEYL_IO		,TRISD
+.EQU KEYL_O_P		,5 
+.EQU KEYL_IO_P		,5 
+;=======================PIN54
+.EQU KEYH_O		,LATD
+.EQU KEYH_IO		,TRISD
+.EQU KEYH_O_P		,6 
+.EQU KEYH_IO_P		,6 
+;=======================PIN55
+.EQU FLASHA_CS_O	,LATC	
+.EQU FLASHA_CS_IO	,TRISC
+.EQU FLASHA_CS_O_P	,9 
+.EQU FLASHA_CS_IO_P	,9 
+;=======================PIN56 	VCAP
+;=======================PIN57	VDD
+;=======================PIN58
+.EQU NC11_O		,LATF
+.EQU NC11_IO		,TRISF
+.EQU NC11_O_P		,0 
+.EQU NC11_IO_P		,0 
+;=======================PIN59
+.EQU PI_RX_O		,LATF
+.EQU PI_RX_IO		,TRISF
+.EQU PI_RX_O_P		,1
+.EQU PI_RX_IO_P		,1
+;=======================PIN60
+.EQU PI_TX_I		,PORTB
+.EQU PI_TX_IO		,TRISB
+.EQU PI_TX_I_P		,10
+.EQU PI_TX_IO_P		,10
+;=======================PIN61
+.EQU KEY_CLK_O		,LATB
+.EQU KEY_CLK_IO		,TRISB
+.EQU KEY_CLK_O_P	,11 
+.EQU KEY_CLK_IO_P	,11 
+;=======================PIN62
+.EQU KEY_CLKEN_O	,LATB
+.EQU KEY_CLKEN_IO	,TRISB
+.EQU KEY_CLKEN_O_P	,12 
+.EQU KEY_CLKEN_IO_P	,12 
+;=======================PIN63
+.EQU FLASHB_CS_O	,LATB	
+.EQU FLASHB_CS_IO	,TRISB
+.EQU FLASHB_CS_O_P	,13 
+.EQU FLASHB_CS_IO_P	,13 
+;==============================
+;.EQU FLASH_DO_I	,PORTB 
+;.EQU FLASH_DO_IO	,TRISB
+;.EQU FLASH_DO_I_P	,13
+;.EQU FLASH_DO_IO_P	,13
+;=======================PIN64
+.EQU IO_READ_O		,PORTA
+.EQU IO_READ_IO		,TRISA
+.EQU IO_READ_O_P	,10
+.EQU IO_READ_IO_P	,10
+;======================================================
+.EQU FLASHA_DI_O	,LATC	
+.EQU FLASHA_D0_O	,LATC	
+.EQU FLASHA_D0_I	,PORTC
+.EQU FLASHA_D0_IO	,TRISC
+.EQU FLASHA_DI_O_P	,0
+.EQU FLASHA_D0_O_P	,0 
+.EQU FLASHA_D0_I_P	,0 
+.EQU FLASHA_D0_IO_P	,0 
+;==
+.EQU FLASHA_DO_I	,PORTC
+.EQU FLASHA_DO_IO	,TRISC
+.EQU FLASHA_DO_I_P	,1 
+.EQU FLASHA_DO_IO_P	,1
+
+.EQU FLASHA_D1_O	,LATC	
+.EQU FLASHA_D1_I	,PORTC
+.EQU FLASHA_D1_IO	,TRISC
+.EQU FLASHA_D1_O_P	,1 
+.EQU FLASHA_D1_I_P	,1 
+.EQU FLASHA_D1_IO_P	,1 
+;==
+.EQU FLASHA_WP_O	,LATC
+.EQU FLASHA_WP_IO	,TRISC
+.EQU FLASHA_WP_O_P	,2 
+.EQU FLASHA_WP_IO_P	,2 
+	
+.EQU FLASHA_D2_O	,LATC	
+.EQU FLASHA_D2_I	,PORTC
+.EQU FLASHA_D2_IO	,TRISC
+.EQU FLASHA_D2_O_P	,2 
+.EQU FLASHA_D2_I_P	,2 
+.EQU FLASHA_D2_IO_P	,2 
+;==
+.EQU FLASHA_HOLD_O	,LATC	
+.EQU FLASHA_HOLD_IO	,TRISC	
+.EQU FLASHA_HOLD_O_P	,3 
+.EQU FLASHA_HOLD_IO_P	,3 
+
+.EQU FLASHA_D3_O	,LATC	
+.EQU FLASHA_D3_I	,PORTC
+.EQU FLASHA_D3_IO	,TRISC
+.EQU FLASHA_D3_O_P	,3 
+.EQU FLASHA_D3_I_P	,3 
+.EQU FLASHA_D3_IO_P	,3 
+;==
+.EQU FLASHB_DI_O	,LATC	
+.EQU FLASHB_DI_IO	,TRISC	
+.EQU FLASHB_DI_O_P	,4
+.EQU FLASHB_DI_IO_P	,4
+
+.EQU FLASHB_D0_O	,LATC	
+.EQU FLASHB_D0_I	,PORTC
+.EQU FLASHB_D0_IO	,TRISC
+.EQU FLASHB_D0_O_P	,4
+.EQU FLASHB_D0_I_P	,4 
+.EQU FLASHB_D0_IO_P	,4 
+;==
+.EQU FLASHB_DO_I	,PORTC
+.EQU FLASHB_DO_IO	,TRISC
+.EQU FLASHB_DO_I_P	,5 
+.EQU FLASHB_DO_IO_P	,5 
+
+.EQU FLASHB_D1_O	,LATC	
+.EQU FLASHB_D1_I	,PORTC
+.EQU FLASHB_D1_IO	,TRISC
+.EQU FLASHB_D1_O_P	,5 
+.EQU FLASHB_D1_I_P	,5 
+.EQU FLASHB_D1_IO_P	,5 
+;==
+.EQU FLASHB_WP_O	,LATC	
+.EQU FLASHB_WP_IO	,TRISC	
+.EQU FLASHB_WP_O_P	,6 
+.EQU FLASHB_WP_IO_P	,6 
+
+.EQU FLASHB_D2_O	,LATC	
+.EQU FLASHB_D2_I	,PORTC
+.EQU FLASHB_D2_IO	,TRISC
+.EQU FLASHB_D2_O_P	,6 
+.EQU FLASHB_D2_I_P	,6 
+.EQU FLASHB_D2_IO_P	,6 
+;==
+.EQU FLASHB_HOLD_O	,LATC	
+.EQU FLASHB_HOLD_IO	,TRISC	
+.EQU FLASHB_HOLD_O_P	,7 
+.EQU FLASHB_HOLD_IO_P	,7 
+
+
+.EQU FLASHB_D3_O	,LATC	
+.EQU FLASHB_D3_I	,PORTC
+.EQU FLASHB_D3_IO	,TRISC
+.EQU FLASHB_D3_O_P	,7 
+.EQU FLASHB_D3_I_P	,7 
+.EQU FLASHB_D3_IO_P	,7 
+;==
+
