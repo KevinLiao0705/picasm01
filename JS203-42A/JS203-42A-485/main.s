@@ -26,9 +26,9 @@
 ;roip_addr 192.168.191,161~166
 
 ;BY DEFINE=============================
-;	.EQU REC_CARD_DK	,1
-	.EQU ROIP_CARD_DK	,1
-;       .EQU MAGNET_CARD_DK     ,1
+;       .EQU REC_CARD_DK	,1
+;       .EQU ROIP_CARD_DK	,1
+        .EQU MAGNET_CARD_DK     ,1
 ;======================================
 
 
@@ -234,6 +234,7 @@ UTXCHN_FLAG:		.SPACE 2
 
 SCMDINX:		.SPACE 2
 
+ICSFLAG:		.SPACE 2
 
 
 
@@ -1343,7 +1344,7 @@ MAIN:					;;
 	CALL INIT_TIMER5	        ;;ROIP3
 	CALL INIT_IC3		        ;;
         .ELSE                           ;;
-        INIT_UART1                      ;;
+        CALL INIT_UART1                 ;;
         .ENDIF                          ;;
         ;=================================
         .IFDEF MAGNET_CARD_DK           ;;
@@ -1676,36 +1677,39 @@ RLP_1:                                  ;;
 
 ;16MS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;       
-SYSLED_PRG:                             ;;                        
+SYSLED_PRG:                             ;;       
 	INC CTRCON_TIM                  ;;
 	MOV #100,W0                     ;;
 	CP CTRCON_TIM                   ;;
 	BRA LTU,$+4                     ;;
 	BCF CTRCON_F                    ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	INC UICON_TIM                   ;;
-	MOV #100,W0                     ;;
-	CP UICON_TIM                    ;;
-	BRA LTU,$+4                     ;;        
-	BCF UICON_F                     ;;
-        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	MOVLF #1,SLOTSTA_FLAG           ;;
 	.IFDEF ROIP_CARD_DK	        ;;        
 	MOVLF #4,SLOTSTA_FLAG           ;;
 	BSF UICON_F                     ;;
+        BRA SYSLED_1                    ;;        
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         CALL ROIP_LED_PRG               ;;
         .ENDIF                          ;;
 	.IFDEF REC_CARD_DK	        ;;        
 	MOVLF #4,SLOTSTA_FLAG           ;;
 	BSF UICON_F                     ;;
+	CLR LEDPNL_FLAG0		;;
+	CLR LEDPNL_FLAG1		;;
+        BRA SYSLED_1                    ;;        
         .ENDIF                          ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	INC UICON_TIM                   ;;
+	MOV #100,W0                     ;;
+	CP UICON_TIM                    ;;
+	BRA LTU,SYSLED_1                ;;        
+	BCF UICON_F                     ;;
+	MOVLF #1,SLOTSTA_FLAG           ;;
 	CLR CHANNEL_FLAG		;;	
 	CLR IPADR0			;;
 	CLR IPADR1                      ;;        
-	;CLR LEDPNL_FLAG0		;;
-	;CLR LEDPNL_FLAG1		;;
+	CLR LEDPNL_FLAG0		;;
+	CLR LEDPNL_FLAG1		;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 SYSLED_1:                               ;;
 	CLR W0                          ;;
@@ -1772,6 +1776,12 @@ DEC_SYSURX:
 ;LEDPNL_FLAG2(1:0)GLED: 0:OFF, 1:ON, 2:BLINK QUICK, 3:BLINK SLOW 
 ;LEDPNL_FLAG2(3:2)RLED: 0:OFF, 1:ON, 2:BLINK QUICK, 3:BLINK SLOW 
 LEDPNL_TX_PRG:
+        ;MOV #0XFFFF,W0
+        ;MOV W0,LEDPNL_FLAG0
+        ;MOV W0,LEDPNL_FLAG1
+        ;MOV W0,LEDPNL_FLAG2
+        ;MOV W0,LEDPNL_FLAG3
+
 
 	MOVLF #0x20,UTXCHN_FLAG
 	MOVLF #0xAB00,UTX_FLAG
@@ -1988,7 +1998,7 @@ U1TXACT_PRG:				;;
 	CLR SCMDINX			;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	CLR UTX_PARA2			;;
-	CLR UTX_PARA3			;;
+        MOVFF ICSFLAG,UTX_PARA3         ;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	MOVLF #128,UTX_BUFFER_LEN	;;
 	MOV #ALLSLOT_INF_ADR,W3 	;;
@@ -2625,11 +2635,11 @@ IS_J2:                          ;;
 	IOR RPINR7		;;IC2
         .ENDIF
 	;;;;;;;;;;;;;;;;;;;;;;;;;;
-	MOV #0x00FF,W0		;;LED PNL USE
-	AND RPINR8		;;
-	MOV #37,W0		;;SPIDI
-	SWAP W0			;;
-	IOR RPINR8		;;IC4
+	;MOV #0x00FF,W0		;;LED PNL USE
+	;AND RPINR8		;;
+	;MOV #37,W0		;;SPIDI
+	;SWAP W0		;;
+	;IOR RPINR8		;;IC4
 	;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;MOV #0xFF00,W0		;;
 	;AND RPINR22		;;
@@ -3067,8 +3077,8 @@ INIT_IO:				;;
 	;;PIN43 			;;
 	;BSF MCURX3_IO			;;
 	;;PIN44 			;;
-	;BCF MCUTX3_O			;;
-	;BCF MCUTX3_IO			;;
+	BCF LEDTX_O			;;
+	BCF LEDTX_IO			;;
 	;;PIN45 			;;
 	;;PIN46 			;;
 	BCF SPI_SCL_O			;;
@@ -3113,12 +3123,12 @@ INIT_IO:				;;
 	;BSET CNPUG,#CNPUG7             ;;
 	;BSET CNPDG,#CNPDG7             ;;
 
-	BSET CNPUG,#7                   ;;ROIP4
-	BSET CNPUE,#15                  ;;ROIP3
-	BSET CNPUA,#8                   ;;ROIP2
-	BSET CNPUA,#9                   ;;ROIP1
-	BSET CNPUF,#0                   ;;ROIP6
-	BSET CNPUB,#12                  ;;ROIP5
+	;BSET CNPUG,#7                   ;;ROIP4
+	;BSET CNPUE,#15                  ;;ROIP3
+	;BSET CNPUA,#8                   ;;ROIP2
+	;BSET CNPUA,#9                   ;;ROIP1
+	;BSET CNPUF,#0                   ;;ROIP6
+	;BSET CNPUB,#12                  ;;ROIP5
 	
 
 	NOP                             ;;
@@ -3132,8 +3142,7 @@ RETURN
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 POWEN_OFF:                              ;;
-
-        .IFDEF MAGNET_CARD_DK           ;;
+        .IFDEF MAGNET_CARD_DKXXX          ;;
 	BSF POWER_EN_O			;;
         .ELSE                           ;;
 	BCF POWER_EN_O			;;
@@ -3141,8 +3150,7 @@ POWEN_OFF:                              ;;
         RETURN                          ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 POWEN_ON:                               ;;
-
-        .IFDEF MAGNET_CARD_DK           ;;
+        .IFDEF MAGNET_CARD_DKXXX           ;;
 	BCF POWER_EN_O			;;
         .ELSE                           ;;
 	BSF POWER_EN_O			;;
@@ -3480,6 +3488,7 @@ CHK_U2RX_1:				;;
 	MOV W0,URX_PARA2		;;
 	MOV [W1++],W0			;;
 	MOV W0,URX_PARA3		;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	MOV RX_CMD,W0			;;
 	SWAP W0				;;
 	AND #255,W0			;;
@@ -3504,6 +3513,9 @@ DECU2RX_10XX:				;;
 ;;GET SLOT INF				;;	
 ;;PARA 0=DELAY US * SLOT CNT TO RESPONESE		
 DECU2RX_1000J:				;;
+        MOV URX_PARA3,W0                ;;        
+        MOV W0,ICSFLAG                  ;;        
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	CALL CHK_SCMDINX		;;
 	MOV #ALLSLOT_INF_ADR,W3		;;
 	MOV RX_ADDR,W1			;;
@@ -5073,6 +5085,8 @@ T3I_END:				;;
 	RETFIE				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+.IFDEF ROIP_CARD_DK
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 __T5Interrupt:				;;10 US
 	PUSH SR				;;	
@@ -5235,7 +5249,7 @@ T5I_END:				;;
 	POP SR				;;
 	RETFIE				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+.ENDIF
 	
 
 ;LED PANEL

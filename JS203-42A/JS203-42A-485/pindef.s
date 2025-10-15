@@ -280,11 +280,11 @@
 .EQU LEDTX_O		,LATB   ;TO LED PANEL
 .EQU LEDTX_IO		,TRISB
 .EQU LEDTX_O_P		,6 
-.EQU LEDTX_IO_P	,6 
+.EQU LEDTX_IO_P	        ,6 
 .EQU SPI_DO_O		,LATB
 .EQU SPI_DO_IO	        ,TRISB
-.EQU SPI_DO_O_P	        ,7 
-.EQU SPI_DO_IO_P	,7 
+.EQU SPI_DO_O_P	        ,6 
+.EQU SPI_DO_IO_P	,6 
 ;=======================PIN45
 ;.EQU I2C_SCK_I		,PORTC
 ;.EQU I2C_SCK_IO	,TRISC

@@ -2,7 +2,7 @@
 MagicCookie={0b13fe8c-dfe0-40eb-8900-6712719559a7}
 Version=1.0
 [File000]
-Location=E:\kevin\picasm\JS203_16C\JS203-16C-C01_SipIo\main.o
+Location=E:\kevin\picasm01\JS203_16C\JS203-16C-C01_SipIo\main.o
 Folder=Intermediary
 DeviceName=PIC24EP64MC202
 LanguageToolSuiteID={F62E444C-B232-4066-9AB0-A6F4E5261396}
@@ -15,7 +15,7 @@ ToolArgsString=-g
 TraceCmdString=
 DebugOptions=
 [File001]
-Location=E:\kevin\picasm\JS203_16C\JS203-16C-C01_SipIo\pindef.o
+Location=E:\kevin\picasm01\JS203_16C\JS203-16C-C01_SipIo\pindef.o
 Folder=Intermediary
 DeviceName=PIC24EP64MC202
 LanguageToolSuiteID={F62E444C-B232-4066-9AB0-A6F4E5261396}
@@ -28,7 +28,7 @@ ToolArgsString=-g
 TraceCmdString=
 DebugOptions=
 [File002]
-Location=E:\kevin\picasm\JS203_16C\JS203-16C-C01_SipIo\main.cof
+Location=E:\kevin\picasm01\JS203_16C\JS203-16C-C01_SipIo\main.cof
 Folder=Output
 DeviceName=PIC24EP64MC202
 LanguageToolSuiteID={F62E444C-B232-4066-9AB0-A6F4E5261396}
@@ -41,7 +41,7 @@ ToolArgsString=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TAR
 TraceCmdString=
 DebugOptions=
 [File003]
-Location=E:\kevin\picasm\JS203_16C\JS203-16C-C01_SipIo\main.hex
+Location=E:\kevin\picasm01\JS203_16C\JS203-16C-C01_SipIo\main.hex
 Folder=Output
 DeviceName=PIC24EP64MC202
 LanguageToolSuiteID={F62E444C-B232-4066-9AB0-A6F4E5261396}

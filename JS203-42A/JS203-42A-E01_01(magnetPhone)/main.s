@@ -290,6 +290,11 @@ R9:			.SPACE 2
 DEBUG_CNT:		.SPACE 2		
 
 U1RXI_BUF:		.SPACE 2		
+PHONE_AD:		.SPACE 2		
+PSTN_AD:		.SPACE 2		
+CONVAD_CNT:		.SPACE 2
+
+MAX_PSTN:		.SPACE 2		
 
 ;;====================================
 TMP0:			.SPACE 2				
@@ -308,6 +313,18 @@ TMP12:			.SPACE 2
 TMP13:			.SPACE 2				
 TMP14:			.SPACE 2				
 TMP15:			.SPACE 2				
+
+ACT_CNT:		.SPACE 2		
+PSTN_HL_CNT:            .SPACE 2
+PSTN_HL_TIM:            .SPACE 2
+PSTN_FLAG:              .SPACE 2
+
+PHONE_HL_CNT:            .SPACE 2
+PHONE_HL_TIM:            .SPACE 2
+PHONE_FLAG:              .SPACE 2
+MAX_PHONE:              .SPACE 2
+
+
 
 
 DIAL_LEN:		.SPACE 2				
@@ -369,6 +386,25 @@ SPIBUFA:		.SPACE 2
 SPIBUFB:		.SPACE 2		
 ;;====================================
 
+ADXBUF00:		.SPACE 2
+ADXBUF01:		.SPACE 2
+ADXBUF02:		.SPACE 2
+ADXBUF03:		.SPACE 2
+
+ADXBUF10:		.SPACE 2
+ADXBUF11:		.SPACE 2
+ADXBUF12:		.SPACE 2
+ADXBUF13:		.SPACE 2
+
+ADXBUF20:		.SPACE 2
+ADXBUF21:		.SPACE 2
+ADXBUF22:		.SPACE 2
+ADXBUF23:		.SPACE 2
+
+ADXBUF30:		.SPACE 2
+ADXBUF31:		.SPACE 2
+ADXBUF32:		.SPACE 2
+ADXBUF33:		.SPACE 2
 
 
 SERIAL_ID:		.SPACE 2
@@ -831,10 +867,19 @@ WAIT_POWER:			;;
 	;CALL TEST_IMAGE
         ;CALL TEST_UART_I
         ;CALL TEST_DTMF
+        ;CALL TEST_RING
 	GOTO MAIN		;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
+TEST_RING:
+        BSF RING_SW_O        
+        MOV #2000,W0
+        CALL DLYMX
+        BCF RING_SW_O        
+        MOV #2000,W0
+        CALL DLYMX
+        BRA TEST_RING
 
 	
 
@@ -877,6 +922,7 @@ TEST_UART:				;;
 	
 	MOV #0xAB,W0			;;
 	MOV W0,U2TXREG			;;
+        
 	;CALL U1TX_RSP			;;
 	MOV #10,W0			;;	
 	CALL DLYMX			;;
@@ -912,21 +958,16 @@ TEST_UART_IX:
 INIT_AD:				;;
 	CLR ANSELA			;;
 	CLR ANSELB			;;
-        RETURN
 	BSET ANSELA,#0			;;
 	BSET ANSELA,#1			;;
-	BSET ANSELB,#0			;;
-	BSET ANSELB,#1			;;
-	BSET ANSELB,#2			;;
-	BSET ANSELB,#3			;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	MOV #0x0004,W0			;;AUTO SAMPLE	
 	;MOV #0x000C,W0			;;Enable simultaneous sampling and auto-sample
 	MOV #0x0000,W0			;;	
 	MOV W0,AD1CON1			;;
-	MOV #0x0300,W0			;;4 CHANNEL	
+	;MOV #0x0300,W0			;;4 CHANNEL	
 	;MOV #0x0100,W0			;;2 CHANNEL	
-	;MOV #0x0000,W0			;;	
+	MOV #0x0000,W0			;;	
 	MOV W0,AD1CON2			;;
 	MOV #0x800F,W0			;;	
 	MOV W0,AD1CON3			;;
@@ -936,33 +977,308 @@ INIT_AD:				;;
 	MOV W0,AD1CSSH                  ;;
 	MOV #0x0000,W0			;;	
 	MOV W0,AD1CSSL                  ;;
-
-
-
 	BSET AD1CON1,#ADON		;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 
+
+
+RING_ACT:
+        BCF PSTN_SW_O
+        BCF PHONE_SW_O
+        BSF RING_SW_O
+        RETURN
+
+CONNECT_ACT:
+        BCF PSTN_SW_O
+        BSF PHONE_SW_O
+        BCF RING_SW_O
+        RETURN
+
+FREE_ACT:
+        BCF PSTN_SW_O
+        BCF PHONE_SW_O
+        BCF RING_SW_O
+        RETURN
+
+DIAL_BEGIN:
+        CALL DIAL_START
+        ;MOVLF #1,ACT_CNT
+        RETURN
+
+
+DTMF_ACT:
+        BSF PSTN_SW_O
+        BCF PHONE_SW_O
+        BCF RING_SW_O
+        RETURN
+
+ACT_PRG:
+        MOV ACT_CNT,W0
+        AND #3,W0
+        BRA W0
+        BRA ACT_J0
+        BRA ACT_J1
+        BRA ACT_J2
+        BRA ACT_J3
+ACT_J0:
+        CALL FREE_ACT
+        CALL CHK_DIAL
+        CALL CHK_RING
+        RETURN
+
+ACT_J1:
+        CALL CONNECT_ACT
+        RETURN
+ACT_J2:
+        RETURN
+ACT_J3:
+        RETURN
+
+CHK_MAX_PSTN:
+        MOV MAX_PSTN,W0
+        CP PSTN_AD
+        BRA GEU,$+4
+        RETURN
+        MOV PSTN_AD,W0
+        MOV W0,MAX_PSTN
+        RETURN
+
+CHK_MAX_PHONE:  ;MAX 2F0 MIN 2F
+        MOV MAX_PHONE,W0
+        CP PHONE_AD
+        BRA GEU,$+4
+        RETURN
+        MOV PHONE_AD,W0
+        MOV W0,MAX_PHONE
+        RETURN
+
+
+CHK_DIAL:
+        BTFSS T16M_F
+        RETURN
+        CALL CHK_MAX_PHONE
+        MOV #0x200,W0
+        CP PHONE_AD
+        BRA LTU,$+4
+        BSET PHONE_FLAG,#0
+        MOV #0x100,W0
+        CP PHONE_AD
+        BRA GEU,$+4
+        BCLR PHONE_FLAG,#0
+        LSR PHONE_FLAG,WREG
+        XOR PHONE_FLAG,WREG
+        AND #1,W0
+        BRA Z,CHK_DIAL_1
+        SL PHONE_FLAG
+        INC PHONE_HL_CNT         ;ABOUT 30 EVERY TONE
+        CLR PHONE_HL_TIM
+        RETURN
+CHK_DIAL_1:
+        INC PHONE_HL_TIM
+        MOV #100,W0
+        CP PHONE_HL_TIM
+        BRA Z,$+4
+        RETURN
+        MOV #4,W0
+        CP PHONE_HL_CNT
+        BRA LTU,$+6
+        CALL DIAL_BEGIN
+        CLR PHONE_HL_CNT
+        RETURN
+
+
+
+
+CHK_RING:
+        BTFSS T16M_F
+        RETURN
+        CALL CHK_MAX_PSTN
+        MOV #0x300,W0
+        CP PSTN_AD
+        BRA LTU,$+4
+        BSET PSTN_FLAG,#0
+        MOV #0x50,W0
+        CP PSTN_AD
+        BRA GEU,$+4
+        BCLR PSTN_FLAG,#0
+        LSR PSTN_FLAG,WREG
+        XOR PSTN_FLAG,WREG
+        AND #1,W0
+        BRA Z,CHK_RING_1
+        SL PSTN_FLAG
+        INC PSTN_HL_CNT         ;ABOUT 30 EVERY TONE
+        CLR PSTN_HL_TIM
+        RETURN
+CHK_RING_1:
+        INC PSTN_HL_TIM
+        MOV #100,W0
+        CP PSTN_HL_TIM
+        BRA Z,$+4
+        RETURN
+        CLR PSTN_HL_CNT
+        RETURN
+
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 MAIN:					;;
+        NOP
+        NOP
+        NOP
+        NOP
 	BCF U1RX_EN_F			;;
 	BSF U2RX_EN_F			;;
+        CLR ACT_CNT                      ;;
+        MOVLF #0,ACT_CNT
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 MAIN_LOOP:				;;
 	CLRWDT				;;
 	BTFSC T128M_F			;;
 	TG TP8_O
-        CALL DIAL_TEST
+        ;CALL DIAL_TEST
+        ;CALL ACT_PRG
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	CALL TMR2PRG			;;	
 	CALL TIMEACT_PRG		;;
 	CALL CHK_U2RX			;;
 	CALL CHK_U2TX_END		;;        
+        CALL CONVERT_AD
 	BRA MAIN_LOOP			;;
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+
+
+
+CONVAD_TBL:
+        AND #3,W0
+        BRA W0
+        RETLW #0,W0
+        RETLW #1,W0
+        RETLW #2,W0
+        RETLW #3,W0
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CONVERT_AD:				;;
+	MOV CONVAD_CNT,W0 		;;
+        LSR W0,#2,W0                    ;;
+        CALL CONVAD_TBL                 ;;
+        CALL AD_STARTX                  ;;
+        MOV #ADXBUF00,W1                ;;
+	MOV CONVAD_CNT,W0 		;;
+        ADD W0,W1,W1                    ;;
+        ADD W0,W1,W1                    ;;
+	MOV ADC1BUF0,W0			;;
+        MOV W0,[W1]                     ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        INC CONVAD_CNT                  ;;
+        MOV #8,W0                       ;;
+        CP CONVAD_CNT                   ;;
+        BRA GEU,$+4                     ;;
+        RETURN                          ;;
+        CLR CONVAD_CNT                  ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	MOVFF ADXBUF00,R0		;;
+	MOVFF ADXBUF01,R1		;;
+	MOVFF ADXBUF02,R2		;;	
+	MOVFF ADXBUF03,R3		;;
+	CALL FILTER			;;
+	MOV W0,PSTN_AD			;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	MOVFF ADXBUF10,R0		;;
+	MOVFF ADXBUF11,R1		;;
+	MOVFF ADXBUF12,R2		;;	
+	MOVFF ADXBUF13,R3		;;
+	CALL FILTER			;;
+	MOV W0,PHONE_AD			;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        RETURN                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        
+
+FILTER:
+	MOV R0,W0
+	CP R1
+	BRA LEU,FILTER_1
+	MOV R0,W0
+	XOR R1,WREG
+	XOR R0
+	XOR R1
+FILTER_1:
+	MOV R1,W0
+	CP R2
+	BRA LEU,FILTER_2
+	MOV R1,W0
+	XOR R2,WREG
+	XOR R1
+	XOR R2
+FILTER_2:
+	MOV R2,W0
+	CP R3
+	BRA LEU,FILTER_3
+	MOV R2,W0
+	XOR R3,WREG
+	XOR R2
+	XOR R3
+FILTER_3:
+	MOV R1,W0
+	CP R2
+	BRA LEU,FILTER_4
+	MOV R1,W0
+	XOR R2,WREG
+	XOR R1
+	XOR R2
+FILTER_4:
+	MOV R0,W0
+	CP R1
+	BRA LEU,FILTER_5
+	MOV R0,W0
+	XOR R1,WREG
+	XOR R0
+	XOR R1
+FILTER_5:
+	MOV R2,W0
+	ADD R1,WREG
+	LSR W0,#1,W0
+	RETURN
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+AD_STARTX:                              ;;
+        BCF YES_F                       ;;
+	MOV W0,AD1CHS0			;;TAD IN RC MODE IS 250 NS
+	BSET AD1CON1,#SAMP		;;MUST OVER 3 TIMES TAD
+        MOV #20,W0                       ;;
+        CALL DLYUXI                     ;;                        
+        BCLR AD1CON1,#SAMP              ;;    
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+        CLR ADWAIT_TIM                  ;;                     
+AD_STARTX_1:                            ;;
+        INC ADWAIT_TIM                  ;;
+        BTSC ADWAIT_TIM,#8              ;;              
+        RETURN                          ;;
+ 	BTSS AD1CON1,#DONE		;;      
+ 	BRA AD_STARTX_1                 ;;
+        BSF YES_F                       ;;
+        RETURN                          ;;              
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
 	
+DLYUXI:
+        NOP
+	DEC W0,W0
+	BRA NZ,DLYUXI
+	RETURN 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CHK_U2TX_END:                           ;;

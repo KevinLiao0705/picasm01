@@ -20,8 +20,10 @@
 	.EQU	VER1_K		,'0'
 	.EQU 	SLOT_DEVICE_ID_K	,0x8900
 	.EQU 	SLOTCLR_DEVICE_ID_K	,0x8902
+        .EQU    ICS_GROUP_ID_K          ,191
 
 	.EQU 	F24SET_FADR	,0xA000	;DONT USE THE LAST BLOCK OF FLASH(0x0A800)
+	.EQU 	F24TEST_FADR	,0xA000	;DONT USE THE LAST BLOCK OF FLASH(0x0A800)
 	.EQU 	FRAM_SIZE_K	,256	
 	.EQU 	RX485_SYNC_K	,0xAAC6
 ;;=====================================================
@@ -168,7 +170,17 @@ R8:			.SPACE 2
 R9:			.SPACE 2		
 DEBUG_CNT:		.SPACE 2		
 DEBUG_B0:		.SPACE 2		
-ACTCTR_FLAG:		.SPACE 2		
+ACTCTR_FLAG:		.SPACE 2	
+
+ICS_SET_TIM:		.SPACE 2	
+ICS_SET_BUF:		.SPACE 2	
+
+
+
+F24_ADR:                .SPACE 2
+F24_LEN:                .SPACE 2
+
+	
 ;;====================================
 TMR2_BUF:		.SPACE 2		
 TMR2_FLAG:		.SPACE 2		
@@ -207,8 +219,11 @@ shiftTime:		.SPACE 2
 shiftFlag:		.SPACE 2
 u1txTime:		.SPACE 2
 
-SETCMD:		.SPACE 2
 SETCMD_INX:		.SPACE 2
+
+MASTCTR:		.SPACE 2
+CTRFLAG:		.SPACE 2
+CTRFLAG_TIM:		.SPACE 2
 
 
 ;;====================================
@@ -233,7 +248,7 @@ TEMP_BUFF:		.SPACE 2
 
 ;DUTX_LEN:		.SPACE 2
 ;WAIT_DUTX_TIM:		.SPACE 2
-F24SET_BUF:		.SPACE 64
+;F24SET_BUF:		.SPACE 64
 ;;====================================
 ;C1DO0:			.SPACE 2
 ;C1DI0:			.SPACE 2
@@ -350,7 +365,7 @@ LCDBUF:			.SPACE 160
 
 ;######################################
 SET_BUF:		.SPACE 0 ;256
-PARA0_FSET:		.SPACE 2
+ICS_GROUP_ID:		.SPACE 2
 PARA1_FSET:		.SPACE 2
 PARA2_FSET:		.SPACE 2
 PARA3_FSET:		.SPACE 2
@@ -394,6 +409,7 @@ END_REG:		.SPACE 2
 .EQU DEBUG_BUF		,0x2C00	;512			
 .EQU FLASH_TMP		,0x2C00	;512			
 .EQU F24SET_BUF		,0x2C00	;64		
+.EQU F24TMP_BUF		,0x2C00	;512		
 
 .EQU END_RAM		,0x2FFF		;512W
 
@@ -467,10 +483,10 @@ END_REG:		.SPACE 2
 .EQU LCD_LINE_F_P	,1
 .EQU DISPLAY_F		,FLAGA
 .EQU DISPLAY_F_P	,2
-;.EQU FLASH_AB_F	,FLAGA
-;.EQU FLASH_AB_F_P	,3
-;.EQU FLASH_QPI_F	,FLAGA
-;.EQU FLASH_QPI_F_P	,4
+.EQU ICS_SET_F  	,FLAGA
+.EQU ICS_SET_F_P	,3
+.EQU SETCMD_F	        ,FLAGA
+.EQU SETCMD_F_P	,4
 ;.EQU FLASH_QPI2_F	,FLAGA	
 ;.EQU FLASH_QPI2_F_P	,5
 ;EQU IICTX_IEN_F	,FLAGA
@@ -479,8 +495,8 @@ END_REG:		.SPACE 2
 ;EQU SLAVE_F_P		,7
 ;EQU IICMRST_F		,FLAGA
 ;EQU IICMRST_F_P	,8
-;EQU PREUTX_F		,FLAGA
-;EQU PREUTX_F_P		,9
+.EQU FLASH_F		,FLAGA
+.EQU FLASH_F_P		,9
 .EQU ERR_F		,FLAGA
 .EQU ERR_F_P		,10
 .EQU OK_F		,FLAGA
@@ -657,6 +673,11 @@ WAIT_POWER:			;;
 	MOV #10000,W0		;;
 	CALL DLYX		;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;
+	MOV #128,W0		;;	
+	MOV #F24SET_FADR,W1	;;	
+	MOV #SET_BUF,W2		;;	
+	CALL LOAD_F24		;;	
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;
 	CALL INIT_TIMER2	;;
 	CALL INIT_TIMER3	;;
 	CALL INIT_UART1		;;
@@ -844,8 +865,13 @@ UTX_GET_SLOTINF:			;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	MOV ACTCTR_FLAG,W0		;;
 	MOV W0,UTX_PARA2		;;
-	MOV #0x0000,W0			;;
+	MOV ICS_GROUP_ID,W0		;;
 	MOV W0,UTX_PARA3		;;
+        MOV MASTCTR,W0                  ;;
+        AND #255,W0                     ;;
+        SWAP W0                         ;;
+        IOR UTX_PARA3                   ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	MOVLF #128,UTX_BUFFER_LEN	;;
 	MOV #SLOTINF_ADR,W3 		;;
 	CALL UTX_BUFFER			;;
@@ -908,7 +934,8 @@ MAIN:					;;
 MAIN_1:					;;
 	CALL DISPLAY_PRG		;;
 	BCF DISPLAY_F			;;
-	CLR SETCMD
+	BCF SETCMD_F              
+        BCF ICS_SET_F
 MAIN_LOOP:				;;
 	CALL TMR2PRG			;;	
 	CLRWDT				;;
@@ -934,12 +961,122 @@ MAIN_LOOP:				;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	BTSC shiftFlag,#5		;;
 	CALL CHK_ACTCTR 		;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	BTSC shiftFlag,#6		;;
+	CALL CHK_MASTCTR 		;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	CALL SCAN_LCD                   ;;
 	CALL CHK_U1TX_END		;;
 	CALL CHK_U1RX			;;
 	BTFSC DISPLAY_F			;;
 	BRA MAIN_1                      ;;
 	BRA MAIN_LOOP			;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CHK_MASTCTR:                            ;;                       
+        CLR W2                          ;;
+        CLR R0                          ;;
+CM_0:                                   ;;
+	MOV #SLOTINF_ADR,W1		;;	
+        MOV W2,W0                       ;;
+	SL W0,#3,W0			;;
+	ADD W0,W1,W1			;;
+        MOV [W1],W0                     ;;
+        SWAP W0                         ;;
+        SWAP.B W0                       ;;
+        AND #15,W0                      ;;
+        CP W0,#1                        ;;
+        BRA NZ,CM_2                     ;;
+        MOV #1,W0                       ;;
+        SL W0,W2,W0                     ;;
+        IOR R0                          ;;        
+CM_2:                                   ;;
+        INC W2,W2                       ;;
+        CP W2,#14                       ;;
+        BRA LTU,CM_0                    ;;
+        MOV R0,W0                       ;;        
+        CP CTRFLAG                      ;;
+        BRA Z,CM_3                      ;;
+        MOVFF R0,CTRFLAG                ;;
+        CLR CTRFLAG_TIM                 ;;
+CM_3:                                   ;;
+        INC CTRFLAG_TIM                 ;;
+        BRA NZ,$+4                      ;;
+        DEC CTRFLAG_TIM                 ;;
+        MOV #100,W0                     ;;
+        CP CTRFLAG_TIM                  ;;
+        BRA Z,$+4                       ;;
+        RETURN                          ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        CLR R0                          ;;        
+        CLR R1                          ;;
+        CLR W2                          ;;
+CM_4:                                   ;;
+        MOV CTRFLAG,W0                  ;;
+        LSR W0,W2,W0                    ;;        
+        AND #1,W0                       ;;
+        BRA Z,CM_5                     ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	MOV #SLOTINF_ADR,W1		;;	
+        MOV W2,W0                       ;;
+	SL W0,#3,W0			;;
+	ADD W0,W1,W1			;;
+        MOV [W1],W0                     ;;
+        SWAP W0                         ;;
+        AND #1,W0                       ;;
+        MOV #R0,W1                      ;;
+        ADD W0,W1,W1                    ;;
+        ADD W0,W1,W1                    ;;
+        MOV W2,W0                       ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        BSET W0,#7                      ;;
+        MOV W0,[W1]                     ;;
+CM_5:                                   ;;
+        INC W2,W2                       ;;
+        CP W2,#14                       ;;
+        BRA LTU,CM_4                    ;;
+        CP0 MASTCTR                     ;;
+        BRA NZ,CM_6                     ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;FIRST        
+        CP0 R0                          ;;
+        BRA Z,CM_5A                     ;;
+        MOV R0,W0                       ;;
+        MOV W0,MASTCTR                  ;;      
+        RETURN                          ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CM_5A:                                  ;;
+        CP0 R1                          ;;
+        BRA NZ,$+4                      ;;
+        RETURN                          ;;
+        MOV R1,W0                       ;;
+        MOV W0,MASTCTR                  ;;
+        RETURN                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CM_6:                                   ;;
+        MOV MASTCTR,W0                  ;;
+        CP R0                           ;;
+        BRA NZ,$+4                      ;;
+        RETURN                          ;;
+        CP R1                           ;;
+        BRA NZ,$+4                      ;;
+        RETURN                          ;;
+        CP0 R0                          ;;
+        BRA Z,CM_7                      ;;
+        MOVFF R0,MASTCTR                ;;
+        RETURN                          ;;
+CM_7:                                   
+        CP0 R1                          ;;
+        BRA Z,CM_8                      ;;
+        MOVFF R1,MASTCTR                ;;
+        RETURN                          ;;
+CM_8:
+        CLR MASTCTR        
+        NOP
+        NOP
+        NOP
+        NOP
+        RETURN                          ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1063,7 +1200,7 @@ SLOT_STATUS_STR:
 SLOT_POSITION_STR:
 	.ASCII "0.SLOTS INFO>  NO  : 123456789ABCDEFG\0"
 SLOT_TYPE_STR:
-	.ASCII "               TYPE: \0"
+	.ASCII "ICS:           TYPE: \0"
 DISPM0J:
 	CALL CLR_LCDBUF			;;
 	LOXY 0,0			;;
@@ -1081,7 +1218,7 @@ DISPLAY_SCAN:
 	cp0 dispDelayTime
 	bra nz,$+6
 	bsf DISPLAY_F
-	CLR SETCMD
+	bcf SETCMD_F
 	return
 displayScan_1:
 	MOV DISPLAY_MOD,W0
@@ -1119,8 +1256,50 @@ displayScan_1:
 
 
 
-
+;&1
 DISPS0J:
+	LOXY 4,1	
+        BTFSC ICS_SET_F
+        BRA DISPS0J_01        
+DISPS0J_00:
+        MOV ICS_GROUP_ID,W0
+        CALL L1D_3B
+        MOV R2,W0
+	CALL ENNUM
+        MOV R1,W0
+	CALL ENNUM
+        MOV R0,W0
+	CALL ENNUM
+        BRA DISPS0J_03
+DISPS0J_01:
+        MOV ICS_SET_BUF,W0
+        CALL L1D_3B
+        MOV R2,W0
+	CALL ENNUM
+        MOV R1,W0
+	CALL ENNUM
+        MOV R0,W0
+	CALL ENNUM
+
+	LOXY 0,1	
+        BTFSS FLASH_F          
+        BRA DISPS0J_02
+        MOV #' ',W0
+	CALL ENCHR
+        MOV #' ',W0
+	CALL ENCHR
+        MOV #' ',W0
+	CALL ENCHR
+        BRA DISPS0J_03
+DISPS0J_02:
+        MOV #'I',W0
+	CALL ENCHR
+        MOV #'C',W0
+	CALL ENCHR
+        MOV #'S',W0
+	CALL ENCHR
+        BRA DISPS0J_03
+DISPS0J_03:
 	CLR R0
 	LOXY 21,1	
 DISPS0J_1:			;;
@@ -1474,6 +1653,15 @@ MAIN_KEYPRG:
 	CALL MAIN_KCON2
 	RETURN
 
+MAIN_KFREE:
+	BTSC R1,#0
+	BRA SW1R_PRG
+	RETURN
+
+SW1P_PRG:
+        CALL beep
+        RETURN
+
 MAIN_KPUSH:
 	BTSC R0,#0
 	BRA SW1P_PRG
@@ -1485,8 +1673,10 @@ MAIN_KPUSH:
 	BRA SW4P_PRG
 	RETURN
 SW2P_PRG:
-	CP0 SETCMD
-	BRA NZ,$+4
+        BTFSC ICS_SET_F
+        BRA INC_ICS_SET
+	BTFSC SETCMD_F
+	RETURN
 	INC DISPLAY_MOD
 	MOV #17,W0
 	CP DISPLAY_MOD
@@ -1497,8 +1687,10 @@ SW2P_PRG:
 	call beep
 	RETURN
 SW4P_PRG:
-	CP0 SETCMD
-	BRA NZ,$+4
+        BTFSC ICS_SET_F
+        BRA DEC_ICS_SET
+	BTFSC SETCMD_F
+	RETURN
 	DEC DISPLAY_MOD
 	MOV #16,W0
 	CP DISPLAY_MOD
@@ -1508,20 +1700,27 @@ SW4P_PRG:
 	clr dispDelayTime
 	call beep
 	RETURN
+INC_ICS_SET:
+        INC ICS_SET_BUF
+        MOV #255,W0
+        AND ICS_SET_BUF
+        RETURN
+DEC_ICS_SET:
+        DEC ICS_SET_BUF
+        MOV #255,W0
+        AND ICS_SET_BUF
+        RETURN
 
 
-SW1P_PRG:
-	MOV #1,W0
-	CP SETCMD
-	BRA Z,SETCMD1_PRG
-	CP0 SETCMD
-	BRA Z,$+4
-	RETURN
-	MOVLF #1,SETCMD
+
+SW1R_PRG:
+        BTFSC ICS_SET_F
+        RETURN
+        BTFSS SETCMD_F
 	SETM SETCMD_INX
+        BSF SETCMD_F
 	BRA SETCMD1_PRG
 SETCMD1_PRG:
-	CALL beep
 	INC SETCMD_INX
 	MOV #4,W0
 	CP SETCMD_INX
@@ -1591,40 +1790,60 @@ hardPowerOffStr:
 
 
 SW3P_PRG:
+        CALL beep
+        BCF SETCMD_F
+	MOVLF #0,DISPLAY_MOD		;;
+	CALL DISPLAY_PRG		;;
+	BSF DISPLAY_F			;;
+        BCF ICS_SET_F
 	RETURN
-SW1C_PRG:
+SW3C_PRG:
 	RETURN
 
-SW3C_PRG:
-	MOV #1,W0
-	CP SETCMD
-	BRA Z,$+4
-	RETURN
+SW1C_PRG:
+	BTFSS SETCMD_F
+        BRA SET_ICS
 	MOV SETCMD_INX,W0
 	CP W0,#4
 	BRA LTU,$+4
 	RETURN
 	BRA W0
-	BRA SW3P_J0
-	BRA SW3P_J1
-	BRA SW3P_J2
-	BRA SW3P_J3
-SW3P_J0:
+	BRA SW1C_J0
+	BRA SW1C_J1
+	BRA SW1C_J2
+	BRA SW1C_J3
+SW1C_J0:
 	MOVLF #0x1000,CMDINX
 	CALL CMDINX_PRG
 	RETURN
-SW3P_J1:
+SW1C_J1:
 	MOVLF #0x1100,CMDINX
 	CALL CMDINX_PRG
 	RETURN
-SW3P_J2:
+SW1C_J2:
 	MOVLF #0x1200,CMDINX
 	CALL CMDINX_PRG
 	RETURN
-SW3P_J3:
+SW1C_J3:
 	MOVLF #0x1300,CMDINX
 	CALL CMDINX_PRG
 	RETURN
+
+SET_ICS:
+        BTFSC ICS_SET_F
+        BRA SET_ICS_1
+        BSF ICS_SET_F
+        MOVFF ICS_GROUP_ID,ICS_SET_BUF
+        CLR ICS_SET_TIM
+        BSF DISKR_F
+        RETURN
+SET_ICS_1:
+        BCF ICS_SET_F
+        MOVFF ICS_SET_BUF,ICS_GROUP_ID
+        CALL SAVE_SET
+	bsf DISPLAY_F
+        CALL beepL
+        RETURN
 
 CMDINX_PRG:
 	MOV #255,W0
@@ -1647,8 +1866,6 @@ actionStr:
 
 
 
-MAIN_KFREE:
-	RETURN
 MAIN_KCON1:
 	BTSC R2,#0
 	BRA SW1C_PRG
@@ -2341,7 +2558,13 @@ TMR2PRG:				;;
 	XOR TMR2_BUF			;;
 	CLRWDT				;;
 	BTFSC T128M_F			;;
-	INC TMR2H_BUF			;;	
+	INC TMR2H_BUF			;;
+        BTSC TMR2H_BUF,#1
+        BSF FLASH_F
+        BTSS TMR2H_BUF,#1
+        BCF FLASH_F
+        
+	
 	BTFSS T1M_F			;;
 	RETURN				;;
 	inc shiftTime			;;
@@ -3031,6 +3254,7 @@ URXDEC_SLOTINF_ACT:			;;
 	BRA W0				;;
 	BRA URXDEC_SLOTINF_00J		;;
 URXDEC_SLOTINF_00J:			;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	MOV #SLOTINF_ADR,W1		;;	
 	MOV RX_SERIAL_ID,W0		;;
 	AND #0x0F,W0			;;
@@ -3044,6 +3268,7 @@ URXDEC_SLOTINF_00J:			;;
 	MOV W0,[W1++]			;;	
 	MOV RX_PARA3,W0			;;
 	MOV W0,[W1++]			;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	MOV RX_SERIAL_ID,W0		;;
 	AND #0x0F,W0			;;
@@ -3202,7 +3427,7 @@ UTX_RXDATA_ERR:				;;
 UTX_BUFFER_ID:				;;
 	CALL UTX_START			;;
 	CALL LOAD_UTX_DEVICE_ID		;;
-	MOV TARGET_SERIAL_ID,W0		;;
+	MOV TARGET_SERIAL_ID,W0	        ;;
 	CALL LOAD_UTX_WORD		;;
 	BRA UTX_BUFFER_0		;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -4279,6 +4504,190 @@ OLED_POS_TBL:
 	RETLW #0x3F,W0
 
 
+;INTPUT W1,REG ADDR
+
+
+
+;W0 LEN
+;W1:F24 ADDRESS
+;W2:LOAD ADDRESS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+LOAD_F24:					;;
+	CLR TBLPAG 				;;	
+	MOV W0,W3 				;;
+LOAD_F24_1:					;;
+	TBLRDL [W1++],W0			;;
+	MOV W0,[W2++]				;;
+	DEC W3,W3				;;
+	BRA NZ,LOAD_F24_1			;;
+	RETURN					;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SAVE_F24:					;;
+	BCLR INTCON2,#GIE			;;
+	MOV #0,W0				;;0=FRC
+	CALL OSC_PRG				;;
+	CALL WAIT_FLASH24_READY			;;
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	CLR W3					;;
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SAVE_F24_1:					;;
+	MOV #0,W0				;;
+	MOV W0,NVMADRU				;;
+	MOV F24_ADR,W0
+	ADD W0,W3,W0				;;
+	ADD W0,W3,W0				;;
+	ADD W0,W3,W0				;;
+	ADD W0,W3,W0				;;
+	MOV W0,NVMADR				;;
+	MOV #F24TMP_BUF,W2			;;
+	ADD W3,W2,W2				;;
+	ADD W3,W2,W2				;;
+	ADD W3,W2,W2				;;
+	ADD W3,W2,W2				;;
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	MOV #0xFA,W0				;;
+	MOV W0,TBLPAG				;;
+	MOV #0,W1				;; Perform the TBLWT instructions to write the latches; W2 is incremented in the TBLWTH instruction to point to the; next instruction location
+	TBLWTL [W2++],[W1]			;;
+	TBLWTH W3,[W1++]			;;
+	TBLWTL [W2++],[W1]			;;
+	TBLWTH W3,[W1++]			;;
+	CLR TBLPAG				;; 
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	MOV #0x4001,W0				;;
+	MOV W0,NVMCON				;;
+	DISI #10				;;
+	MOV #0x55,W0				;;				
+	MOV W0,NVMKEY 				;;	
+	MOV #0xAA,W0 				;;	
+	MOV W0,NVMKEY 				;;
+	BSET NVMCON,#15 			;;	
+	NOP 					;;	
+	NOP 					;;
+	NOP					;;
+	NOP					;;
+	NOP					;;
+	CALL WAIT_FLASH24_READY			;;
+	INC W3,W3				;;
+	MOV F24_LEN,W0				;;
+	INC W0,W0				;;
+	ASR W0,#1,W0 				;;
+	CP W3,W0				;;				
+	BRA LTU,SAVE_F24_1			;;
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	MOV #0,W0				;;
+	MOV W0,NVMCON				;;
+	CALL INIT_OSC				;;
+	BSET INTCON2,#GIE			;;
+ 	RETURN					;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+	
+
+;W1:F24 ADDRESS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ERASE_F24:					;;
+	PUSH W1					;;
+	BCLR INTCON2,#GIE			;;
+	MOV #0,W0				;;0=FRC
+	CALL OSC_PRG				;;
+	CALL WAIT_FLASH24_READY			;;
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	MOV #0,W0				;;
+	MOV W0,NVMADRU				;;
+	POP W0					;;
+	MOV W0,NVMADRL				;;
+	MOV #0x4003,W0 				;;	
+	MOV W0,NVMCON 				;;	
+	DISI #10				;;
+	MOV #0x55,W0				;;				
+	MOV W0,NVMKEY 				;;	
+	MOV #0xAA,W0 				;;	
+	MOV W0,NVMKEY 				;;
+	BSET NVMCON,#15 			;;	
+	NOP					;;
+	NOP 					;;	
+	NOP 					;;
+	NOP					;;
+	NOP					;;
+	CALL WAIT_FLASH24_READY			;;
+	MOV #0,W0				;;
+	MOV W0,NVMCON				;;
+	CALL INIT_OSC				;;
+	BSET INTCON2,#GIE			;;
+ 	RETURN					;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+SAVE_SET:
+	MOV #F24TMP_BUF,W1		;;
+        MOV ICS_GROUP_ID,W0
+        MOV W0,[W1]
+	MOV #F24SET_FADR,W0		;;
+	MOV W0,F24_ADR			;;
+	MOV #128,W0			;;	
+	MOV W0,F24_LEN			;;
+	CALL SAVE_F24			;;
+        RETURN
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+TEST_F24:				;;
+	MOV #128,W0			;;	
+	MOV #F24TEST_FADR,W1		;;	
+	MOV #F24TMP_BUF,W2		;;	
+	CALL LOAD_F24			;;	
+	NOP				;;	
+	NOP				;;
+	NOP				;;
+	MOV #tbloffset(F24TEST_FADR),W1	;;	
+	CALL ERASE_F24			;;
+	NOP				;;
+	NOP				;;
+	NOP				;;
+	MOV #128,W0			;;	
+	MOV #F24TEST_FADR,W1		;;	
+	MOV #F24TMP_BUF,W2		;;	
+	CALL LOAD_F24			;;	
+	NOP				;;
+	NOP				;;	
+	NOP				;;
+	MOV #0,W7			;;
+	MOV #128,W6			;;
+	MOV #F24TMP_BUF,W1		;;
+TEST_F24_1:				;;
+	MOV W7,[W1++]			;;
+	INC W7,W7			;;
+	DEC W6,W6			;;
+	BRA NZ,TEST_F24_1		;;
+	NOP				;;
+	NOP				;;
+	NOP				;;
+	MOV #F24TEST_FADR,W0		;;
+	MOV W0,F24_ADR			;;
+	MOV #128,W0			;;	
+	MOV W0,F24_LEN			;;
+	CALL SAVE_F24			;;
+	NOP				;;
+	NOP				;;
+	NOP				;;
+	MOV #128,W0			;;	
+	MOV #F24TEST_FADR,W1		;;	
+	MOV #F24TMP_BUF,W2		;;	
+	CALL LOAD_F24			;;	
+	NOP				;;
+	NOP				;;
+	NOP				;;
+	RETURN				;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 
 
@@ -4293,7 +4702,7 @@ FSET_LOC_TBL_END:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	.ORG (F24SET_FADR-0x204)	;;
 F24SET_TBL:				;;
-	.WORD 0x1234			;;00	
+	.WORD 0x00BF			;;00	
 	.WORD 0x5678			;;01	
 	.WORD 0x0000			;;02	
 	.WORD 0x0000			;;03	
