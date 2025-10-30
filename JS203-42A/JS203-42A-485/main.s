@@ -205,6 +205,20 @@ F24_ADR:		.SPACE 2
 F24_LEN:		.SPACE 2		
 
 
+ICS_GROUP_ID:	        .SPACE 2
+EXSTATUS_FLAG0:	        .SPACE 2
+EXSTATUS_FLAG1:	        .SPACE 2
+MAGCALL_LEN:            .SPACE 2
+MAGCALL_BUF0:           .SPACE 2
+MAGCALL_BUF1:           .SPACE 2
+MAGCALL_BUF2:           .SPACE 2
+MAGCALL_BUF3:           .SPACE 2
+MAGCALL_BUF4:           .SPACE 2
+MAGCALL_BUF5:           .SPACE 2
+MAGCALL_BUF6:           .SPACE 2
+MAGCALL_BUF7:           .SPACE 2
+
+
 ;;POWER_OFF_TIM:		.SPACE 2		
 POWER_ACT_TIM:		.SPACE 2		
 POWER_EN_TIM:		.SPACE 2		
@@ -1348,7 +1362,7 @@ MAIN:					;;
         .ENDIF                          ;;
         ;=================================
         .IFDEF MAGNET_CARD_DK           ;;
-        MOV #1,W0                       ;;57600
+        MOV #2,W0                       ;;57600
         CALL INIT_TIMER3	        ;;MAGNET SON
 	CALL INIT_IC2		        ;;
         .ENDIF                          ;;
@@ -1369,6 +1383,10 @@ MAIN_LOOP:				;;
         CALL CHK_MCURX1                 ;;
         CALL CHK_MCURX2                 ;;
         CALL CHK_MCURX3                 ;;
+        .ENDIF                          ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        .IFDEF MAGNET_CARD_DK           ;;
+        CALL CHK_MCURX2                 ;;
         .ENDIF                          ;;
 	BRA MAIN_LOOP			;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1844,7 +1862,7 @@ ROIPA_TX_PRG:                           ;;
         MOV #168,W0                     ;;
         CALL LOAD_BYTE_W3               ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	MOV #191,W0		        ;;
+	MOV ICS_GROUP_ID,W0		;;
         CALL LOAD_BYTE_W3               ;;
         MOV #161,W0                     ;;
         BTSC SW1_FLAG,#0                ;;
@@ -1872,7 +1890,7 @@ ROIPB_TX_PRG:                           ;;
         MOV #0X00,W0                    ;;
         CALL LOAD_BYTE_W3               ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        MOV #192,W0                     ;;
+	MOV ICS_GROUP_ID,W0		;;
         CALL LOAD_BYTE_W3               ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         MOV #168,W0                     ;;
@@ -1913,7 +1931,7 @@ ROIPC_TX_PRG:                           ;;
         MOV #168,W0                     ;;
         CALL LOAD_BYTE_W3               ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	MOV #191,W0		        ;;
+	MOV ICS_GROUP_ID,W0		;;
         CALL LOAD_BYTE_W3               ;;
         MOV #163,W0                     ;;
         BTSC SW1_FLAG,#0                ;;
@@ -1945,6 +1963,18 @@ LBW3_1:                                 ;;
         
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+LOAD_WORD_W3:                           ;;
+        PUSH W0                         ;;
+        CALL LOAD_BYTE_W3               ;;
+        POP W0                          ;;
+        SWAP W0                         ;;
+        CALL LOAD_BYTE_W3               ;;        
+        RETURN                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 TBLW1_W3:		        	;;
 	CLR W2	        	        ;;
 TBLW1_W3_1:			        ;;
@@ -1964,19 +1994,33 @@ TBLW1_W3_END:		        	;;
 
 
 
-
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 MAGNET_TX_PRG:
-	MOVLF #0x08,UTXCHN_FLAG
-	MOVLF #0xAB00,UTX_FLAG
-	MOVLF #0x1000,UTX_CMD
+	MOVLF #0x08,UTXCHN_FLAG         ;;
+	MOVLF #0xAB00,UTX_FLAG          ;;
         MOVFF MAGNET_TX_CNT,UTX_SERIAL_ID
-	MOVLF #0X0008,UTX_PARA0 ;B15:4 FLAG,B3:0 DIAL NUMBER LEN
-	MOVLF #0X2299,UTX_PARA1 ;DIAL NUMBER
-	MOVLF #0X6900,UTX_PARA2 ;DIAL NUMBER
-	MOVLF #0X0000,UTX_PARA3 ;DIAL NUMBER
-	CALL UTX_STD
-	RETURN
+	MOVLF #0x1000,UTX_CMD           ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV #UTXBUF,W3                  ;;
+        MOV EXSTATUS_FLAG0,W0           ;;
+        CALL LOAD_WORD_W3               ;;        
+        MOV EXSTATUS_FLAG1,W0           ;;
+        CALL LOAD_WORD_W3               ;;
+        MOV #0XAB,W0                    ;;
+        CALL LOAD_BYTE_W3               ;;
+        MOV MAGCALL_LEN,W0              ;;
+        CALL LOAD_BYTE_W3               ;;
+        MOV MAGCALL_LEN,W2              ;;
+        MOV #MAGCALL_BUF0,W1            ;;
+        CALL B2B_PRG                    ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV #UTXBUF,W0                  ;;
+        SUB W3,W0,W0                    ;;        
+        MOV W0,UTXBUF_LEN               ;;
+	CALL UTX_BUF                    ;;
+        RETURN                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 
 
@@ -3281,8 +3325,6 @@ CHK_U1RX_3:				;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 URXDEC_PCSLOT_ACT:			;;
 	MOV RX_CMD,W0			;;
@@ -3305,13 +3347,63 @@ U1RX_00J:				;;
 	MOV RX_ADDR,W1			;;
 	ADD #18,W1			;;
 	MOV [W1++],W0			;;
-	MOV W0,LEDPNL_FLAG0		;;
+	MOV W0,EXSTATUS_FLAG0		;;
 	MOV [W1++],W0			;;
-	MOV W0,LEDPNL_FLAG1		;;
+	MOV W0,EXSTATUS_FLAG1		;;
 	CLR UICON_TIM			;;
 	BSF UICON_F			;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        CLR LEDPNL_FLAG0                ;;
+        CLR LEDPNL_FLAG1                ;;
+        CLR W4                          ;;
+U1RX_00J_0:	                        ;;
+        BCLR SR,#C                      ;;
+        RLC LEDPNL_FLAG1                ;;
+        RLC LEDPNL_FLAG0                ;;
+        BCLR SR,#C                      ;;
+        RLC LEDPNL_FLAG1                ;;
+        RLC LEDPNL_FLAG0                ;;
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV EXSTATUS_FLAG0,W5           ;;              
+        BTSC W4,#2                      ;;
+        MOV EXSTATUS_FLAG1,W5           ;;
+        MOV W4,W0                       ;;
+        SL W0,#2,W0                     ;;
+        LSR W5,W2,W0                    ;;
+        AND #15,W0                      ;;
+        CP W0,#2                        ;;
+        BRA LTU,U1RX_00J_1              ;;        
+        BSET LEDPNL_FLAG1,#0            ;;
+U1RX_00J_1:				;;
+        INC W4,W4                       ;;
+        CP W4,#8                        ;;
+        BRA LTU,U1RX_00J_0              ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        .IFDEF MAGNET_CARD_DK           ;;
+	MOV [W1++],W0			;;
+        MOV W0,W2                       ;;
+        AND #255,W0                     ;;
+        CP W0,#0XAB                     
+        BRA Z,$+4
+        RETURN
+        SWAP W2
+        AND #255,W2
+        MOV W2,MAGCALL_LEN
+        MOV #MAGCALL_BUF0,W3
+        CALL B2B_PRG      
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+        .ENDIF
+
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3514,7 +3606,9 @@ DECU2RX_10XX:				;;
 ;;PARA 0=DELAY US * SLOT CNT TO RESPONESE		
 DECU2RX_1000J:				;;
         MOV URX_PARA3,W0                ;;        
-        MOV W0,ICSFLAG                  ;;        
+        MOV W0,ICSFLAG                  ;;    
+        AND #255,W0
+        MOV W0,ICS_GROUP_ID    
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	CALL CHK_SCMDINX		;;
 	MOV #ALLSLOT_INF_ADR,W3		;;
@@ -5767,6 +5861,42 @@ SAVE_F24_1:					;;
 
 
 
+;W2=LEN
+;[W1] SOURCE
+;[W3] DEST
+B2B_PRG:
+        CP0 W2
+        BRA NZ,$+4
+        RETURN
+        DEC W2,W2
+        CALL B2B
+        BRA B2B_PRG
+
+
+;[W1] => [W3] 
+B2B:
+        BTSC W1,#0
+        BRA B2B_1
+        MOV [W1],W0
+        INC W1,W1
+        BRA B2B_2
+B2B_1:
+        BCLR W1,#0
+        MOV [W1++],W0
+        SWAP W0
+B2B_2:
+        AND #255,W0
+        BTSC W3,#0
+        BRA B2B_3
+        MOV W0,[W3]
+        INC W3,W3
+        RETURN
+B2B_3:
+        BCLR W3,#0 
+        SWAP W0
+        IOR W0,[W3],[W3]
+        INC2 W3,W3
+        RETURN
 
 
 GROUP_POS_TBL:

@@ -16,7 +16,7 @@
 	.EQU	VER0_K		,'1'
 	.EQU	VER1_K		,'0'
 	.EQU 	DEVICE_ID_K		,0x8906
-	.EQU 	SERIAL_ID_K		,0x0000
+	.EQU 	SERIAL_ID_K		,0x0003
 	.EQU 	F24SET_FADR	,0xA000	;DONT USE THE LAST BLOCK OF FLASH(0x0A800)
 	.EQU 	FRAM_SIZE_K	,16	
 ;;=====================================================
@@ -325,6 +325,9 @@ PHONE_FLAG:              .SPACE 2
 MAX_PHONE:              .SPACE 2
 
 
+EXSTATUS_FLAG0:         .SPACE 2
+EXSTATUS_FLAG1:         .SPACE 2
+MAGCALL_LEN:            .SPACE 2
 
 
 DIAL_LEN:		.SPACE 2				
@@ -985,10 +988,17 @@ INIT_AD:				;;
 
 
 
-RING_ACT:
+
+HANGON_ACT:
         BCF PSTN_SW_O
         BCF PHONE_SW_O
         BSF RING_SW_O
+        RETURN
+
+HANGOFF_ACT:
+        BCF PSTN_SW_O
+        BCF PHONE_SW_O
+        BCF RING_SW_O
         RETURN
 
 CONNECT_ACT:
@@ -1003,39 +1013,87 @@ FREE_ACT:
         BCF RING_SW_O
         RETURN
 
-DIAL_BEGIN:
-        CALL DIAL_START
-        ;MOVLF #1,ACT_CNT
-        RETURN
-
-
 DTMF_ACT:
         BSF PSTN_SW_O
-        BCF PHONE_SW_O
-        BCF RING_SW_O
         RETURN
+
+
+DIAL_BEGIN:
+        CALL DIAL_START
+        MOVLF #1,ACT_CNT
+        RETURN
+
 
 ACT_PRG:
         MOV ACT_CNT,W0
-        AND #3,W0
+        AND #7,W0
         BRA W0
         BRA ACT_J0
         BRA ACT_J1
         BRA ACT_J2
         BRA ACT_J3
+        BRA ACT_J4
+        BRA ACT_J5
+        BRA ACT_J6
+        BRA ACT_J7
 ACT_J0:
-        CALL FREE_ACT
+        MOVLF #0,ACT_CNT
+        BSF PHONE_SW_O  
+        BSF RING_SW_O   ;hangOn
         CALL CHK_DIAL
         CALL CHK_RING
+        BTFSC YES_F
+        BRA ACT_J4
         RETURN
-
+;DIAL
 ACT_J1:
-        CALL CONNECT_ACT
+        MOVLF #1,ACT_CNT
+        CP0 DIAL_LEN
+        BRA Z,$+4
         RETURN
+        CALL CONNECT_ACT
+        INC ACT_CNT
+        RETURN
+;WAIT_DIAL
 ACT_J2:
+        MOVLF #2,ACT_CNT
+        NOP
+        NOP
+        NOP
         RETURN
 ACT_J3:
+        MOVLF #3,ACT_CNT
         RETURN
+ACT_J4:;;ON RING 
+        MOVLF #4,ACT_CNT
+        CALL GET_PHONE_STA
+        CP W0,#5         ;RINGING         
+        BRA NZ,$+4    
+        RETURN  
+        ;;;;;;;;;;;;;;;;;;;
+        CP W0,#2          ;;CUT OFF      
+        BRA Z,ACT_J0
+        CP W0,#3          ;;HANG OFF      
+        BRA Z,ACT_J5
+
+        RETURN
+ACT_J5:
+        MOVLF #5,ACT_CNT
+        BCF RING_SW_O   ;hangoFF
+        CALL GET_PHONE_STA
+        CP W0,#3         ;CONNECT         
+        BRA NZ,$+4    
+        RETURN  
+        CP W0,#2          ;;CUT OFF      
+        BRA Z,ACT_J0
+        RETURN
+ACT_J6:
+        MOVLF #6,ACT_CNT
+        RETURN
+ACT_J7:
+        MOVLF #7,ACT_CNT
+        RETURN
+
 
 CHK_MAX_PSTN:
         MOV MAX_PSTN,W0
@@ -1090,9 +1148,49 @@ CHK_DIAL_1:
         RETURN
 
 
+GET_PHONE_STA:
+        MOV EXSTATUS_FLAG0,W0
+        MOV W0,W7
+        BTSC SERIAL_ID,#1
+        SWAP W0
+        BTSC SERIAL_ID,#0
+        SWAP.B W0
+        AND #15,W0
+        RETURN
 
 
 CHK_RING:
+        BCF YES_F
+        MOV EXSTATUS_FLAG0,W0
+        MOV W0,W7
+        BTSC SERIAL_ID,#1
+        SWAP W0
+        BTSC SERIAL_ID,#0
+        SWAP.B W0
+        AND #15,W0
+        CP W0,#5
+        BRA Z,$+4
+        RETURN
+        BSF YES_F
+        RETURN
+        
+CHK_HANGOFF:
+        BCF YES_F
+        MOV EXSTATUS_FLAG0,W0
+        MOV W0,W7
+        BTSC SERIAL_ID,#1
+        SWAP W0
+        BTSC SERIAL_ID,#0
+        SWAP.B W0
+        AND #15,W0
+        CP W0,#3
+        BRA Z,$+4
+        RETURN
+        BSF YES_F
+        RETURN
+
+
+
         BTFSS T16M_F
         RETURN
         CALL CHK_MAX_PSTN
@@ -1126,21 +1224,27 @@ CHK_RING_1:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 MAIN:					;;
+        MOVLF #SERIAL_ID_K,SERIAL_ID
+        NOP
+        NOP
+        NOP
         NOP
         NOP
         NOP
         NOP
 	BCF U1RX_EN_F			;;
 	BSF U2RX_EN_F			;;
-        CLR ACT_CNT                      ;;
-        MOVLF #0,ACT_CNT
+        CLR ACT_CNT                     ;;
+        NOP
+        NOP
+        NOP
+        NOP
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 MAIN_LOOP:				;;
 	CLRWDT				;;
 	BTFSC T128M_F			;;
-	TG TP8_O
-        ;CALL DIAL_TEST
-        ;CALL ACT_PRG
+	TG TP8_O                        
+        CALL ACT_PRG
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	CALL TMR2PRG			;;	
 	CALL TIMEACT_PRG		;;
@@ -1329,6 +1433,7 @@ CHK_U2RX_1:				;;
 CHK_U2RX_2:				;;
 	MOV [W1++],W0			;;
         MOV W0,RX_SERIAL_ID             ;;        
+        BRA CHK_U2RX_3
 	MOV SERIAL_ID,W2		;;
 	CP W0,W2			;;
 	BRA Z,CHK_U2RX_3		;;
@@ -1349,30 +1454,50 @@ CHK_U2RX_3:				;;
 	MOV W0,RX_CMD			;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	MOV [W1++],W0			;;
-	MOV W0,URX_PARA0		;;
+	MOV W0,EXSTATUS_FLAG0		;;
 	MOV [W1++],W0			;;
-	MOV W0,URX_PARA1		;;
-	MOV [W1++],W0			;;
-	MOV W0,URX_PARA2		;;
-	MOV [W1++],W0			;;
-	MOV W0,URX_PARA3		;;	
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	MOV RX_CMD,W0			;;	
-	SWAP W0				;;
-	AND #255,W0			;;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	CP W0,#0x00			;;
-	BRA NZ,$+6			;;
-	GOTO URXDEC_SYSTEM_ACT		;;
-	CP W0,#0x10			;;
-	BRA NZ,$+6			;;
-	GOTO URXDEC_GETINF_ACT		;;
-	CP W0,#0x20			;;
-	BRA NZ,$+6			;;
-	GOTO URXDEC_CMD_ACT		;;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	MOV W0,EXSTATUS_FLAG1		;;
+	MOV [W1++],W2			;;
+        MOV W2,W0                       ;;
+        AND #255,W0                     ;;
+        CP W0,#0xAB                     ;;
+        BRA Z,$+4                       ;;
+        RETURN                          ;;
+        MOV W2,W0                       ;;
+        SWAP W0                         ;;
+        AND #15,W0                      ;;
+        MOV W0,MAGCALL_LEN              ;;
+        MOV W0,W2                       ;;
+        MOV #DIAL_BUF0,W3               ;;
+        CALL B2W_PRG                    ;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+B2W_PRG:
+        CP0 W2
+        BRA NZ,$+4
+        RETURN
+        CALL B2W
+        DEC W2,W2
+        BRA B2W_PRG
+        
+B2W:
+        BTSC W1,#0
+        BRA B2W_1
+        MOV [W1],W0
+        AND #255,W0
+        MOV W0,[W3++]
+        INC W1,W1
+        RETURN
+B2W_1:
+        BCLR W1,#0
+        MOV [W1++],W0
+        SWAP W0
+        AND #255,W0
+        MOV W0,[W3++]
+        RETURN
+
+
+
 
 
 
@@ -1487,14 +1612,7 @@ CMD_NONE_PRG:
 
 
 DIAL_START:
-        MOVLF #3,DIAL_LEN
-        MOV #DIAL_BUF0,W1               ;;
-        MOV #1,W0
-        MOV W0,[W1++]
-        MOV #4,W0
-        MOV W0,[W1++]
-        MOV #9,W0
-        MOV W0,[W1++]
+        MOVFF MAGCALL_LEN,DIAL_LEN
         BSF PSTN_SW_O
         MOVLF #30,DIAL_TIM
         CLR DIAL_STEP
@@ -1523,6 +1641,8 @@ DIAL_TEST_J0:
 DIAL_TEST_J1:
         BCF PSTN_SW_O
         RETURN
+
+;32ms
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1630,7 +1750,30 @@ INIT_TIMER5:				;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-DTMF_FREQ:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DTMF_FREQ:                              ;;
+        MOV W0,W2                       ;;
+        MOV #'*',W0                     ;;
+        CP W2,W0                        ;;
+        MOV #14,W0                      ;;
+        BRA Z,DTMF_FREQ_1               ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV #'#',W0                     ;;
+        CP W2,W0                        ;;
+        MOV #15,W0                      ;;
+        BRA Z,DTMF_FREQ_1               ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV #'9',W0                     ;;
+        CP W2,W0                        ;;
+        BRA LEU,$+4                     ;;
+        RETURN                          ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV #'0',W0                     ;;
+        CP W2,W0                        ;;
+        BRA GEU,$+4                     ;;
+        RETURN                          ;;
+        SUB W2,W0,W0                    ;;
+DTMF_FREQ_1:
         AND #15,W0
         BRA W0
         BRA DTMF_J0
@@ -1890,8 +2033,8 @@ INIT_UART1:				;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 INIT_UART2:				;;
-	MOV #284,W0	;57600		;;66MHZ
-	;MOV #142,W0	;115200		;;66MHZ
+	;MOV #284,W0	;57600		;;66MHZ
+	MOV #142,W0	;115200		;;66MHZ
 	;MOV #65,W0	;256000		;;66MHZ
 	;MOV #47,W0	;345600		;;66MHZ
 	;MOV #35,W0	;460800		;;66MHZ
