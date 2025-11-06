@@ -596,7 +596,7 @@ AICFUN_END:		.SPACE 0
 
 ;######################################
 FSET_BUF:		.SPACE 0 ;256
-SERIAL_ID:			.SPACE 2
+SERIAL_ID:		.SPACE 2
 DIMS_SET:		.SPACE 2
 PARA2_FSET:		.SPACE 2
 PARA3_FSET:		.SPACE 2
@@ -735,10 +735,10 @@ END_REG:		.SPACE 2
 .EQU ERR_F_P		,8
 .EQU OK_F		,FLAGA
 .EQU OK_F_P		,9
-;.EQU ERR_F		,FLAGA
-;.EQU ERR_F_P		,10
-;.EQU OK_F		,FLAGA
-;.EQU OK_F_P		,11
+.EQU RED_B_F		,FLAGA
+.EQU RED_B_F_P		,10
+.EQU GREEN_B_F		,FLAGA
+.EQU GREEN_B_F_P		,11
 ;EQU AICIO_AB_F		,FLAGA
 ;EQU AICIO_AB_F_P  	,12
 .EQU MASTER_U1RX_F	,FLAGA
@@ -928,6 +928,9 @@ WAIT_POWER:			;;
 	CALL LF24_F24SET	;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;
 	CALL TEST_FLASH_ID	;;	
+        ;MOV #0X3F,W0        ;<<DEBUG            
+        ;MOV W0,SERIAL_ID    ;DEBUG     
+
 	;;;;;;;;;;;;;;;;;;;;;;;;;;
 	CALL FLASH_EXITQPI	;;
 
@@ -2955,8 +2958,18 @@ URXDEC_TFT_ACT5:			;;
 	MOV SERIAL_ID,W0		;;
 	ADD W0,W1,W1			;;
 	CALL LOAD_W1_1B			;;
-	BTSC W0,#7			;;
-	BRA URXDEC_TFT_ACT4_1		;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;BCF RED_B_F                     ;;
+        ;BTSC W0,#3                      ;;
+        ;BSF RED_B_F                     ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;BSF GREEN_B_F                   ;;
+        ;BTSC W0,#7                      ;;
+        ;BSF GREEN_B_F                   ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;;BTSC W0,#7			;;
+	;;BRA URXDEC_TFT_ACT4_1		;;DARK
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	PUSH W0				;;
 	AND #7,W0			;;
 	MOV W0,KB_PAGE_CNT		;;
@@ -5938,18 +5951,26 @@ SHOW_IMAGE:				;;
 	CALL CRASET			;;
 	STWC 0x2C			;;
 	MOV #128,W3			;;
-CLRSCR_1X:				;;
+DRAW_1X:				;;
 	CALL READ_FLASH_PAGE		;;
 	MOV #128,W4			;;
 	MOV #FLASH_TMP,W1		;;
-CLRSCR_2X:				;;
+DRAW_2X:				;;
 	CLRWDT				;;
 	MOV [W1++],W0			;;
+        CP0 W0                          ;;
+        BRA NZ,DRAW_3X                  ;;
+        BTFSC GREEN_B_F                 ;;
+        MOV #0x07E0,W0                  ;;
+        BTFSC RED_B_F                   ;;
+        IOR #0x001F,W0                  ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+DRAW_3X:				;;
 	CALL STWDP16			;;
 	DEC W4,W4			;;
-	BRA NZ,CLRSCR_2X		;;
+	BRA NZ,DRAW_2X		        ;;
 	DEC W3,W3			;;
-	BRA NZ,CLRSCR_1X		;;
+	BRA NZ,DRAW_1X		        ;;
 	STWEND				;;
 	POP R6				;;
 	POP R7				;;
