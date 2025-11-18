@@ -28,7 +28,7 @@
 ;BY DEFINE=============================
 ;       .EQU REC_CARD_DK	,1
 ;       .EQU ROIP_CARD_DK	,1
-        .EQU MAGNET_CARD_DK     ,1
+;       .EQU MAGNET_CARD_DK     ,1
 ;======================================
 
 
@@ -3041,6 +3041,8 @@ INIT_IO:				;;
 	BSET CNPUA,#9                   ;;ROIP1
 	BSET CNPUF,#0                   ;;ROIP6
 	BSET CNPUB,#12                  ;;ROIP5
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	BSET CNPUG,#7                   ;;
 	NOP                             ;;
 	NOP                             ;;
 	NOP                             ;;
@@ -3173,6 +3175,9 @@ INIT_IO:				;;
 	;BSET CNPUA,#9                   ;;ROIP1
 	;BSET CNPUF,#0                   ;;ROIP6
 	;BSET CNPUB,#12                  ;;ROIP5
+        .IFDEF MAGNET_CARD_DK           
+	BSET CNPUG,#7                  ;;
+        .ENDIF                          
 	
 
 	NOP                             ;;

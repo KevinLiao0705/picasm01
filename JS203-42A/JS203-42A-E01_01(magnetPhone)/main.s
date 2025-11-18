@@ -318,6 +318,8 @@ ACT_CNT:		.SPACE 2
 PSTN_HL_CNT:            .SPACE 2
 PSTN_HL_TIM:            .SPACE 2
 PSTN_FLAG:              .SPACE 2
+DIAL_TIME:              .SPACE 2
+
 
 PHONE_HL_CNT:            .SPACE 2
 PHONE_HL_TIM:            .SPACE 2
@@ -1038,8 +1040,9 @@ ACT_PRG:
         BRA ACT_J7
 ACT_J0:
         MOVLF #0,ACT_CNT
-        BSF PHONE_SW_O  
-        BSF RING_SW_O   ;hangOn
+        BCF PHONE_SW_O  
+        BCF RING_SW_O   ;hangOn
+        BCF PSTN_SW_O
         CALL CHK_DIAL
         CALL CHK_RING
         BTFSC YES_F
@@ -1051,20 +1054,44 @@ ACT_J1:
         CP0 DIAL_LEN
         BRA Z,$+4
         RETURN
-        CALL CONNECT_ACT
         INC ACT_CNT
+        CLR DIAL_TIME
         RETURN
 ;WAIT_DIAL
 ACT_J2:
         MOVLF #2,ACT_CNT
-        NOP
-        NOP
-        NOP
+        BSF PHONE_SW_O
+        BSF RING_SW_O
+        CALL GET_PHONE_STA
+        CP W0,#3                        ;CONNECT OR DIAL RING          
+        BRA Z,ACT_J3
+      	BTFSC T128M_F			;;
+	INC DIAL_TIME                        
+        MOV #20,W0
+        CP DIAL_TIME
+        BRA GEU,$+4
         RETURN
+        CALL GET_PHONE_STA
+        CP W0,#3                        ;CONNECT OR DIAL RING          
+        BRA Z,ACT_J3
+        BRA ACT_J0
 ACT_J3:
         MOVLF #3,ACT_CNT
-        RETURN
+        BCF PSTN_SW_O
+        BSF PHONE_SW_O  
+        BSF RING_SW_O
+        CALL GET_PHONE_STA
+        CP W0,#3         ;CONNECT         
+        BRA NZ,$+4    
+        RETURN  
+        BRA ACT_J0
 ACT_J4:;;ON RING 
+        NOP
+        NOP
+        NOP
+        NOP
+        BCF PSTN_SW_O
+        BSF PHONE_SW_O  
         MOVLF #4,ACT_CNT
         CALL GET_PHONE_STA
         CP W0,#5         ;RINGING         
@@ -1075,11 +1102,10 @@ ACT_J4:;;ON RING
         BRA Z,ACT_J0
         CP W0,#3          ;;HANG OFF      
         BRA Z,ACT_J5
-
         RETURN
 ACT_J5:
         MOVLF #5,ACT_CNT
-        BCF RING_SW_O   ;hangoFF
+        BSF RING_SW_O   ;hangoFF
         CALL GET_PHONE_STA
         CP W0,#3         ;CONNECT         
         BRA NZ,$+4    
