@@ -24,10 +24,13 @@
 
 ;SLOT SERIAL BI1~0
 ;roip_addr 192.168.191,161~166
+;161 166  up
+;162 164
+;163 165
 
 ;BY DEFINE=============================
 ;       .EQU REC_CARD_DK	,1
-;       .EQU ROIP_CARD_DK	,1
+        .EQU ROIP_CARD_DK	,1
 ;       .EQU MAGNET_CARD_DK     ,1
 ;======================================
 
@@ -1420,11 +1423,18 @@ CHK_MCURX1:                             ;;
         MOV #0,W0                       ;;
         CALL LOAD_ROIP_REGS             ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        MOV #0XBFA1,W0                  ;;
+        CP0 ICS_GROUP_ID                ;;
+        BRA NZ,$+4                      ;;
+        RETURN                  
+	MOV ICS_GROUP_ID,W2		;;
+        SWAP W2                         ;;
+        MOV #0XA1,W0                    ;;
         BTSC SW1_FLAG,#0                ;;
-        MOV #0XBFA4,W0                  ;;
+        MOV #0XA4,W0                    ;;
+        ADD W0,W2,W0                    ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         CP W0,W4                        ;;
-        BRA NZ,$+4                       ;;
+        BRA NZ,$+4                      ;;
         RETURN                          ;;
         CP0 ROIPTX_TIM                  ;;
         BRA Z,$+4                       ;;
@@ -1464,11 +1474,17 @@ CHK_MCURX2:                             ;;
         MOV #1,W0                       ;;
         CALL LOAD_ROIP_REGS             ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        MOV #0XBFA2,W0                  ;;
+        CP0 ICS_GROUP_ID                ;;
+        BRA NZ,$+4                      ;;
+        RETURN                  
+	MOV ICS_GROUP_ID,W2		;;
+        SWAP W2                         ;;
+        MOV #0XA2,W0                    ;;
         BTSC SW1_FLAG,#0                ;;
-        MOV #0XBFA5,W0                  ;;
+        MOV #0XA5,W0                    ;;
+        ADD W0,W2,W0                    ;;
         CP W0,W4                        ;;
-        BRA NZ,$+4                       ;;
+        BRA NZ,$+4                      ;;
         RETURN                          ;;
         CP0 ROIPTX_TIM                  ;;
         BRA Z,$+4                       ;;
@@ -1506,9 +1522,15 @@ CHK_MCURX3:                             ;;
         MOV #2,W0                       ;;
         CALL LOAD_ROIP_REGS             ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        MOV #0XBFA3,W0                  ;;
+        CP0 ICS_GROUP_ID                ;;
+        BRA NZ,$+4                      ;;
+        RETURN                  
+	MOV ICS_GROUP_ID,W2		;;
+        SWAP W2                         ;;
+        MOV #0XA3,W0                    ;;
         BTSC SW1_FLAG,#0                ;;
-        MOV #0XBFA6,W0                  ;;
+        MOV #0XA6,W0                    ;;
+        ADD W0,W2,W0                    ;;
         CP W0,W4                        ;;
         BRA NZ,$+4                      ;;
         RETURN                          ;;
@@ -1668,7 +1690,7 @@ RLP_0:                                  ;;
         MOV #1,W0                       ;;
         SL W0,W2,W0                     ;;
         COM W0,W0                       ;;
-        AND ROIP_RX_FLAG                ;;        
+        ;AND ROIP_RX_FLAG               ;;        
 RLP_1:                                  ;;
         ADD #8,W1                       ;;
         INC W2,W2                       ;;
@@ -1703,11 +1725,11 @@ SYSLED_PRG:                             ;;
 	BCF CTRCON_F                    ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	.IFDEF ROIP_CARD_DK	        ;;        
+        CALL ROIP_LED_PRG               ;;
 	MOVLF #4,SLOTSTA_FLAG           ;;
 	BSF UICON_F                     ;;
         BRA SYSLED_1                    ;;        
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        CALL ROIP_LED_PRG               ;;
         .ENDIF                          ;;
 	.IFDEF REC_CARD_DK	        ;;        
 	MOVLF #4,SLOTSTA_FLAG           ;;
@@ -1890,13 +1912,13 @@ ROIPB_TX_PRG:                           ;;
         MOV #0X00,W0                    ;;
         CALL LOAD_BYTE_W3               ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	MOV ICS_GROUP_ID,W0		;;
+        MOV #192,W0                     ;;
         CALL LOAD_BYTE_W3               ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         MOV #168,W0                     ;;
         CALL LOAD_BYTE_W3               ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	MOV #191,W0		        ;;
+	MOV ICS_GROUP_ID,W0		;;
         CALL LOAD_BYTE_W3               ;;
         MOV #162,W0                     ;;
         BTSC SW1_FLAG,#0                ;;
