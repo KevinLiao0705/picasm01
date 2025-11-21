@@ -30,7 +30,7 @@
 
 ;BY DEFINE=============================
 ;       .EQU REC_CARD_DK	,1
-        .EQU ROIP_CARD_DK	,1
+;        .EQU ROIP_CARD_DK	,1
 ;       .EQU MAGNET_CARD_DK     ,1
 ;======================================
 

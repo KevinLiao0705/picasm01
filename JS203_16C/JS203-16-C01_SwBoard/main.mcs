@@ -2,7 +2,7 @@
 MagicCookie={0b13fe8c-dfe0-40eb-8900-6712719559a7}
 Version=1.0
 [File000]
-Location=E:\kevin\picasm01\JS203_16C\JS203-16-C01_SwBoard\data.o
+Location=D:\kevin\picasm01\JS203_16C\JS203-16-C01_SwBoard\data.o
 Folder=Intermediary
 DeviceName=PIC24EP64GP206
 LanguageToolSuiteID={F62E444C-B232-4066-9AB0-A6F4E5261396}
@@ -15,7 +15,7 @@ ToolArgsString=-g
 TraceCmdString=
 DebugOptions=
 [File001]
-Location=E:\kevin\picasm01\JS203_16C\JS203-16-C01_SwBoard\main.o
+Location=D:\kevin\picasm01\JS203_16C\JS203-16-C01_SwBoard\main.o
 Folder=Intermediary
 DeviceName=PIC24EP64GP206
 LanguageToolSuiteID={F62E444C-B232-4066-9AB0-A6F4E5261396}
@@ -28,7 +28,7 @@ ToolArgsString=-g
 TraceCmdString=
 DebugOptions=
 [File002]
-Location=E:\kevin\picasm01\JS203_16C\JS203-16-C01_SwBoard\main.cof
+Location=D:\kevin\picasm01\JS203_16C\JS203-16-C01_SwBoard\main.cof
 Folder=Output
 DeviceName=PIC24EP64GP206
 LanguageToolSuiteID={F62E444C-B232-4066-9AB0-A6F4E5261396}
@@ -41,7 +41,20 @@ ToolArgsString=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TAR
 TraceCmdString=
 DebugOptions=
 [File003]
-Location=E:\kevin\picasm01\JS203_16C\JS203-16-C01_SwBoard\main.hex
+Location=D:\kevin\picasm01\JS203_16C\JS203-16-C01_SwBoard\main.hex
+Folder=Output
+DeviceName=PIC24EP64GP206
+LanguageToolSuiteID={F62E444C-B232-4066-9AB0-A6F4E5261396}
+LanguageToolID={433C3D55-811D-409D-A6BF-159CF9355B42}
+LanguageToolLocation=C:\Program Files (x86)\Microchip\MPLAB ASM30 Suite\bin\pic30-ld.exe
+PPAD=$(BINDIR)||$(TMPDIR)||$(AINDIR)||$(INCDIR)||$(LIBDIR)||$(LKRDIR)||
+SOLK=<src>|data.s|main.s||<obj>||<lib>||<lkr>|p24EP64GP206.gld||
+SuiteArgsString=
+ToolArgsString=-o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)" -Map="$(BINDIR_)$(TARGETBASE).map" --report-mem
+TraceCmdString=
+DebugOptions=
+[File004]
+Location=
 Folder=Output
 DeviceName=PIC24EP64GP206
 LanguageToolSuiteID={F62E444C-B232-4066-9AB0-A6F4E5261396}

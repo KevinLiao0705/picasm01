@@ -1,4 +1,4 @@
-Microchip Technology Inc, vv3_31 (A) {
+Microchip Technology Inc, vv3_31 (A) Í
 
 Tool Name:
   C:\Program Files (x86)\Microchip\MPLAB ASM30 Suite\bin\bin/pic30-coff-ld.exe
@@ -8,6 +8,9 @@ Command:
   pindef.o \
   --script=p24EP64GP206.gld \
   --defsym=__MPLAB_BUILD=1 \
+  --defsym=__MPLAB_DEBUG=1 \
+  --defsym=__MPLAB_DEBUGGER_PK3=1 \
+  --defsym=__ICD2RAM=1 \
   -omain.cof \
   -Map=main.map \
   --report-mem \
@@ -31,9 +34,10 @@ Data Memory  [Origin = 0x1000, Length = 0x2000]
 
 section                    address      alignment gaps    total length  (dec)
 -------                    -------      --------------    -------------------
-.nbss                       0x1000                   0           0xd06  (3334)
+.icd                        0x1000                0x50            0x50  (80)
+.nbss                       0x1050                   0           0xd06  (3334)
 
-                        Total data memory used (bytes):          0xd06  (3334) 40%
+                        Total data memory used (bytes):          0xd56  (3414) 41%
 
 
 Dynamic Memory Usage
@@ -41,9 +45,9 @@ Dynamic Memory Usage
 region                     address                      maximum length  (dec)
 ------                     -------                      ---------------------
 heap                             0                                   0  (0)
-stack                       0x1d06                              0x12fa  (4858)
+stack                       0x1d56                              0x12aa  (4778)
 
-                        Maximum dynamic memory (bytes):         0x12fa  (4858)
+                        Maximum dynamic memory (bytes):         0x12aa  (4778)
 
 
 External Symbols in Program Memory (by address):
@@ -175,6 +179,10 @@ __FUID2
 
 __FUID3
  *(__FUID3.sec*)
+
+.icd                0x1000         0x50
+                    0x1050                  . = (. + DEFINED (__ICD2RAM)?0x50:0x0)
+ *fill*             0x1000         0x5000
 
 .comment
  *(.comment)
@@ -1345,12 +1353,15 @@ __FUID3
                     0x0230                  UART2 = 0x230
                     0x0230                  _UART2 = 0x230
                     0x0001                  __MPLAB_BUILD = 0x1
+                    0x0001                  __MPLAB_DEBUG = 0x1
+                    0x0001                  __MPLAB_DEBUGGER_PK3 = 0x1
+                    0x0001                  __ICD2RAM = 0x1
 OUTPUT(main.cof coff-pic30)
 LOAD data_init
 LOAD default_isr
 
-.nbss               0x1000        0xd06
- .nbss              0x1000        0xd06 main.o
+.nbss               0x1050        0xd06
+ .nbss              0x1050        0xd06 main.o
 
 .text             0x000204       0x9ffc
  .text            0x000204       0x9ffc main.o
