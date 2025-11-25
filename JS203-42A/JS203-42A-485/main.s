@@ -30,7 +30,7 @@
 
 ;BY DEFINE=============================
 ;       .EQU REC_CARD_DK	,1
-;        .EQU ROIP_CARD_DK	,1
+        .EQU ROIP_CARD_DK	,1
 ;       .EQU MAGNET_CARD_DK     ,1
 ;======================================
 
@@ -664,12 +664,12 @@ END_REG:		.SPACE 2
 .EQU POWER_EN_F_P	,2
 .EQU FIRST_CON485_F	,FLAGA
 .EQU FIRST_CON485_F_P	,3
-;.EQU FLASH_QPI_F	,FLAGA
-;.EQU FLASH_QPI_F_P	,4
-;.EQU FLASH_QPI2_F	,FLAGA	
-;.EQU FLASH_QPI2_F_P	,5
-;.EQU SET_DIMS_F		,FLAGA
-;.EQU SET_DIMS_F_P	,6
+.EQU CHGIP1_F	        ,FLAGA
+.EQU CHGIP1_F_P	        ,4
+.EQU CHGIP2_F	        ,FLAGA
+.EQU CHGIP2_F_P	        ,4
+.EQU CHGIP3_F	        ,FLAGA
+.EQU CHGIP3_F_P	        ,4
 ;.EQU KEYCODE_IN_F	,FLAGA
 ;.EQU KEYCODE_IN_F_P	,7
 .EQU ERR_F		,FLAGA
@@ -1404,6 +1404,15 @@ CHK_MCURX1:                             ;;
         MOV [W1++],W2                   ;;
         MOV [W1++],W4                   ;;LOW IP
         MOV [W1++],W6                   ;;
+
+        MOV W4,W0
+        SWAP W0
+        AND #255,W0
+        CP0 W0
+        BRA NZ,$+4
+        RETURN
+
+
         MOV W0,R3                       ;;
         MOV #0X1947,W0                  ;;
         CP W0,W2                        ;;
@@ -1426,6 +1435,12 @@ CHK_MCURX1:                             ;;
         CP0 ICS_GROUP_ID                ;;
         BRA NZ,$+4                      ;;
         RETURN                  
+
+        BTFSC CHGIP1_F
+        RETURN
+        BSF CHGIP1_F
+
+
 	MOV ICS_GROUP_ID,W2		;;
         SWAP W2                         ;;
         MOV #0XA1,W0                    ;;
@@ -1439,7 +1454,7 @@ CHK_MCURX1:                             ;;
         CP0 ROIPTX_TIM                  ;;
         BRA Z,$+4                       ;;
         RETURN                          ;;
-        MOVLF #500,ROIPTX_TIM           ;;
+        MOVLF #5,ROIPTX_TIM           ;;
         CALL ROIPA_TX_PRG               ;;
         RETURN                          ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1455,6 +1470,16 @@ CHK_MCURX2:                             ;;
         MOV [W1++],W2                   ;;
         MOV [W1++],W4                   ;;LOW IP
         MOV [W1++],W6                   ;;
+
+        MOV W4,W0
+        SWAP W0
+        AND #255,W0
+        CP0 W0
+        BRA NZ,$+4
+        RETURN
+
+
+
         MOV W0,R3                       ;;
         MOV #0X1947,W0                  ;;
         CP W0,W2                        ;;
@@ -1476,7 +1501,13 @@ CHK_MCURX2:                             ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         CP0 ICS_GROUP_ID                ;;
         BRA NZ,$+4                      ;;
-        RETURN                  
+        RETURN             
+
+        BTFSC CHGIP2_F
+        RETURN
+        BSF CHGIP2_F
+
+     
 	MOV ICS_GROUP_ID,W2		;;
         SWAP W2                         ;;
         MOV #0XA2,W0                    ;;
@@ -1499,10 +1530,22 @@ CHK_MCURX2:                             ;;
 CHK_MCURX3:                             ;;        
 	BTFSS MCURX3_PACK_F		;;
 	RETURN			        ;;
+        NOP
+        NOP
+        NOP
 	MOV #MCURX3_BUF,W1		;;
         MOV [W1++],W2                   ;;
         MOV [W1++],W4                   ;;LOW IP
         MOV [W1++],W6                   ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV W4,W0
+        SWAP W0
+        AND #255,W0
+        CP0 W0
+        BRA NZ,$+4
+        RETURN
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
         MOV W0,R3                       ;;
         MOV #0X1947,W0                  ;;
         CP W0,W2                        ;;
@@ -1524,7 +1567,10 @@ CHK_MCURX3:                             ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         CP0 ICS_GROUP_ID                ;;
         BRA NZ,$+4                      ;;
-        RETURN                  
+        RETURN                          ;;
+        BTFSC CHGIP3_F
+        RETURN
+        BSF CHGIP3_F
 	MOV ICS_GROUP_ID,W2		;;
         SWAP W2                         ;;
         MOV #0XA3,W0                    ;;
@@ -2435,7 +2481,7 @@ INIT_IC1:				;;
 	MOVLF #0x0402,IC1CON1		;;
 	BSET IPC0,#6			;;
 	BCLR IPC0,#5			;;
-	BCLR IPC0,#4			;;
+	BSET IPC0,#4			;;
 	BSET IEC0,#IC1IE		;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2452,7 +2498,7 @@ INIT_IC2:				;;
 	MOVLF #0x0402,IC2CON1		;;
 	BSET IPC0,#6			;;
 	BCLR IPC0,#5			;;
-	BCLR IPC0,#4			;;
+	BSET IPC0,#4			;;
 	BSET IEC0,#IC2IE		;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2469,7 +2515,7 @@ INIT_IC3:				;;
 	MOVLF #0x0402,IC3CON1		;;
 	BSET IPC9,#6			;;
 	BCLR IPC9,#5			;;
-	BCLR IPC9,#4			;;
+	BSET IPC9,#4			;;
 	BSET IEC2,#IC3IE		;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2543,7 +2589,7 @@ INIT_TIMER1:				;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	BSET IPC0,#14			;;
 	BCLR IPC0,#13			;;
-	BSET IPC0,#12			;;
+	BCLR IPC0,#12			;;
         BCLR IFS0,#T1IF			;;	
         BSET IEC0,#3                    ;;            
 	RETURN				;;
@@ -2559,7 +2605,7 @@ INIT_TIMER3:				;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	BSET IPC2,#2			;;
 	BCLR IPC2,#1			;;
-	BSET IPC2,#0			;;
+	BCLR IPC2,#0			;;
         BCLR IFS0,#T3IF			;;	
         BSET IEC0,#T3IE                  ;;            
 	RETURN				;;
@@ -2575,7 +2621,7 @@ INIT_TIMER5:				;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	BSET IPC7,#2			;;
 	BCLR IPC7,#1			;;
-	BSET IPC7,#0			;;
+	BCLR IPC7,#0			;;
         BCLR IFS1,#T5IF			;;	
         BSET IEC1,#T5IE                  ;;            
 	RETURN				;;
@@ -3780,6 +3826,16 @@ HW_POWENON_PRG:
         CLR POWER_ACT_TIM
         CLR POWER_EN_TIM
 	RETURN
+
+
+
+HW_POWENON_PRG_XXX:
+	BSF POWER_EN_F
+        MOV #600,W0
+        MOV W0,POWER_ACT_TIM
+        CLR POWER_EN_TIM
+	RETURN
+
 
 
 

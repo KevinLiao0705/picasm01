@@ -847,12 +847,12 @@ END_REG:		.SPACE 2
 .EQU MCURX5_RXIN_F_P	,9
 .EQU MCURX5_START_F	,FLAGC
 .EQU MCURX5_START_F_P	,10
-;EQU LDU2TX_U1RBCRA_F	,FLAGC
-;EQU LDU2TX_U1RBCRA_F_P	,11
-;EQU IICS_RXED_F	,FLAGC
-;EQU IICS_RXED_F_P	,12
-;EQU IICRX_ERR_F	,FLAGC
-;EQU IICRX_ERR_F_P	,13
+.EQU YES_F	        ,FLAGC
+.EQU YES_F_P	        ,11
+.EQU DISP_ALL_KEY_F	,FLAGC
+.EQU DISP_ALL_KEY_F_P	,12
+.EQU SAME_KEY_F	        ,FLAGC
+.EQU SAME_KEY_F_P	,13
 ;EQU LD_CODTXA_F	,FLAGC
 ;EQU LD_CODTXA_F_P	,14
 ;EQU LD_CODTXB_F	,FLAGC
@@ -1777,7 +1777,7 @@ MAIN_LOOP:				;;
 	BRA MAIN_LOOP			;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
+;RS422 CH0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CHK_MCURX2:				;;
 	BTFSS MCURX2_RXIN_F		;;	
@@ -1830,11 +1830,21 @@ CHK_MCURX2_END:				;;
 	RETURN	  			;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
+;RS422_1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CHK_MCURX3:				;;
 	BTFSS MCURX3_RXIN_F		;;	
 	RETURN				;;
+        NOP
+        NOP
+        NOP
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;BCF MCURX3_RXIN_F		 ;;XXX
+        ;CALL EMU_KEYIN                  ;;XXX        
+        ;BRA CHK_MCURX3_END              ;;XXX
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 	BCF MCURX3_RXIN_F		;;
 	CLR URXTMP_LEN			;;
 CHK_MCURX3_0:				;;
@@ -1883,6 +1893,8 @@ CHK_MCURX3_END:				;;
 	RETURN	  			;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
+;USBCOM0 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CHK_MCURX4:				;;
 	BTFSS MCURX4_RXIN_F		;;	
@@ -1937,6 +1949,7 @@ CHK_MCURX4_END:				;;
 
 
 
+;USBCOM1 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CHK_MCURX5:				;;
 	BTFSS MCURX5_RXIN_F		;;	
@@ -1989,8 +2002,28 @@ CHK_MCURX5_END:				;;
 	RETURN	  			;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+EMU_KEYIN:                              ;;
+	MOV #URXTMP,W1			;;
+        MOV #0X1090,W0                  ;;      
+        MOV W0,[W1++]                   ;;      
+        MOV #0X2190,W0                  ;;
+        MOV W0,[W1++]                   ;;
+        MOV #0X3090,W0                  ;;
+        MOV W0,[W1++]                   ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV #0X1091,W0                  ;;
+        MOV W0,[W1++]                   ;;
+        MOV #0X2091,W0                  ;;
+        MOV W0,[W1++]                   ;;
+        MOV #0X3191,W0                  ;;
+        MOV W0,[W1++]                   ;;
+	MOVLF #12,URXTMP_LEN      	;;
+        RETURN                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;        
 
 
+;RS232 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CHK_MCURX1:				;;
 	BTFSS MCURX1_RXIN_F		;;	
@@ -2701,6 +2734,7 @@ KTP_1:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
 MAIN_KPUSH:				;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	DEC R0				;;
 	MOV R0,W0			;;
 	MOV W0,OLED_POS			;;
@@ -2782,6 +2816,10 @@ MAIN_KFREE:				;;
 	MOV R1,W0			;;
 	MOV W0,OLED_POS			;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;MOV #0X1C,W0                    ;;XXX
+        ;CP OLED_POS                     ;;XXX
+        ;BRA NZ,$+4                      ;;XXX
+        ;BSF MCURX3_RXIN_F               ;;XXX
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;MOV #0x03,W0			;;
 	;CP OLED_POS			;;
@@ -4775,12 +4813,6 @@ SSF_J6:					;;
 	CLR KB_X256_CNT			;;
 	RETURN				;;
 SSF_J7:					;;
-        CP0 KB_X256_CNT
-        BRA NZ,XXX1
-        NOP
-        NOP
-        NOP
-XXX1:
 	CALL LOAD_KEY_DATA		;;
 	BTFSC DONE_F			;;
 	BRA SSF_J7_1			;;
@@ -6045,7 +6077,11 @@ INIT_RAM:				;;
 	MOVLF #31,DIM_CNT		;;MAX=31			
 	MOVLF #31,COMV_CNT		;;MAX=31			
 	MOVLF #15,OLEDCUR_CNT		;;MAX=15		
-	SETM MCURX2_CLR_TIM		;;
+	SETM MCURX1_CLR_TIM		;;
+        SETM MCURX2_CLR_TIM
+        SETM MCURX3_CLR_TIM
+	SETM MCURX4_CLR_TIM		;;
+        SETM MCURX5_CLR_TIM
 	
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6190,6 +6226,14 @@ INIT_IO:				;;
 	;;PIN64 			;;
 	BSF IO_READ_O			;;
 	BCF IO_READ_IO			;;
+
+
+	BSET CNPUB,#15                  ;;
+	BSET CNPUG,#7                   ;;
+	BSET CNPUB,#0                   ;;
+	BSET CNPUA,#9                  ;;
+	BSET CNPUB,#12                  ;;
+
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -6809,6 +6853,18 @@ DEC_SYSURX_1:				;;
 	CP RX_CH			;;
 	BRA NZ,DEC_SYSURX_3		;;
 DEC_SYSURX_2:				;;
+        MOV #0X1C,W0
+        CP OLED_POS
+        BRA NZ,VVV
+        NOP
+        NOP
+        NOP
+VVV:
+        NOP
+        CALL CHK_SWITCH_MODE            ;;
+        BTFSC YES_F                     ;;
+        BRA DEC_SYSURX_3                ;;                
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	BTSC NOWKEY_STA0,#8		;;
 	CALL CHK_SWITCH_PAGE0		;;
 	BTSC NOWKEY_STA0,#9		;;
@@ -6830,6 +6886,10 @@ DEC_SYSURX_3:				;;
 	MOV #OLED_AMT_K,W0		;;		
 	CP OLED_POS			;;	
 	BRA LTU,DEC_SYSURX_1		;;
+        BTFSS DISP_ALL_KEY_F            ;;
+        RETURN                          ;;
+        BCF DISP_ALL_KEY_F              ;;
+        CALL DISP_ALL_KEY               ;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -6875,6 +6935,211 @@ CHK_SWITCH_PAGE7:			;;
 	MOVLF #7,IMAGE_PAG		;;
 	BRA CHK_SWITCH_PAGE		;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+TEST_SET:                               ;;
+        MOV #0x1C,W0                    ;;
+        CP OLED_POS                     ;;
+        BRA NZ,TEST_SET_1               ;;
+        NOP                             ;;
+        NOP                             ;;
+	MOV #FLASH_TMP,W1		;;
+        MOV #0x0006,W0                  ;;
+        MOV W0,[W1++]                   ;;
+        MOV #0xB6A7,W0                  ;;A7B619430090
+	MOV W0,[W1++]			;;
+        MOV #0x4319,W0                  ;;
+	MOV W0,[W1++]			;;
+        MOV #0x9000,W0                  ;;
+	MOV W0,[W1++]			;;
+        RETURN                          ;;
+TEST_SET_1:                             ;;
+        MOV #0x1D,W0                    ;;
+        CP OLED_POS                     ;;
+        BRA NZ,TEST_SET_2               ;;
+        NOP                             ;;
+        NOP                             ;;
+	MOV #FLASH_TMP,W1		;;
+        MOV #0x0006,W0                  ;;
+        MOV W0,[W1++]                   ;;
+        MOV #0xB6A7,W0                  ;;A7B619430090
+	MOV W0,[W1++]			;;
+        MOV #0x4319,W0                  ;;
+	MOV W0,[W1++]			;;
+        MOV #0x9100,W0                  ;;
+	MOV W0,[W1++]			;;
+        RETURN                          ;;
+TEST_SET_2:                             ;;
+        RETURN                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CHK_SWITCH_MODE:			;;
+        BCF YES_F                       ;;
+	CALL LOAD_KEY_ACT		;;
+	MOVLF #0,IMAGE_PAG		;;
+	MOV #FLASH_TMP+0x0D,W1		;;
+	CALL GET_3BADRX4		;;
+	MOV RX_LEN,W0			;;
+	INC2 W0,W0			;;
+	CALL READ_FLASH_XB		;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;CALL TEST_SET                   ;;XXX
+CWM_0:                                  ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	MOV #FLASH_TMP,W1		;;
+	MOV [W1++],W0			;;
+	CP W0,#6			;;
+	BRA Z,$+4                	;;	
+        RETURN                          ;;
+	MOV [W1++],W0			;;
+        MOV #0xB6A7,W2                  ;;        
+        CP W0,W2                        ;;
+        BRA Z,$+4                       ;;
+        RETURN                          ;;
+	MOV [W1++],W0			;;
+        MOV #0x4319,W2                  ;;        
+        CP W0,W2                        ;;
+        BRA Z,$+4                       ;;
+        RETURN                          ;;
+	MOV [W1++],W2			;;
+        MOV W2,W0                       ;;
+        AND #255,W0                     ;;
+        CP W0,#0                        ;;
+        BRA Z,CSM_M0                    ;;
+        RETURN                          ;;
+CSM_M0:                                 ;;
+        SWAP W2                         ;;
+        AND #255,W2                     ;;
+        MOV W2,R0                       ;;
+        BSF YES_F                       ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        CLR R6                          ;;
+        BCF SAME_KEY_F                  ;;
+	MOV RX_ADDR,W3			;;
+	CLR W4				;;
+CSM_M0_1:		   	        ;;
+	MOV W3,W5			;;
+	BCLR W5,#0			;;
+	MOV [W5],W0 			;;
+	BTSC W3,#0			;;
+	SWAP W0				;;
+	XOR W0,W2,W0			;;
+	AND #255,W0			;;
+	BRA Z,CSM_M0_2         	        ;;		
+	INC W3,W3			;;
+	INC W4,W4			;;
+        BRA CSM_M0_3                    ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CSM_M0_2:		   	        ;;
+	INC W3,W3			;;
+	INC W4,W4			;;
+	MOV RX_LEN,W0			;;
+	CP W4,W0			;;
+	BRA LTU,$+4             	;;	
+        RETURN                          ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        BSF SAME_KEY_F                  ;;
+	MOV W3,W5			;;
+	BCLR W5,#0			;;
+	MOV [W5],W0 			;;
+	BTSC W3,#0			;;
+	SWAP W0				;;
+        AND #255,W0                     ;;
+        CALL CSM_M0_DEC                 ;;
+        BRA Z,$+4                       ;;
+        RETURN                          ;;
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CSM_M0_3:		   	        ;;
+	INC W3,W3			;;
+	INC W4,W4			;;
+	MOV RX_LEN,W0			;;
+	CP W4,W0			;;
+	BRA LTU,CSM_M0_1        	;;	
+	;=================================
+        BTFSS SAME_KEY_F                ;;
+        RETURN
+        MOV R6,W0                       ;;
+        CALL CSM_M0_TBL                 ;;
+        MOV W0,IMAGE_PAG                ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	CALL GET_KBSTA_ADR		;;
+	MOV [W1],W0			;;
+	MOV #0xFFF0,W2			;;
+	AND W2,W0,W0			;;
+	MOV IMAGE_PAG,W2		;;	
+	AND #15,W2			;;
+	IOR W2,W0,W0			;;
+	MOV W0,[W1]			;;
+
+        BSF DISP_ALL_KEY_F              ;;
+        BSF YES_F                       ;;
+	RETURN				;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+CSM_M0_TBL:
+        AND #7,W0
+        BRA W0
+        RETLW #0,W0
+        RETLW #0,W0
+        RETLW #2,W0
+        RETLW #2,W0
+        RETLW #3,W0
+        RETLW #3,W0
+        RETLW #1,W0
+        RETLW #1,W0
+        
+
+
+CSM_M0_DEC:
+        CP W0,#0X10
+        BRA Z,CSM_M0_DEC_10
+        CP W0,#0X11
+        BRA Z,CSM_M0_DEC_11
+        CP W0,#0X20
+        BRA Z,CSM_M0_DEC_20
+        CP W0,#0X21
+        BRA Z,CSM_M0_DEC_21
+        CP W0,#0X30
+        BRA Z,CSM_M0_DEC_30
+        CP W0,#0X31
+        BRA Z,CSM_M0_DEC_31
+        BCLR SR,#Z
+        RETURN
+CSM_M0_DEC_10:
+        BCLR R6,#0
+        BSET SR,#Z
+        RETURN
+CSM_M0_DEC_11:
+        BSET R6,#0
+        BSET SR,#Z
+        RETURN
+CSM_M0_DEC_20:
+        BCLR R6,#1
+        BSET SR,#Z
+        RETURN
+CSM_M0_DEC_21:
+        BSET R6,#1
+        BSET SR,#Z
+        RETURN
+CSM_M0_DEC_30:
+        BCLR R6,#2
+        BSET SR,#Z
+        RETURN
+CSM_M0_DEC_31:
+        BSET R6,#2
+        BSET SR,#Z
+        RETURN
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CHK_SWITCH_PAGE:			;;
