@@ -4271,6 +4271,15 @@ SAVE_F24EXE:					;;
 	RETURN					;;
 	CALL ERASE_F24SET			;;
 	CALL SAVE_F24SET			;;
+        MOV #40000,W0
+YYYY:
+        NOP
+        NOP
+        DEC W0,W0
+        BRA NZ,YYYY
+        
+        
+
 	RETURN					;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -4626,14 +4635,23 @@ ERASE_F24:					;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 SAVE_SET:
-	MOV #F24TMP_BUF,W1		;;
+        ;CALL SAVE_F24EXE
+        ;RETURN
+
+	MOV #F24SET_BUF,W1		;;
         MOV ICS_GROUP_ID,W0
         MOV W0,[W1]
+	CALL ERASE_F24SET			;;
+	CALL SAVE_F24SET			;;
+        RETURN
+
+
 	MOV #F24SET_FADR,W0		;;
 	MOV W0,F24_ADR			;;
 	MOV #128,W0			;;	
 	MOV W0,F24_LEN			;;
-	CALL SAVE_F24			;;
+	CALL ERASE_F24SET			;;
+	CALL SAVE_F24SET		;;
         RETURN
 
 
