@@ -18,6 +18,7 @@
 	.EQU	KB_PAGE_LK	,3	
 	.EQU	KB_TYPE_LK	,3	
 
+	.EQU	ECS_DK	        ,1	
 
 
 ;	.EQU	U2TX_TEST_DK	,1	
@@ -299,7 +300,8 @@ F24_LEN:		.SPACE 2
 SELF_TEST_INX:		.SPACE 2	
 KB_TEST_CNT:		.SPACE 2	
 DIM_SET:		.SPACE 2	
-
+ECSRX_KEY_ADR:          .SPACE 2
+RCCRX_KEY_ADR:          .SPACE 2
 ;;====================================
 TMR2_BUF:		.SPACE 2		
 TMR2_FLAG:		.SPACE 2		
@@ -680,10 +682,13 @@ END_REG:		.SPACE 2
 .EQU MCUTX2_BUF		,0x2A00	;128
 .EQU MCURX2_BUF		,0x2A80	;128
 .EQU MCUTX3_BUF		,0x2B00	;128
-.EQU MCURX3_BUF		,0x2C80	;128
-
+.EQU MCURX3_BUF		,0x2B80	;128
 .EQU FLASH_TMP		,0x2C00	;512			
 .EQU F24TMP_BUF		,0x2C00	;512		
+.EQU RCC_KBBUF		,0x2E00	;96		
+.EQU ECS_KBBUF		,0x2E60	;96		
+
+
 
 .EQU END_RAM		,0x2FFF		;512W
 
@@ -853,10 +858,10 @@ END_REG:		.SPACE 2
 .EQU DISP_ALL_KEY_F_P	,12
 .EQU SAME_KEY_F	        ,FLAGC
 .EQU SAME_KEY_F_P	,13
-;EQU LD_CODTXA_F	,FLAGC
-;EQU LD_CODTXA_F_P	,14
-;EQU LD_CODTXB_F	,FLAGC
-;EQU LD_CODTXB_F_P	,15
+.EQU ECS_KEY_F  	,FLAGC
+.EQU ECS_KEY_F_P	,14
+.EQU ECS_KEYIN_F	,FLAGC
+.EQU ECS_KEYIN_F_P	,15
 
 
 ;FLAGD
@@ -889,6 +894,10 @@ END_REG:		.SPACE 2
 .EQU U2RX_EN_F		,FLAGD
 .EQU U2RX_EN_F_P	,13
 
+.EQU RCC_KEY_F		,FLAGD
+.EQU RCC_KEY_F_P	,14
+.EQU RCC_KEYIN_F	,FLAGD
+.EQU RCC_KEYIN_F_P	,15
 
 
 
@@ -1187,11 +1196,11 @@ LSKF_00:				;;
 	BSET [W5],#4 			;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	MOV [W1++],W0			;;action:packageType
-	PUSH W0
+	PUSH W0                         ;;
 	AND #255,W0			;;
 	SWAP W0				;;
 	IOR W0,[W5],[W5]		;;
-	POP W0
+	POP W0                          ;;
 	BTSC W0,#8			;;
 	BSET [W5],#5			;;ENABLE BIT
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1305,6 +1314,14 @@ INIT_OLED_ALL:
 	RETURN
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 OLED_RESTART:				;;
+        .IFDEF ECS_DK
+        MOV #95,W0
+        MOV #RCC_KBBUF,W1
+        REPEAT W0
+        CLR [W1++] 
+        .ENDIF
+
+
         BCF FACTORY_TEST_F              ;;
 	CLR KBMODE_INX			;;
 	CLR NOWKB_INX			;;
@@ -1727,32 +1744,32 @@ MAIN:					;;
         BCF FACTORY_TEST_F              ;;
 	CALL ENABLE_FLASH_QPI		;;
 	CALL LOAD_KEYTBL		;;	
-	CALL CLR_ALL_KB_PAGE
+	CALL CLR_ALL_KB_PAGE            ;;
 	CALL OLED_RESTART		;;
 	BSF U1RX_EN_F			;;
 	BSF U2RX_EN_F			;;
-
-	;MOV #500,W0		;;
-	;CALL DLY1000X		;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;        
+	;MOV #500,W0		        ;;
+	;CALL DLY1000X		        ;;
 	;CALL OLED_RESTART		;;
-
-
 	;MOVLF #CMD_TEST2_K,CMDINX	;;
 	;CLR CMDTIME			;;	
 	;CLR CMDSTEP			;;
 	;MOVLF #CMD_TEST1_K,CMDINX	;;
 	;CLR CMDTIME			;;	
 	;CLR CMDSTEP			;;
-
 	;MOVLF #CMD_TEST1_K,CMDINX	;;
 	;CLR CMDTIME			;;	
 	;CLR CMDSTEP			;;
-
-
-
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 MAIN_LOOP:				;;
 	CLRWDT				;;
+
+        BTFSS DISP_ALL_KEY_F            ;;
+        BRA MAIN_1                      ;;
+        BCF DISP_ALL_KEY_F              ;;
+        CALL DISP_ALL_KEY               ;;
+MAIN_1:
 	BTFSC T128M_F			;;	
 	TG LED_O			;;	
 	BTFSC T128M_F			;;
@@ -1780,6 +1797,18 @@ MAIN_LOOP:				;;
 ;RS422 CH0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CHK_MCURX2:				;;
+        .IFDEF ECS_DK                   ;;
+        CALL CHK_RCCRX                  ;;
+        MOV #1000,W0                    ;;
+        CP MCURX2_CLR_TIM               ;;
+        BRA GEU,$+4                     ;;
+        RETURN                          ;;
+        BTFSS RCC_KEYIN_F               ;;        
+        RETURN                          ;;
+        BCF RCC_KEYIN_F                 ;;
+        CALL TRANS_RCCECS_PAGE          ;;
+        RETURN                          ;;
+        .ENDIF                          ;;
 	BTFSS MCURX2_RXIN_F		;;	
 	RETURN				;;
 	BCF MCURX2_RXIN_F		;;
@@ -1831,20 +1860,455 @@ CHK_MCURX2_END:				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;RS422_1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+CHK_ECSRX:                              ;;
+        MOV MCURX3_PCNT0,W0             ;;        
+	CP MCURX3_PCNT1                 ;;
+        BRA NZ,$+4                      ;;
+        RETURN                          ;;      
+        INC MCURX3_PCNT1                ;;
+        MOV #127,W0                     ;;
+        AND MCURX3_PCNT1                ;;
+        MOV #MCURX3_BUF,W1              ;;
+        MOV MCURX3_PCNT1,W0             ;;
+        ADD W0,W1,W1                    ;;
+        BCLR W1,#0                      ;;
+        MOV [W1],W0                     ;;
+        BTSC MCURX3_PCNT1,#0            ;;
+        SWAP W0                         ;;
+        AND #255,W0                     ;;
+        MOV W0,R0                       ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV #0x80,W0                    ;;
+        CP R0                           ;;
+        BRA LTU,CHK_ECSRX_2             ;;
+        MOV #0xE0,W0                    ;;
+        CP R0                           ;;
+        BRA LTU,CHK_ECSRX_1             ;;
+        BCF ECS_KEY_F                   ;;
+        BRA CHK_ECSRX                   ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CHK_ECSRX_1:                            ;;
+        BSF ECS_KEY_F                   ;;
+        MOV #0x80,W0                    ;;
+        SUB R0                          ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;MOV #RCC_KBBUF,W1               ;;
+        ;BTSC NOWKB_INX,#0               ;;
+        MOV #ECS_KBBUF,W1               ;;
+        MOV R0,W0                       ;;              
+        ADD W0,W1,W1                    ;;
+        MOV W1,ECSRX_KEY_ADR            ;;         
+        BRA CHK_ECSRX                   ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CHK_ECSRX_2:                            ;;
+        BTFSS ECS_KEY_F                 ;;
+        BRA CHK_ECSRX                   ;;
+        MOV R0,W0                       ;;
+        CP W0,#0x10                     ;;
+        BRA Z,CHK_ECSRX_2_10            ;;
+        CP W0,#0x11                     ;;
+        BRA Z,CHK_ECSRX_2_11            ;;
+        CP W0,#0x20                     ;;
+        BRA Z,CHK_ECSRX_2_20            ;;
+        CP W0,#0x21                     ;;
+        BRA Z,CHK_ECSRX_2_21            ;;
+        CP W0,#0x30                     ;;
+        BRA Z,CHK_ECSRX_2_30            ;;
+        CP W0,#0x31                     ;;
+        BRA Z,CHK_ECSRX_2_31            ;;
+        BCF ECS_KEY_F                   ;;
+        BRA CHK_ECSRX                   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CHK_ECSRX_2_10:                         ;;
+        MOV #1,W0                       ;;
+        BRA CHK_ECSRX_2_CLR             ;;
+CHK_ECSRX_2_20:                         ;;
+        MOV #2,W0                       ;;
+        BRA CHK_ECSRX_2_CLR             ;;
+CHK_ECSRX_2_30:                         ;;
+        MOV #4,W0                       ;;
+        BRA CHK_ECSRX_2_CLR             ;;
+CHK_ECSRX_2_11:                         ;;
+        MOV #1,W0                       ;;
+        BRA CHK_ECSRX_2_SET             ;;
+CHK_ECSRX_2_21:                         ;;
+        MOV #2,W0                       ;;
+        BRA CHK_ECSRX_2_SET             ;;
+CHK_ECSRX_2_31:                         ;;
+        MOV #4,W0                       ;;
+        BRA CHK_ECSRX_2_SET             ;;
+CHK_ECSRX_2_CLR:                        ;;
+        BTSC ECSRX_KEY_ADR,#0           ;;      
+        SWAP W0                         ;;
+        COM W0,W0                       ;;
+        MOV ECSRX_KEY_ADR,W1            ;;
+        BCLR W1,#0                      ;;              
+        AND W0,[W1],[W1]                ;;
+        BCF ECS_KEY_F                   ;;
+        BSF ECS_KEYIN_F                 ;;
+        BRA CHK_ECSRX                   ;;
+CHK_ECSRX_2_SET:                        ;;      
+        BTSC ECSRX_KEY_ADR,#0           ;;
+        SWAP W0                         ;;
+        MOV ECSRX_KEY_ADR,W1            ;;
+        BCLR W1,#0                      ;;
+        MOV [W1],W2                       ;;
+        IOR W0,W2,W0
+        MOV W0,[W1]
+        
+        ;IOR W0,[W1],[W1]                ;;
+        BCF ECS_KEY_F                   ;;
+        BSF ECS_KEYIN_F                 ;;
+        BRA CHK_ECSRX                   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+CHK_RCCRX:                              ;;
+        MOV MCURX2_PCNT0,W0             ;;        
+	CP MCURX2_PCNT1                 ;;
+        BRA NZ,$+4                      ;;
+        RETURN                          ;;      
+        INC MCURX2_PCNT1                ;;
+        MOV #127,W0                     ;;
+        AND MCURX2_PCNT1                ;;
+        MOV #MCURX2_BUF,W1              ;;
+        MOV MCURX2_PCNT1,W0             ;;
+        ADD W0,W1,W1                    ;;
+        BCLR W1,#0                      ;;
+        MOV [W1],W0                     ;;
+        BTSC MCURX2_PCNT1,#0            ;;
+        SWAP W0                         ;;
+        AND #255,W0                     ;;
+        MOV W0,R0                       ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV #0x80,W0                    ;;
+        CP R0                           ;;
+        BRA LTU,CHK_RCCRX_2             ;;
+        MOV #0xE0,W0                    ;;
+        CP R0                           ;;
+        BRA LTU,CHK_RCCRX_1             ;;
+        BCF RCC_KEY_F                   ;;
+        BRA CHK_RCCRX                   ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CHK_RCCRX_1:                            ;;
+        BSF RCC_KEY_F                   ;;
+        MOV #0x80,W0                    ;;
+        SUB R0                          ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV #RCC_KBBUF,W1               ;;
+        MOV R0,W0                       ;;              
+        ADD W0,W1,W1                    ;;
+        MOV W1,RCCRX_KEY_ADR            ;;         
+        BRA CHK_RCCRX                   ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CHK_RCCRX_2:                            ;;
+        BTFSS RCC_KEY_F                 ;;
+        BRA CHK_RCCRX                   ;;
+        MOV R0,W0                       ;;
+        CP W0,#0x10                     ;;
+        BRA Z,CHK_RCCRX_2_10            ;;
+        CP W0,#0x11                     ;;
+        BRA Z,CHK_RCCRX_2_11            ;;
+        CP W0,#0x20                     ;;
+        BRA Z,CHK_RCCRX_2_20            ;;
+        CP W0,#0x21                     ;;
+        BRA Z,CHK_RCCRX_2_21            ;;
+        CP W0,#0x30                     ;;
+        BRA Z,CHK_RCCRX_2_30            ;;
+        CP W0,#0x31                     ;;
+        BRA Z,CHK_RCCRX_2_31            ;;
+        BCF RCC_KEY_F                   ;;
+        BRA CHK_RCCRX                   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+CHK_RCCRX_2_10:                         ;;
+        MOV #1,W0                       ;;
+        BRA CHK_RCCRX_2_CLR             ;;
+CHK_RCCRX_2_20:                         ;;
+        MOV #2,W0                       ;;
+        BRA CHK_RCCRX_2_CLR             ;;
+CHK_RCCRX_2_30:                         ;;
+        MOV #4,W0                       ;;
+        BRA CHK_RCCRX_2_CLR             ;;
+CHK_RCCRX_2_11:                         ;;
+        MOV #1,W0                       ;;
+        BRA CHK_RCCRX_2_SET             ;;
+CHK_RCCRX_2_21:                         ;;
+        MOV #2,W0                       ;;
+        BRA CHK_RCCRX_2_SET             ;;
+CHK_RCCRX_2_31:                         ;;
+        MOV #4,W0                       ;;
+        BRA CHK_RCCRX_2_SET             ;;
+CHK_RCCRX_2_CLR:                        ;;
+        BTSC RCCRX_KEY_ADR,#0           ;;      
+        SWAP W0                         ;;
+        COM W0,W0                       ;;
+        MOV RCCRX_KEY_ADR,W1            ;;
+        BCLR W1,#0                      ;;              
+        AND W0,[W1],[W1]                ;;
+        BCF RCC_KEY_F                   ;;
+        BSF RCC_KEYIN_F                 ;;
+        BRA CHK_RCCRX                   ;;
+CHK_RCCRX_2_SET:                        ;;      
+        BTSC RCCRX_KEY_ADR,#0           ;;
+        SWAP W0                         ;;
+        MOV RCCRX_KEY_ADR,W1            ;;
+        BCLR W1,#0                      ;;
+        IOR W0,[W1],[W1]                ;;
+        BCF RCC_KEY_F                   ;;
+        BSF RCC_KEYIN_F                 ;;
+        BRA CHK_RCCRX                   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+TRANS_RCCECS_PAGE:                      ;;
+        PUSH NOWKB_INX                  ;;
+        PUSH OLED_POS                   ;;
+        CLR R0                          ;;
+TRP_0:                                  ;;
+        MOV #ECS_KBBUF,W1               ;;
+        BTSS NOWKB_INX,#0               ;;
+        MOV #RCC_KBBUF,W1               ;;
+        MOV R0,W0                       ;;
+        ADD W0,W1,W1                    ;;
+        BCLR W1,#0                      ;;        
+        MOV [W1],W0                     ;;
+        BTSC R0,#0                      ;;
+        SWAP W0                         ;;
+        CALL RGB_TBL                    ;;
+        MOV W0,IMAGE_PAG                ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV R0,W0                       ;;
+        CALL ECSKEY_TBL                 ;;
+        MOV W0,R2                       ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        CP W0,#255                      ;;
+        BRA Z,TRP_4                     ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV R0,W0                       ;;
+        CP W0,#0x10                     ;;
+        BRA LTU,TRP_1                   ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        CP W0,#0x50                     ;;
+        BRA LTU,TRP_2                   ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        CP W0,#0x60                     ;;        
+        BRA LTU,TRP_3                   ;;
+        BRA TRP_4                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+TRP_1:                                  ;;
+        MOV #1,W0                       ;;
+        BTSS NOWKB_INX,#0               ;;
+        MOV #0,W0                       ;;
+        MOV W0,NOWKB_INX                ;;
+        MOVFF R2,OLED_POS               ;;           
+        CALL LOAD_IMAGE_PAG             ;;
+        INC NOWKB_INX                   ;;
+        INC NOWKB_INX                   ;;
+        MOVFF R2,OLED_POS               ;;
+        CALL LOAD_IMAGE_PAG             ;;
+        BRA TRP_4                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+TRP_2:                                  ;;
+        MOV #1,W0                       ;;
+        BTSS NOWKB_INX,#0               ;;
+        MOV #0,W0                       ;;
+        MOV W0,NOWKB_INX                ;;
+        MOVFF R2,OLED_POS               ;;
+        CALL LOAD_IMAGE_PAG             ;;
+        BRA TRP_4                       ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+TRP_3:                                  ;;
+        MOV #3,W0                       ;;
+        BTSS NOWKB_INX,#0               ;;
+        MOV #2,W0                       ;;
+        MOV W0,NOWKB_INX                ;;
+        MOVFF R2,OLED_POS               ;;
+        CALL LOAD_IMAGE_PAG             ;;
+        BRA TRP_4                       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;                
+TRP_4:                                  ;;
+        INC R0                          ;;
+        MOV #96,W0                      ;;
+        CP R0                           ;;
+        BRA LTU,TRP_0                   ;;        
+        POP OLED_POS                    ;;
+        POP NOWKB_INX                   ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        BSF DISP_ALL_KEY_F              ;;
+        RETURN                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+LOAD_IMAGE_PAG:                         ;;
+	CALL GET_KBSTA_ADR		;;
+	MOV [W1],W0			;;
+	MOV #0xFFF0,W2			;;
+	AND W2,W0,W0			;;
+	MOV IMAGE_PAG,W2		;;	
+	AND #15,W2			;;
+	IOR W2,W0,W0			;;
+	MOV W0,[W1]			;;
+        RETURN                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;        
+        
+RGB_TBL:
+        AND #7,W0
+        BRA W0
+        RETLW #0,W0
+        RETLW #0,W0
+        RETLW #2,W0
+        RETLW #2,W0
+        RETLW #3,W0
+        RETLW #3,W0
+        RETLW #1,W0
+        RETLW #1,W0
+
+ECSKEY_TBL:
+        CP W0,#96
+        BRA LTU,$+4
+        RETLW #255,W0
+        BRA W0
+        RETLW #0x10,W0                  ;;0x80        
+        RETLW #0x11,W0                  ;;0x81        
+        RETLW #0x12,W0                  ;;0x82        
+        RETLW #0x13,W0                  ;;0x83        
+        RETLW #0x17,W0                  ;;0x84        
+        RETLW #0x18,W0                  ;;0x85        
+        RETLW #0x19,W0                  ;;0x86        
+        RETLW #0x1A,W0                  ;;0x87        
+        RETLW #0x1B,W0                  ;;0x88        
+        RETLW #0xFF,W0                  ;;0x89        
+        RETLW #0xFF,W0                  ;;0x8A        
+        RETLW #0xFF,W0                  ;;0x8B        
+        RETLW #0xFF,W0                  ;;0x8C        
+        RETLW #0xFF,W0                  ;;0x8D        
+        RETLW #0xFF,W0                  ;;0x8E        
+        RETLW #0xFF,W0                  ;;0x8F        
+        ;;
+        RETLW #0x1C,W0                  ;;0x90       
+        RETLW #0x1D,W0                  ;;0x91      
+        RETLW #0x1E,W0                  ;;0x92      
+        RETLW #0x1F,W0                  ;;0x93      
+        RETLW #0x20,W0                  ;;0x94      
+        RETLW #0x21,W0                  ;;0x95      
+        RETLW #0x22,W0                  ;;0x96      
+        RETLW #0x23,W0                  ;;0x97      
+        RETLW #0x24,W0                  ;;0x98      
+        RETLW #0x25,W0                  ;;0x99      
+        RETLW #0x26,W0                  ;;0x9A      
+        RETLW #0x27,W0                  ;;0x9B       
+        RETLW #0x28,W0                  ;;0x9C       
+        RETLW #0x29,W0                  ;;0x9D       
+        RETLW #0x2A,W0                  ;;0x9E       
+        RETLW #0x2B,W0                  ;;0x9F       
+        ;;
+        RETLW #0x2C,W0                  ;;0xA0       
+        RETLW #0x2D,W0                  ;;0xA1      
+        RETLW #0x2E,W0                  ;;0xA2      
+        RETLW #0x2F,W0                  ;;0xA3      
+        RETLW #0x30,W0                  ;;0xA4      
+        RETLW #0x31,W0                  ;;0xA5      
+        RETLW #0x32,W0                  ;;0xA6      
+        RETLW #0x33,W0                  ;;0xA7      
+        RETLW #0x34,W0                  ;;0xA8      
+        RETLW #0x35,W0                  ;;0xA9      
+        RETLW #0x36,W0                  ;;0xAA      
+        RETLW #0x37,W0                  ;;0xAB       
+        RETLW #0x38,W0                  ;;0xAC       
+        RETLW #0x39,W0                  ;;0xAD       
+        RETLW #0x3A,W0                  ;;0xAE       
+        RETLW #0x3B,W0                  ;;0xAF       
+        ;;
+        RETLW #0x3C,W0                  ;;0xB0       
+        RETLW #0x3D,W0                  ;;0xB1      
+        RETLW #0x3E,W0                  ;;0xB2      
+        RETLW #0x3F,W0                  ;;0xB3      
+        RETLW #0x40,W0                  ;;0xB4      
+        RETLW #0x41,W0                  ;;0xB5      
+        RETLW #0x42,W0                  ;;0xB6      
+        RETLW #0x43,W0                  ;;0xB7      
+        RETLW #0x44,W0                  ;;0xB8      
+        RETLW #0x45,W0                  ;;0xB9      
+        RETLW #0x46,W0                  ;;0xBA      
+        RETLW #0x47,W0                  ;;0xBB       
+        RETLW #0x48,W0                  ;;0xBC       
+        RETLW #0x49,W0                  ;;0xBD       
+        RETLW #0x4A,W0                  ;;0xBE       
+        RETLW #0x4B,W0                  ;;0xBF       
+        ;;
+        RETLW #0x4C,W0                  ;;0xC0       
+        RETLW #0x4D,W0                  ;;0xC1      
+        RETLW #0x4E,W0                  ;;0xC2      
+        RETLW #0x4F,W0                  ;;0xC3      
+        RETLW #0x50,W0                  ;;0xC4      
+        RETLW #0x51,W0                  ;;0xC5      
+        RETLW #0x52,W0                  ;;0xC6      
+        RETLW #0x53,W0                  ;;0xC7      
+        RETLW #0x54,W0                  ;;0xC8      
+        RETLW #0x55,W0                  ;;0xC9      
+        RETLW #0x56,W0                  ;;0xCA      
+        RETLW #0x57,W0                  ;;0xCB       
+        RETLW #0x58,W0                  ;;0xCC       
+        RETLW #0x59,W0                  ;;0xCD       
+        RETLW #0x5A,W0                  ;;0xCE       
+        RETLW #0x5B,W0                  ;;0xCF       
+        ;;
+        RETLW #0x1C,W0                  ;;0xD0       
+        RETLW #0x1D,W0                  ;;0xD1      
+        RETLW #0x1E,W0                  ;;0xD2      
+        RETLW #0x1F,W0                  ;;0xD3      
+        RETLW #0x2C,W0                  ;;0xD4      
+        RETLW #0x2D,W0                  ;;0xD5      
+        RETLW #0x2E,W0                  ;;0xD6      
+        RETLW #0x2F,W0                  ;;0xD7      
+        RETLW #0x3C,W0                  ;;0xD8      
+        RETLW #0x3D,W0                  ;;0xD9      
+        RETLW #0x3E,W0                  ;;0xDA      
+        RETLW #0x3F,W0                  ;;0xDB       
+        RETLW #0x4C,W0                  ;;0xDC       
+        RETLW #0x4D,W0                  ;;0xDD       
+        RETLW #0x4E,W0                  ;;0xDE       
+        RETLW #0x4F,W0                  ;;0xDF       
+
+
+
+        
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CHK_MCURX3:				;;
+        .IFDEF ECS_DK                   ;;
+        CALL CHK_ECSRX                  ;;
+        MOV #1000,W0                    ;;
+        CP MCURX3_CLR_TIM               ;;
+        BRA GEU,$+4                     ;;
+        RETURN                          ;;
+        BTFSS ECS_KEYIN_F               ;;        
+        RETURN                          ;;
+        BCF ECS_KEYIN_F                 ;;
+        NOP
+        NOP
+        NOP
+        CALL TRANS_RCCECS_PAGE          ;;
+        NOP
+        NOP
+        NOP
+        RETURN                          ;;
+        .ENDIF                          ;;
 	BTFSS MCURX3_RXIN_F		;;	
 	RETURN				;;
-        NOP
-        NOP
-        NOP
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;BCF MCURX3_RXIN_F		 ;;XXX
         ;CALL EMU_KEYIN                  ;;XXX        
         ;BRA CHK_MCURX3_END              ;;XXX
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
 	BCF MCURX3_RXIN_F		;;
 	CLR URXTMP_LEN			;;
 CHK_MCURX3_0:				;;
@@ -2323,6 +2787,9 @@ SET_SPEC_KEY_1:				;;
         SWAP W0                         ;;
         AND #7,W0                       ;;
 	MOV W0,NOWKB_INX		;;
+        .IFDEF ECS_DK                   ;;
+        ;CALL TRANS_RCCECS_PAGE          ;;
+        .ENDIF                          ;;
 	CLR OLED_INX			;;
 	CALL DISP_ALL_KEY		;;
 	BSF OK_F			;;
@@ -3093,6 +3560,11 @@ DAK_3:					;;
 	CALL UTX_BUFFER			;;
 	BCF U1U2_F			;;
 	POP OLED_POS			;;
+        NOP
+        NOP
+        NOP
+        NOP
+        
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -6819,7 +7291,7 @@ URXDEC_VERIFY_FLASH_2:			;;
 	NOP
 	NOP
 	NOP
-	NOP
+	        NOP
 	CALL UTX_I_HAVE_REC		;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6833,8 +7305,135 @@ URXDEC_VERIFY_FLASH_2:			;;
 ;RX_CH=3 RS232
 
 
+ECS_KB:
+        BCF YES_F
+        .IFNDEF ECS_DK
+        RETURN        
+        .ENDIF
+        MOV RX_CH,W0
+        CP W0,#1
+        BRA Z,ECS_DECA
+        CP W0,#3
+        BRA Z,ECS_DECB
+        RETURN
+ECS_DECA:
+        BSF YES_F
+        RETURN
+ECS_DECB:
+        LOFFS1 ECS_KB2_TBL
+        MOV #14,W4
+	MOV #URXTMP,W3			;;
+        CALL CMP_TBL_W3 
+        BTFSC YES_F
+        BRA SWITCH_RCC
+
+        LOFFS1 ECS_KB1_TBL
+        MOV #14,W4
+	MOV #URXTMP,W3			;;
+        CALL CMP_TBL_W3 
+        BTFSC YES_F
+        BRA SWITCH_ECS
+        
+
+        NOP
+        NOP
+        BSF YES_F
+        RETURN
+SWITCH_ECS:
+        MOV NOWKB_INX,W0
+        CP W0,#1
+        BRA NZ,$+4
+        RETURN
+        CP W0,#3
+        BRA NZ,$+4
+        RETURN
+	MOVLF #1,NOWKB_INX		;;
+
+	CLR OLED_INX			;;
+	CALL DISP_ALL_KEY		;;
+        BSF YES_F
+        RETURN
+SWITCH_RCC:
+        MOV NOWKB_INX,W0
+        CP W0,#0
+        BRA NZ,$+4
+        RETURN
+        CP W0,#2
+        BRA NZ,$+4
+        RETURN
+	MOVLF #0,NOWKB_INX		;;
+        ;.IFDEF ECS_DK
+        ;CALL TRANS_RCCECS_PAGE
+        ;.ENDIF
+	CLR OLED_INX			;;
+	CALL DISP_ALL_KEY		;;
+        BSF YES_F
+        RETURN
+
+
+
+CMP_TBL_W3:
+        BCF YES_F
+CMP_TBL_W3_1:
+        MOV W1,W0
+        BCLR W0,#0
+	TBLRDL [W0],W2		;;
+        BTSC W1,#0
+        SWAP W2
+        MOV W3,W0
+        BCLR W0,#0
+        MOV [W0],W0
+        BTSC W3,#0
+        SWAP W0
+        XOR W0,W2,W0
+        AND #255,W0
+        BRA Z,$+4
+        RETURN
+        INC W1,W1
+        INC W3,W3
+        DEC W4,W4
+        BRA NZ,CMP_TBL_W3_1
+        BSF YES_F
+        RETURN
+
+
+
+
+
+
+
+        
+
+
+
+ECS_KB1_TBL:
+        .WORD 0xA3EA
+        .WORD 0x0095
+        .WORD 0x0000
+        .WORD 0x02AB
+        .WORD 0x0100
+        .WORD 0x1520
+        .WORD 0xEB06
+        
+        
+ECS_KB2_TBL:
+        .WORD 0xA3EA
+        .WORD 0x0095
+        .WORD 0x0000
+        .WORD 0x02AB
+        .WORD 0x0200
+        .WORD 0x1620
+        .WORD 0xEB07
+
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DEC_SYSURX:				;;
+        CALL ECS_KB                     ;;        
+        BTFSC YES_F                     ;;
+        RETURN                          ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	CLR OLED_POS			;;
 DEC_SYSURX_1:				;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -6853,17 +7452,9 @@ DEC_SYSURX_1:				;;
 	CP RX_CH			;;
 	BRA NZ,DEC_SYSURX_3		;;
 DEC_SYSURX_2:				;;
-        MOV #0X1C,W0
-        CP OLED_POS
-        BRA NZ,VVV
-        NOP
-        NOP
-        NOP
-VVV:
-        NOP
-        CALL CHK_SWITCH_MODE            ;;
-        BTFSC YES_F                     ;;
-        BRA DEC_SYSURX_3                ;;                
+        ;CALL CHK_SWITCH_MODE           ;;
+        ;BTFSC YES_F                    ;;
+        ;BRA DEC_SYSURX_3               ;;                
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	BTSC NOWKEY_STA0,#8		;;
 	CALL CHK_SWITCH_PAGE0		;;
@@ -10064,6 +10655,7 @@ T5I_2:				;;
 	BRA NZ,T5I_END		;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;
 	RRNC MCURX1_IBUF	;;
+	BTFSC MCU_RX1_I		;;
 	BSET MCURX1_IBUF,#15	;;
 	BTFSS MCU_RX1_I		;;
 	BCLR MCURX1_IBUF,#15	;;
