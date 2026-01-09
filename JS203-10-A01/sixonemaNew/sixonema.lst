@@ -1,0 +1,3117 @@
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;ESTABLISH 2015,11,04
+                      00002 
+                      00003 
+                      00004 
+                      00005 ;      LIST P=18F14K50,R=DEC
+                      00006 #INCLUDE "P18F8310.INC"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ;  MPASM PIC18F8310 processor include
+                      00005 ; 
+                      00006 ;  (c) Copyright 1999-2013 Microchip Technology, All rights reserved
+                      00007 ;==========================================================================
+                      00008 
+                      01785         LIST
+                      00007 
+                      00008 
+                      00009 
+                      00010 #define VER_K   10
+  00000040            00011 URX_LEN_LIM_K   EQU 64
+                      00012 
+                      00013 
+                      00014 
+                      00015 
+                      00016 
+                      00017 #DEFINE PSW     STATUS  
+                      00018 #define BNK     1
+                      00019 
+                      00020 
+                      00021 
+                      00022 
+                      00023 #define KID_M1          0
+                      00024 #define KID_NUM1        1
+                      00025 #define KID_NUM2        2
+                      00026 #define KID_NUM3        3
+                      00027 #define KID_M2          4
+                      00028 #define KID_NUM4        5
+                      00029 #define KID_NUM5        6
+                      00030 #define KID_NUM6        7
+                      00031 #define KID_M3          8
+                      00032 #define KID_NUM7        9
+                      00033 #define KID_NUM8        10
+                      00034 #define KID_NUM9        11
+                      00035 #define KID_M4          12
+                      00036 #define KID_STAR        13
+                      00037 #define KID_NUM0        14
+                      00038 #define KID_SHARP       15
+                      00039 #define KID_HANDSET     16
+                      00040 #define KID_TRIANGLE    17
+                      00041 #define KID_HANDFREE_ON 18
+                      00042 #define KID_HANDFREE_OFF 19
+                      00043 #define KID_OK          20
+                      00044 #define KID_MUTE        21
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00045 #define KID_VOLDOWN     22
+                      00046 #define KID_VOLUP       23
+                      00047 #define KID_UP          24
+                      00048 #define KID_LEFT        25
+                      00049 #define KID_DOWN        26
+                      00050 #define KID_RIGHT       27
+                      00051 #define KID_MODE        28
+                      00052 #define KID_INFO        29
+                      00053 #define KID_LIGHT       30
+                      00054 #define KID_BOOK        31
+                      00055 #define KID_PTT         32
+                      00056 #define KID_PTT_RESET   33
+                      00057 
+                      00058 
+                      00059 
+  00000001            00060 BR              EQU 1 
+                      00061 
+                      00062 bank0           idata_acs
+                      00063 
+000000 00             00064 FLAGA           RES 1
+000001 00             00065 FLAGB           RES 1
+000002 00             00066 FLAGC           RES 1
+000003 00             00067 FLAGD           RES 1
+                      00068 ;=======================
+                      00069 
+                      00070 
+000004 00             00071 W_TEMP          RES 1
+000005 00             00072 STATUS_TEMP     RES 1
+000006 00             00073 RR0             RES 1
+000007 00             00074 RR1             RES 1
+000008 00             00075 RR2             RES 1
+000009 00             00076 RR3             RES 1
+00000A 00             00077 RR4             RES 1
+00000B 00             00078 RR5             RES 1
+00000C 00             00079 RR6             RES 1
+00000D 00             00080 RR7             RES 1
+00000E 00             00081 RR8             RES 1
+                      00082 
+00000F 00             00083 FSR1L_B         RES 1
+000010 00             00084 FSR1H_B         RES 1
+                      00085 
+000011 00             00086 LCDA_PTR        RES 1
+000012 00             00087 LCDB_PTR        RES 1
+000013 00             00088 LCD_INX         RES 1
+000014 00             00089 LCD_ACTT        RES 1
+                      00090 
+                      00091 
+000015 00             00092 DEBUG_CNT       RES 1
+                      00093 
+000016 00             00094 SPI_ACTT        RES 1
+000017 00             00095 SPI_INX         RES 1
+                      00096 
+                      00097 
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000018 00             00098 LED_BUF0        RES 1
+000019 00             00099 LED_BUF1        RES 1
+00001A 00             00100 LED_BUF2        RES 1
+00001B 00             00101 LED_BUF3        RES 1
+                      00102 
+                      00103 
+00001C 00             00104 PTT_TIM         RES 1
+00001D 00             00105 PREKEY          RES 1
+00001E 00             00106 KID             RES 1
+00001F 00             00107 CLICK_TIM       RES 1
+                      00108 
+                      00109 
+000020 00             00110 KEYFLAG0        RES 1
+000021 00             00111 KEYFLAG1        RES 1
+000022 00             00112 KEYFLAG2        RES 1
+000023 00             00113 KEYFLAG3        RES 1
+                      00114 
+000024 00             00115 INTBUF          RES 1
+000025 00             00116 TIMER_FLAG0     RES 1
+000026 00             00117 TIMER_FLAG1     RES 1
+000027 00             00118 TMR3H_BUF       RES 1
+000028 00             00119 TMR3K_BUF       RES 1
+000029 00             00120 TMR3K_CNT       RES 1
+                      00121 
+                      00122 
+00002A 00             00123 HOFF_TIM        RES 1
+                      00124 
+00002B 00             00125 RES_END         RES 1
+                      00126 
+                      00127 
+                      00128 
+                      00129 
+                      00130 
+                      00131 
+                      00132 #DEFINE EN1_O                   LATE,0  
+                      00133 #DEFINE EN1_IO                  TRISE,0 
+                      00134 
+                      00135 #DEFINE EN2_O                   LATE,1
+                      00136 #DEFINE EN2_IO                  TRISE,1 
+                      00137 
+                      00138 #DEFINE EN3_O                   LATE,2  
+                      00139 #DEFINE EN3_IO                  TRISE,2 
+                      00140 
+                      00141 #DEFINE EN4_O                   LATE,3  
+                      00142 #DEFINE EN4_IO                  TRISE,3 
+                      00143 
+                      00144 #DEFINE EN7_O                   LATE,6  
+                      00145 #DEFINE EN7_IO                  TRISE,6 
+                      00146 
+                      00147 #DEFINE EN8_O                   LATE,7
+                      00148 #DEFINE EN8_IO                  TRISE,7 
+                      00149 
+                      00150 #DEFINE EN9_O                   LATH,2  
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00151 #DEFINE EN9_IO                  TRISH,2 
+                      00152 
+                      00153 #DEFINE EN10_O                  LATH,3  
+                      00154 #DEFINE EN10_IO                 TRISH,3 
+                      00155 
+                      00156 #DEFINE LCDCS_I                 PORTB,0 
+                      00157 #DEFINE LCDCS_IO                TRISB,0 
+                      00158 
+                      00159 #DEFINE LCDRS_I                 PORTB,2 
+                      00160 #DEFINE LCDRS_IO                TRISB,2 
+                      00161 
+                      00162 #DEFINE TRIG1_O                 LATH,0  
+                      00163 #DEFINE TRIG1_IO                TRISH,0 
+                      00164 
+                      00165 #DEFINE SDO_O                   LATC,5  
+                      00166 #DEFINE SDO_IO                  TRISC,5 
+                      00167 
+                      00168 #DEFINE SDI_I                   PORTC,4 
+                      00169 #DEFINE SDI_IO                  TRISC,4 
+                      00170 
+                      00171 #DEFINE SCK_I                   PORTC,3 
+                      00172 #DEFINE SCK_O                   LATC,3  
+                      00173 #DEFINE SCK_IO                  TRISC,3 
+                      00174 
+                      00175 
+                      00176 #DEFINE TEST_O                  LATH,0  
+                      00177 #DEFINE TEST_IO                 TRISH,0 
+                      00178 
+                      00179 
+                      00180 ;#DEFINE Q1_I                   PORTA,4 
+                      00181 ;#DEFINE Q2_I                   PORTC,0 
+                      00182 ;#DEFINE Q1_IO                  TRISA,4 
+                      00183 ;#DEFINE Q2_IO                  TRISC,0 
+                      00184 
+                      00185 
+                      00186 
+                      00187 ;#DEFINE TEST_O                 LATH,2  
+                      00188 ;#DEFINE TEST_IO                TRISH,2 
+                      00189 
+                      00190 ;#DEFINE LED_O                  LATB,4  
+                      00191 ;#DEFINE LED_IO                 TRISB,4 
+                      00192 
+                      00193 
+                      00194 
+                      00195 
+                      00196 
+                      00197 
+                      00198 
+                      00199 
+                      00200 
+                      00201 #DEFINE C_F             STATUS,0
+                      00202 #DEFINE Z_F             STATUS,2
+                      00203 
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00204 
+                      00205 
+                      00206 
+                      00207 
+                      00208 
+                      00209 #DEFINE LCDHL_F                 FLAGA,0
+                      00210 #DEFINE LCDRS_F                 FLAGA,1
+                      00211 #DEFINE PTTON_F                 FLAGA,2
+                      00212 #DEFINE PTT_START_F             FLAGA,3
+                      00213 ;#DEFINE LOAD_DATA_F            FLAGA,4
+                      00214 ;#DEFINE URX_BUFAB_F            FLAGA,5
+                      00215 ;#DEFINE URX_PACKA_F            FLAGA,6 ;FIX
+                      00216 ;#DEFINE URX_PACKB_F            FLAGA,7 ;FIX
+                      00217 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00218 
+                      00219 
+                      00220 
+                      00221 
+                      00222 
+                      00223 #DEFINE T0_F            TIMER_FLAG0,0
+                      00224 #DEFINE T1_F            TIMER_FLAG0,1
+                      00225 #DEFINE T2_F            TIMER_FLAG0,2
+                      00226 #DEFINE T3_F            TIMER_FLAG0,3
+                      00227 #DEFINE T4_F            TIMER_FLAG0,4
+                      00228 #DEFINE T5_F            TIMER_FLAG0,5
+                      00229 #DEFINE T6_F            TIMER_FLAG0,6
+                      00230 #DEFINE T7_F            TIMER_FLAG0,7
+                      00231 
+                      00232 #DEFINE T8_F            TIMER_FLAG1,1
+                      00233 #DEFINE T9_F            TIMER_FLAG1,2
+                      00234 #DEFINE T10_F           TIMER_FLAG1,3
+                      00235 #DEFINE T11_F           TIMER_FLAG1,4
+                      00236 #DEFINE T12_F           TIMER_FLAG1,5
+                      00237 #DEFINE T13_F           TIMER_FLAG1,6
+                      00238 #DEFINE T14_F           TIMER_FLAG1,7
+                      00239 
+                      00240 
+                      00241 
+                      00242 
+                      00243 
+                      00244 
+                      00245 
+                      00246 
+                      00247 
+  00000100            00248 LCD_TEMP                EQU 0x100
+  00000140            00249 LCD_BUF                 EQU 0x140
+  00000160            00250 SPI_BUF                 EQU 0x160
+                      00251 
+                      00252 
+                      00253 
+                      00254 
+                      00255 
+                      00256 
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00257 
+                      00258 
+                      00259 
+                      00260 
+                      00261 
+                      00262 
+                      00263 
+                      00264 
+                      00265 
+                      00266 
+                      00267 
+                      00268 
+                      00269 
+                      00270 
+                      00271 
+                      00272 
+                      00273 
+                      00274 
+                      00275 
+                      00276 
+                      00277 
+                      00278 
+                      00279 
+                      00280 
+                      00281 
+                      00282 
+                      00283 
+                      00284 
+                      00285 
+                      00286 
+                      00287         code        
+                      00288         org 0
+                      00289 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000000                00290 RESET_VECTOR:                   ;;
+000000 D???           00291         BRA POWER_ON            ;;
+                      00292 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000002                00293 HISR_VECTOR:                    ;;
+                      00294         ORG 0x0008              ;;
+000008 B2F2           00295         BTFSC INTCON,INT0IF     ;;
+00000A D???           00296         BRA INT0PRG             ;;
+00000C B2F0           00297         BTFSC INTCON3,INT2IF    ;;
+00000E D???           00298         BRA INT2PRG             ;;
+000010 0010           00299         RETFIE                  ;;
+                      00300 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00301 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000012                00302 LISR_VECTOR:                    ;;
+                      00303         ORG 0x0018              ;;
+000018 92F0           00304         BCF INTCON3,INT2IF      ;;
+00001A 0010           00305         RETFIE                  ;;
+                      00306 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00001C                00307 BIT_TRANS:                      ;;
+00001C 26F9           00308         ADDWF PCL               ;;
+00001E 0C01           00309         RETLW 01H               ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000020 0C02           00310         RETLW 02H               ;;
+000022 0C04           00311         RETLW 04H               ;;
+000024 0C08           00312         RETLW 08H               ;;
+000026 0C10           00313         RETLW 10H               ;;
+000028 0C20           00314         RETLW 20H               ;;
+00002A 0C40           00315         RETLW 40H               ;;
+00002C 0C80           00316         RETLW 80H               ;;
+                      00317 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00318 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00002E                00319 ASCII_TBL:                      ;;
+00002E 0B0F           00320         ANDLW 15                ;;
+000030 6E??           00321         MOVWF RR1               ;;
+000032 26??           00322         ADDWF RR1               ;;
+000034 50??           00323         MOVF RR1,W              ;;      
+000036 26F9           00324         ADDWF PC                ;;
+000038 0C30           00325         RETLW 30H               ;;
+00003A 0C31           00326         RETLW 31H               ;;
+00003C 0C32           00327         RETLW 32H               ;;
+00003E 0C33           00328         RETLW 33H               ;;
+000040 0C34           00329         RETLW 34H               ;;
+000042 0C35           00330         RETLW 35H               ;;
+000044 0C36           00331         RETLW 36H               ;;
+000046 0C37           00332         RETLW 37H               ;;
+000048 0C38           00333         RETLW 38H               ;;
+00004A 0C39           00334         RETLW 39H               ;;
+00004C 0C41           00335         RETLW 41H               ;;
+00004E 0C42           00336         RETLW 42H               ;;
+000050 0C43           00337         RETLW 43H               ;;
+000052 0C44           00338         RETLW 44H               ;;
+000054 0C45           00339         RETLW 45H               ;;
+000056 0C46           00340         RETLW 46H               ;;
+                      00341 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00342 
+                      00343 
+                      00344 
+                      00345 
+                      00346 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000058                00347 INT0PRG:                                ;;
+000058 92F2           00348         BCF INTCON,INT0IF               ;;
+00005A 6E??           00349         MOVWF W_TEMP                    ;;   
+00005C CFD8 F???      00350         MOVFF STATUS,STATUS_TEMP        ;;
+000060 6A??           00351         CLRF LCD_ACTT                   ;;
+000062 9E8D           00352         BCF EN8_O                       ;;
+000064 82??           00353         BSF LCDRS_F                     ;;
+000066 A481           00354         BTFSS LCDRS_I                   ;;
+000068 92??           00355         BCF LCDRS_F                     ;;
+00006A 5083           00356         MOVF PORTD,W                    ;;
+00006C 8E8D           00357         BSF EN8_O                       ;;
+00006E 0BF0           00358         ANDLW 0xF0                      ;;
+000070 B0??           00359         BTFSC LCDHL_F                   ;;
+000072 D???           00360         BRA INT1_1                      ;; 
+000074 6E??           00361         MOVWF INTBUF                    ;;
+000076 3A??           00362         SWAPF INTBUF                    ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE  8
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000078 80??           00363         BSF LCDHL_F                     ;;      
+00007A D???           00364         BRA INT0_END
+00007C                00365 INT1_1:                                 ;;
+00007C 12??           00366         IORWF INTBUF                    ;;
+00007E 90??           00367         BCF LCDHL_F                     ;;      
+                      00368 ;       MOVFF FSR1L,FSR1L_B             ;;
+                      00369 ;       MOVFF FSR1H,FSR1H_B             ;;
+000080 EE11 F000      00370         LFSR FSR1,LCD_TEMP              ;;
+000084 50??           00371         MOVF LCDA_PTR,W                 ;;
+000086 0B1F           00372         ANDLW 0x1F                      ;;
+000088 26E1           00373         ADDWF FSR1L                     ;;
+00008A 26E1           00374         ADDWF FSR1L                     ;;
+00008C 38??           00375         SWAPF INTBUF,W                  ;;
+00008E 6EE6           00376         MOVWF POSTINC1                  ;;      
+000090 0E00           00377         MOVLW 0                         ;;
+000092 A2??           00378         BTFSS LCDRS_F                   ;;
+000094 0E01           00379         MOVLW 1                         ;;
+000096 6EE6           00380         MOVWF POSTINC1                  ;;
+000098 2A??           00381         INCF LCDA_PTR                   ;;
+00009A 2A??           00382         INCF DEBUG_CNT                  ;;
+                      00383 ;       MOVFF FSR1L_B,FSR1L             ;;
+                      00384 ;       MOVFF FSR1H_B,FSR1H             ;;
+00009C                00385 INT0_END:                               ;;
+00009C 50??           00386         MOVF W_TEMP,W                   ;;
+00009E C??? FFD8      00387         MOVFF STATUS_TEMP,STATUS        ;;
+0000A2 0010           00388         RETFIE                          ;;
+                      00389 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00390 
+                      00391 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000A4                00392 INT2PRG:                                ;;
+0000A4 92F0           00393         BCF INTCON3,INT2IF              ;;
+0000A6 78F1           00394         BTG INTCON2,INTEDG2             ;;
+0000A8 90??           00395         BCF LCDHL_F                     ;;
+0000AA 0010           00396         RETFIE                          ;;
+                      00397 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00398 
+                      00399 
+                      00400 
+                      00401 
+                      00402 
+                      00403 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000AC                00404 GOTOXY_LCD:                             ;;
+0000AC 0E1F           00405         MOVLW 0x1F                      ;;
+0000AE 14??           00406         ANDWF RR0,W                     ;;
+0000B0 6E??           00407         MOVWF LCD_INX                   ;;
+0000B2 6A??           00408         CLRF DEBUG_CNT                  ;;
+0000B4 0012           00409         RETURN                          ;;
+                      00410 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000B6                00411 CLR_LCD:                                ;;
+0000B6 6A??           00412         CLRF LCD_INX                    ;;
+0000B8 0E14           00413         MOVLW 20                        ;;
+0000BA 6E??           00414         MOVWF RR0                       ;;
+0000BC EE01 F040      00415         LFSR FSR0,LCD_BUF               ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE  9
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0000C0                00416 CLR_LCD0_1:                             ;;
+0000C0 0E20           00417         MOVLW 0x20                      ;;
+0000C2 6EEE           00418         MOVWF POSTINC0                  ;;
+0000C4 2E??           00419         DECFSZ RR0                      ;;
+0000C6 D???           00420         BRA CLR_LCD0_1                  ;;
+0000C8 0012           00421         RETURN                          ;;
+                      00422 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00423 
+                      00424 
+                      00425 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000CA                00426 DECLCD:                                 ;;
+0000CA 50??           00427         MOVF LCDB_PTR,W                 ;;
+0000CC 18??           00428         XORWF LCDA_PTR,W                ;;
+0000CE 0B1F           00429         ANDLW #0x1F                     ;;
+0000D0 B4D8           00430         BTFSC PSW,Z                     ;;
+0000D2 0012           00431         RETURN                          ;;
+                      00432         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000D4 EE01 F000      00433         LFSR FSR0,LCD_TEMP              ;;
+0000D8 50??           00434         MOVF LCDB_PTR,W                 ;;      
+0000DA 0B1F           00435         ANDLW #0x1F                     ;;
+0000DC 26E9           00436         ADDWF FSR0L                     ;;
+0000DE 26E9           00437         ADDWF FSR0L                     ;;
+0000E0 50EE           00438         MOVF POSTINC0,W                 ;;
+0000E2 6E??           00439         MOVWF RR0                       ;;
+0000E4 50EE           00440         MOVF POSTINC0,W                 ;;
+0000E6 6E??           00441         MOVWF RR1                       ;;
+0000E8 2A??           00442         INCF LCDB_PTR                   ;;
+                      00443         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000EA A0??           00444         BTFSS RR1,0                     ;;
+0000EC D???           00445         BRA DECLCD_3                    ;;
+0000EE 0E01           00446         MOVLW 0x01                      ;;
+0000F0 18??           00447         XORWF RR0,W                     ;;
+0000F2 A4D8           00448         BTFSS PSW,Z                     ;;      
+0000F4 D???           00449         BRA DECLCD_1                    ;;
+0000F6 EC?? F???      00450         CALL CLR_LCD                    ;;
+0000FA D???           00451         BRA DECLCD                      ;;
+                      00452         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000FC                00453 DECLCD_1:                               ;;
+0000FC 0EE0           00454         MOVLW 0xE0                      ;;
+0000FE 14??           00455         ANDWF RR0,W                     ;;      
+000100 0A80           00456         XORLW 0x80                      ;;
+000102 A4D8           00457         BTFSS PSW,Z                     ;;
+000104 D???           00458         BRA DECLCD_2                    ;;
+000106 EC?? F???      00459         CALL GOTOXY_LCD                 ;;
+00010A D???           00460         BRA DECLCD                      ;;
+00010C                00461 DECLCD_2:                               ;;
+00010C D???           00462         BRA DECLCD                      ;;
+                      00463 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00010E                00464 DECLCD_3:                               ;;
+00010E EE01 F040      00465         LFSR FSR0,LCD_BUF               ;;
+000112 50??           00466         MOVF LCD_INX,W                  ;;
+000114 0B1F           00467         ANDLW 0x1F                      ;;
+000116 26E9           00468         ADDWF FSR0L                     ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 10
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000118 EC?? F???      00469         CALL TRANS_FASC                 ;; 
+00011C 6EEE           00470         MOVWF POSTINC0                  ;;
+00011E 2A??           00471         INCF LCD_INX                    ;;
+000120 D???           00472         BRA DECLCD                      ;;
+                      00473 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+                      00474 
+                      00475 
+                      00476 
+                      00477 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000122                00478 TRANS_FASC:                             ;;
+000122 0E00           00479         MOVLW 0x00                      ;;
+000124 18??           00480         XORWF RR0,W                     ;;
+000126 A4D8           00481         BTFSS PSW,Z                     ;;
+000128 D???           00482         BRA TRANS_FASC_1                ;;
+00012A 0E3E           00483         MOVLW 0x3E                      ;;
+00012C 0012           00484         RETURN                          ;;
+00012E                00485 TRANS_FASC_1:                           ;;
+00012E 0EF7           00486         MOVLW 0xF7                      ;;
+000130 18??           00487         XORWF RR0,W                     ;;
+000132 A4D8           00488         BTFSS PSW,Z                     ;;
+000134 D???           00489         BRA TRANS_FASC_2                ;;
+000136 0E2A           00490         MOVLW '*'                       ;;
+000138 0012           00491         RETURN                          ;;
+00013A                00492 TRANS_FASC_2:                           ;;
+00013A 0ED7           00493         MOVLW 0xD7                      ;;
+00013C 18??           00494         XORWF RR0,W                     ;;
+00013E A4D8           00495         BTFSS PSW,Z                     ;;
+000140 D???           00496         BRA TRANS_FASC_3                ;;
+000142 0E2E           00497         MOVLW '.'                       ;;
+000144 0012           00498         RETURN                          ;;
+000146                00499 TRANS_FASC_3:                           ;;
+000146 50??           00500         MOVF RR0,W                      ;;
+000148 0012           00501         RETURN                          ;;
+                      00502 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+                      00503 
+                      00504 
+                      00505 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00014A                00506 INLED0:                                 ;;
+00014A 0EFF           00507         MOVLW 255                       ;;
+00014C 6E95           00508         MOVWF TRISD                     ;;
+00014E 9EF2           00509         BCF INTCON,GIE                  ;;
+000150 0000           00510         NOP                             ;;
+000152 9690           00511         BCF EN10_O                      ;;
+000154 0000           00512         NOP                             ;;
+000156 5083           00513         MOVF PORTD,W                    ;;      
+000158 8690           00514         BSF EN10_O                      ;;
+00015A 8EF2           00515         BSF INTCON,GIE                  ;;
+00015C 0AFF           00516         XORLW 255                       ;;
+00015E 6E??           00517         MOVWF LED_BUF0                  ;;
+000160 0012           00518         RETURN                          ;;
+                      00519 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+                      00520 
+                      00521 
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 11
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00522 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000162                00523 INLED1:                                 ;;
+000162 0EFF           00524         MOVLW 255                       ;;
+000164 6E95           00525         MOVWF TRISD                     ;;
+000166 9EF2           00526         BCF INTCON,GIE                  ;;
+000168 0000           00527         NOP                             ;;
+00016A 9490           00528         BCF EN9_O                       ;;
+00016C 0000           00529         NOP                             ;;
+00016E 5083           00530         MOVF PORTD,W                    ;;      
+000170 8490           00531         BSF EN9_O                       ;;
+000172 8EF2           00532         BSF INTCON,GIE                  ;;
+000174 0AFF           00533         XORLW 255                       ;;
+000176 6E??           00534         MOVWF LED_BUF1                  ;;
+000178 0012           00535         RETURN                          ;;
+                      00536 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+                      00537 
+                      00538 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00017A                00539 INLED2:                                 ;;
+00017A 0EFF           00540         MOVLW 255                       ;;
+00017C 6E95           00541         MOVWF TRISD                     ;;
+00017E 9EF2           00542         BCF INTCON,GIE                  ;;
+000180 0000           00543         NOP                             ;;
+000182 9C8D           00544         BCF EN7_O                       ;;
+000184 0000           00545         NOP                             ;;
+000186 5083           00546         MOVF PORTD,W                    ;;      
+000188 8C8D           00547         BSF EN7_O                       ;;
+00018A 8EF2           00548         BSF INTCON,GIE                  ;;
+00018C 6E??           00549         MOVWF LED_BUF2                  ;;
+00018E 90??           00550         BCF LED_BUF2,0                  ;;
+000190 B4??           00551         BTFSC PTTON_F                   ;;
+000192 80??           00552         BSF LED_BUF2,0                  ;;
+                      00553 ;       BTFSC KEYFLAG3,7                ;;
+                      00554 ;       BCF LED_BUF2,5                  ;;
+000194 0012           00555         RETURN                          ;;
+                      00556 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00557 
+                      00558 
+                      00559 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000196                00560 INLED3:                                 ;;
+000196 0EFF           00561         MOVLW 255                       ;;
+000198 6E95           00562         MOVWF TRISD                     ;;
+00019A 9EF2           00563         BCF INTCON,GIE                  ;;
+00019C 0000           00564         NOP                             ;;
+00019E 9E8D           00565         BCF EN8_O                       ;;
+0001A0 0000           00566         NOP                             ;;
+0001A2 5083           00567         MOVF PORTD,W                    ;;      
+0001A4 8E8D           00568         BSF EN8_O                       ;;
+0001A6 8EF2           00569         BSF INTCON,GIE                  ;;
+0001A8 6E??           00570         MOVWF LED_BUF3                  ;;
+0001AA 0012           00571         RETURN                          ;;
+                      00572 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00573 
+                      00574 
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 12
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00575         
+                      00576 
+                      00577 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0001AC                00578 OUTKEY0:                                ;;
+0001AC 9EF2           00579         BCF INTCON,GIE                  ;;
+0001AE 0E00           00580         MOVLW 0                         ;;
+0001B0 6E95           00581         MOVWF TRISD                     ;;
+0001B2 50??           00582         MOVF KEYFLAG0,W                 ;;
+0001B4 6E83           00583         MOVWF PORTD                     ;;
+0001B6 908D           00584         BCF EN1_O                       ;;
+0001B8 8090           00585         BSF TRIG1_O                     ;;
+0001BA 0000           00586         NOP                             ;;
+0001BC 9090           00587         BCF TRIG1_O                     ;;
+0001BE 808D           00588         BSF EN1_O                       ;;
+0001C0 0EFF           00589         MOVLW 255                       ;;
+0001C2 6E95           00590         MOVWF TRISD                     ;;
+0001C4 8EF2           00591         BSF INTCON,GIE                  ;;
+0001C6 0012           00592         RETURN                          ;;
+                      00593 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+                      00594 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0001C8                00595 OUTKEY1:                                ;;
+0001C8 9EF2           00596         BCF INTCON,GIE                  ;;
+0001CA 0E00           00597         MOVLW 0                         ;;
+0001CC 6E95           00598         MOVWF TRISD                     ;;
+0001CE 50??           00599         MOVF KEYFLAG1,W                 ;;
+0001D0 6E83           00600         MOVWF PORTD                     ;;
+0001D2 928D           00601         BCF EN2_O                       ;;
+0001D4 8090           00602         BSF TRIG1_O                     ;;
+0001D6 0000           00603         NOP                             ;;
+0001D8 9090           00604         BCF TRIG1_O                     ;;
+0001DA 828D           00605         BSF EN2_O                       ;;
+0001DC 0EFF           00606         MOVLW 255                       ;;
+0001DE 6E95           00607         MOVWF TRISD                     ;;
+0001E0 8EF2           00608         BSF INTCON,GIE                  ;;
+0001E2 0012           00609         RETURN                          ;;
+                      00610 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+                      00611 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0001E4                00612 OUTKEY2:                                ;;
+0001E4 9EF2           00613         BCF INTCON,GIE                  ;;
+0001E6 0E00           00614         MOVLW 0                         ;;
+0001E8 6E95           00615         MOVWF TRISD                     ;;
+0001EA 50??           00616         MOVF KEYFLAG2,W                 ;;
+0001EC 6E83           00617         MOVWF PORTD                     ;;
+0001EE 948D           00618         BCF EN3_O                       ;;
+0001F0 8090           00619         BSF TRIG1_O                     ;;
+0001F2 0000           00620         NOP                             ;;
+0001F4 9090           00621         BCF TRIG1_O                     ;;
+0001F6 848D           00622         BSF EN3_O                       ;;
+0001F8 0EFF           00623         MOVLW 255                       ;;
+0001FA 6E95           00624         MOVWF TRISD                     ;;
+0001FC 8EF2           00625         BSF INTCON,GIE                  ;;
+0001FE 0012           00626         RETURN                          ;;
+                      00627 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 13
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00628 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000200                00629 OUTKEY3:                                ;;
+000200 9EF2           00630         BCF INTCON,GIE                  ;;
+000202 0E00           00631         MOVLW 0                         ;;
+000204 6E95           00632         MOVWF TRISD                     ;;
+000206 50??           00633         MOVF KEYFLAG3,W                 ;;
+000208 6E83           00634         MOVWF PORTD                     ;;
+00020A 968D           00635         BCF EN4_O                       ;;
+00020C 8090           00636         BSF TRIG1_O                     ;;
+00020E 0000           00637         NOP                             ;;
+000210 9090           00638         BCF TRIG1_O                     ;;
+000212 868D           00639         BSF EN4_O                       ;;
+000214 0EFF           00640         MOVLW 255                       ;;
+000216 6E95           00641         MOVWF TRISD                     ;;
+000218 8EF2           00642         BSF INTCON,GIE                  ;;
+00021A 0012           00643         RETURN                          ;;
+                      00644 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+                      00645 
+                      00646 
+                      00647 
+                      00648 
+                      00649 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00021C                00650 KEYOUT:                         ;;
+00021C 9EF2           00651         BCF INTCON,GIE          ;;
+00021E 0E00           00652         MOVLW 0                 ;;
+000220 6E95           00653         MOVWF TRISD             ;;
+                      00654         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000222 50??           00655         MOVF KEYFLAG0,W         ;;
+000224 6E83           00656         MOVWF PORTD             ;;
+000226 908D           00657         BCF EN1_O               ;;
+000228 8090           00658         BSF TRIG1_O             ;;
+00022A 9090           00659         BCF TRIG1_O             ;;
+00022C 808D           00660         BSF EN1_O               ;;
+                      00661         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+00022E 50??           00662         MOVF KEYFLAG1,W         ;;
+000230 6E83           00663         MOVWF PORTD             ;;
+000232 928D           00664         BCF EN2_O               ;;
+000234 8090           00665         BSF TRIG1_O             ;;
+000236 9090           00666         BCF TRIG1_O             ;;
+000238 828D           00667         BSF EN2_O               ;;
+                      00668         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+00023A 50??           00669         MOVF KEYFLAG2,W         ;;
+00023C 6E83           00670         MOVWF PORTD             ;;
+00023E 948D           00671         BCF EN3_O               ;;
+000240 8090           00672         BSF TRIG1_O             ;;
+000242 9090           00673         BCF TRIG1_O             ;;
+000244 848D           00674         BSF EN3_O               ;;
+                      00675         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000246 50??           00676         MOVF KEYFLAG3,W         ;;
+000248 6E83           00677         MOVWF PORTD             ;;
+00024A 968D           00678         BCF EN4_O               ;;
+00024C 8090           00679         BSF TRIG1_O             ;;
+00024E 9090           00680         BCF TRIG1_O             ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 14
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000250 868D           00681         BSF EN4_O               ;;
+000252 0EFF           00682         MOVLW 0xFF              ;;
+000254 6E95           00683         MOVWF TRISD             ;;
+000256 8EF2           00684         BSF INTCON,GIE          ;;
+000258 0012           00685         RETURN                  ;;
+                      00686 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00687 
+                      00688 
+                      00689 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00025A                00690 INIT_SPI:                       ;;      
+00025A 9AC6           00691         BCF SSPCON1,SSPEN       ;;      
+00025C 8E97           00692         BSF TRISF,7             ;;      
+00025E 0E25           00693         MOVLW 00100101B         ;;
+000260 6EC6           00694         MOVWF SSPCON1           ;;
+000262 0E40           00695         MOVLW 01000000B         ;;
+000264 6EC7           00696         MOVWF SSPSTAT           ;;
+000266 6A??           00697         CLRF SPI_INX            ;;
+000268 0012           00698         RETURN                  ;;
+                      00699 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00700 
+00026A                00701 TEST_SPI:
+00026A 9694           00702         BCF SCK_IO
+00026C                00703 TEST_SPI_1:     
+00026C 0004           00704         CLRWDT 
+00026E 0ECC           00705         MOVLW 0xCC
+000270 6EC9           00706         MOVWF SSPBUF
+000272                00707 LOOP0:
+000272 B0C7           00708         BTFSC SSPSTAT,BF
+000274 D???           00709         BRA LOOP0
+000276 50C9           00710         MOVF SSPBUF,W
+000278 6E??           00711         MOVWF RR0
+00027A 0E01           00712         MOVLW 1
+00027C EC?? F???      00713         CALL DLYMX
+000280 D???           00714         BRA TEST_SPI_1  
+                      00715                 
+000282                00716 LOOP:
+000282 A0C7           00717         BTFSS SSPSTAT,BF
+000284 D???           00718         BRA LOOP
+000286 50C9           00719         MOVF SSPBUF,W
+000288 6E??           00720         MOVWF RR0
+00028A 0EAA           00721         MOVLW 0xAA
+00028C 6EC9           00722         MOVWF SSPBUF
+00028E 0E0A           00723         MOVLW 10
+000290 EC?? F???      00724         CALL DLYMX
+000294 D???           00725         BRA TEST_SPI_1
+                      00726 
+                      00727 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000296                00728 INIT_OSC:                       ;;
+000296 0E70           00729         MOVLW 01110000B         ;;
+000298 6ED3           00730         MOVWF OSCCON            ;;
+00029A 8CD3           00731         BSF OSCCON,6            ;;
+00029C 8AD3           00732         BSF OSCCON,5            ;;
+00029E 88D3           00733         BSF OSCCON,4            ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 15
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00734 ;       BSF OSCCON,1            ;;
+                      00735 ;       BCF OSCCON,0            ;;
+0002A0 8C9B           00736         BSF OSCTUNE,6           ;;
+0002A2 0012           00737         RETURN                  ;;
+                      00738 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00739 
+                      00740 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0002A4                00741 INIT_IO:                        ;;
+0002A4 0EFF           00742         MOVLW 255               ;;
+0002A6 6E95           00743         MOVWF TRISD             ;;
+0002A8 808D           00744         BSF EN1_O               ;;
+0002AA 828D           00745         BSF EN2_O               ;;
+0002AC 848D           00746         BSF EN3_O               ;;
+0002AE 868D           00747         BSF EN4_O               ;;
+0002B0 8C8D           00748         BSF EN7_O               ;;
+0002B2 8E8D           00749         BSF EN8_O               ;;
+0002B4 8490           00750         BSF EN9_O               ;;
+0002B6 8690           00751         BSF EN10_O              ;;
+0002B8 9090           00752         BCF TRIG1_O             ;;
+0002BA 9A8B           00753         BCF SDO_O               ;;
+                      00754         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0002BC 9096           00755         BCF EN1_IO              ;;
+0002BE 9296           00756         BCF EN2_IO              ;;
+0002C0 9496           00757         BCF EN3_IO              ;;
+0002C2 9696           00758         BCF EN4_IO              ;;
+0002C4 9C96           00759         BCF EN7_IO              ;;
+0002C6 9E96           00760         BCF EN8_IO              ;;
+0002C8 9499           00761         BCF EN9_IO              ;;
+0002CA 9699           00762         BCF EN10_IO             ;;
+0002CC 9099           00763         BCF TRIG1_IO            ;;
+0002CE 8493           00764         BSF LCDRS_IO            ;;
+0002D0 8093           00765         BSF LCDCS_IO            ;;
+0002D2 9A94           00766         BCF SDO_IO              ;;
+0002D4 8894           00767         BSF SDI_IO              ;;
+0002D6 8694           00768         BSF SCK_IO              ;;
+                      00769         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0002D8 0E0F           00770         MOVLW 00001111B         ;;
+0002DA 6EC1           00771         MOVWF ADCON1            ;;      
+0002DC 0012           00772         RETURN                  ;;
+                      00773 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+                      00774  
+                      00775 
+                      00776 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0002DE                00777 POWER_ON:                       ;;
+0002DE                00778 WAKEUP:                         ;;
+0002DE 0004           00779         CLRWDT                  ;;
+0002E0 9EF2           00780         BCF INTCON,GIEH         ;;
+0002E2 9CF2           00781         BCF INTCON,GIEL         ;;      
+0002E4 0100           00782         MOVLB 0
+                      00783         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0002E6 EC?? F???      00784         CALL INIT_IO            ;;
+0002EA 0E64           00785         MOVLW 100               ;;
+0002EC EC?? F???      00786         CALL DLYMX              ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 16
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0002F0 EC?? F???      00787         CALL INIT_IO            ;;
+0002F4 EC?? F???      00788         CALL CLR_ALLRAM         ;;
+0002F8 EC?? F???      00789         CALL INIT_SPI           ;;
+0002FC EC?? F???      00790         CALL INIT_RAM           ;;      
+000300 EC?? F???      00791         CALL INIT_TIMER         ;;
+000304 EC?? F???      00792         CALL INIT_INT           ;;
+000308 EF?? F???      00793         GOTO MAIN               ;;
+                      00794 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00795 
+                      00796 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00030C                00797 TEST_OSC:                       ;;
+00030C 9099           00798         BCF TEST_IO             ;;
+00030E                00799 TEST_OSC_1:
+00030E 0004           00800         CLRWDT                  ;;
+000310 7090           00801         BTG TEST_O              ;;
+000312 7090           00802         BTG TEST_O              ;;
+000314 7090           00803         BTG TEST_O              ;;
+000316 7090           00804         BTG TEST_O              ;;
+000318 7090           00805         BTG TEST_O              ;;
+00031A 7090           00806         BTG TEST_O              ;;
+00031C 7090           00807         BTG TEST_O              ;;
+00031E 7090           00808         BTG TEST_O              ;;
+000320 7090           00809         BTG TEST_O              ;;
+000322 7090           00810         BTG TEST_O              ;;
+000324 7090           00811         BTG TEST_O              ;;
+000326 7090           00812         BTG TEST_O              ;;
+                      00813         
+000328 D???           00814         BRA TEST_OSC_1          ;;      
+                      00815         
+                      00816 
+                      00817 
+                      00818 
+                      00819 
+                      00820 
+                      00821 
+                      00822 
+                      00823 ;;;;;;;;;;;;;;;;;;;;;;;;;;
+00032A                00824 CLR_ALLRAM:             ;;
+00032A EE00 F000      00825         LFSR FSR0,0     ;;      
+00032E                00826 CLR_ALLRAM1:            ;;
+00032E 0E00           00827         MOVLW 0         ;;
+000330 6EEE           00828         MOVWF POSTINC0  ;;
+000332 0E0F           00829         MOVLW 0x0F      ;;      
+000334 5CEA           00830         SUBWF FSR0H,W   ;;
+000336 A0D8           00831         BTFSS PSW,C     ;;
+000338 D???           00832         BRA CLR_ALLRAM1 ;;
+00033A 0012           00833         RETURN          ;;
+                      00834 ;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00835 
+                      00836 
+                      00837 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00033C                00838 MAINT_PRG:                      ;;
+00033C A2??           00839         BTFSS T1_F              ;;684US
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 17
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00033E D???           00840         BRA MAINT_1             ;;
+000340 2A??           00841         INCF SPI_ACTT           ;;
+000342 B4D8           00842         BTFSC PSW,Z             ;;
+000344 06??           00843         DECF SPI_ACTT           ;;
+000346 0E0A           00844         MOVLW 10                ;;
+000348 5C??           00845         SUBWF SPI_ACTT,W        ;;      
+00034A B4D8           00846         BTFSC PSW,Z             ;;
+00034C EC?? F???      00847         CALL INIT_SPI           ;;
+                      00848         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000350 2A??           00849         INCF CLICK_TIM          ;;
+000352 B4D8           00850         BTFSC PSW,Z             ;;      
+000354 06??           00851         DECF CLICK_TIM          ;;
+000356 0E46           00852         MOVLW 70                ;;
+000358 5C??           00853         SUBWF CLICK_TIM,W       ;;
+00035A B4D8           00854         BTFSC PSW,Z             ;;
+00035C EC?? F???      00855         CALL FREE_KEY           ;;  
+000360                00856 MAINT_1:                        ;;
+000360 A4??           00857         BTFSS T2_F              ;;1.3M
+000362 D???           00858         BRA MAINT_2             ;;
+000364 2A??           00859         INCF LCD_ACTT           ;;
+000366 0E64           00860         MOVLW 100               ;;
+000368 5C??           00861         SUBWF LCD_ACTT,W        ;;
+00036A B0D8           00862         BTFSC PSW,C             ;;
+00036C 90??           00863         BCF LCDHL_F             ;;
+00036E                00864 MAINT_2:                        ;;
+00036E B8??           00865         BTFSC T4_F              ;;5MS
+000370 EC?? F???      00866         CALL PTTPRG             ;;
+000374 BA??           00867         BTFSC LED_BUF2,5        
+000376 6A??           00868         CLRF HOFF_TIM
+000378 BE??           00869         BTFSC T7_F              ;;40MS
+00037A EC?? F???      00870         CALL HOFFPRG    ;;
+00037E 0012           00871         RETURN                  ;;
+                      00872 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000380                00873 HOFFPRG:
+000380 2A??           00874         INCF HOFF_TIM
+000382 0E28           00875         MOVLW 40
+000384 5C??           00876         SUBWF HOFF_TIM,W
+000386 B0D8           00877         BTFSC PSW,C
+000388 8E??           00878         BSF KEYFLAG3,7
+00038A 0012           00879         RETURN
+                      00880 
+                      00881 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00038C                00882 PTTPRG:                         ;;
+00038C A6??           00883         BTFSS PTT_START_F       ;;      
+00038E 0012           00884         RETURN                  ;;
+000390 2A??           00885         INCF PTT_TIM            ;;
+000392 0E46           00886         MOVLW 70                ;;
+000394 18??           00887         XORWF PTT_TIM,W         ;;
+000396 B4D8           00888         BTFSC PSW,Z             ;;      
+000398 EC?? F???      00889         CALL KPUSH_PTT          ;;
+00039C 0E8C           00890         MOVLW 140               ;;
+00039E 18??           00891         XORWF PTT_TIM,W         ;;
+0003A0 B4D8           00892         BTFSC PSW,Z             ;;      
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 18
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0003A2 EC?? F???      00893         CALL KPUSH_M1           ;;
+0003A6 0E8C           00894         MOVLW 140               ;;
+0003A8 5C??           00895         SUBWF PTT_TIM,W         ;;
+0003AA B0D8           00896         BTFSC PSW,C             ;;
+0003AC 96??           00897         BCF PTT_START_F         ;;      
+0003AE 0012           00898         RETURN                  ;;
+                      00899 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00900 
+                      00901 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0003B0                00902 KPUSH_M1:                       ;;
+0003B0 0E00           00903         MOVLW KID_M1            ;;
+0003B2 6E??           00904         MOVWF KID               ;;
+0003B4 EC?? F???      00905         CALL BUTCLICK           ;;               
+0003B8 0012           00906         RETURN                  ;;
+                      00907 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00908 
+                      00909 
+                      00910 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0003BA                00911 KPUSH_PTT:                      ;;
+0003BA 0E05           00912         MOVLW KID_NUM4          ;;
+0003BC A4??           00913         BTFSS PTTON_F           ;;
+0003BE 0E06           00914         MOVLW KID_NUM5          ;;
+0003C0 6E??           00915         MOVWF KID               ;;
+0003C2 EC?? F???      00916         CALL BUTCLICK           ;;               
+0003C6 0012           00917         RETURN                  ;;
+                      00918 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00919 
+                      00920 
+                      00921 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0003C8                00922 FREE_KEY:                       ;;
+0003C8 6A??           00923         CLRF KEYFLAG0           ;;
+0003CA 6A??           00924         CLRF KEYFLAG1           ;;
+0003CC 6A??           00925         CLRF KEYFLAG2           ;;
+0003CE 0E80           00926         MOVLW 0x80              ;;
+0003D0 16??           00927         ANDWF KEYFLAG3          ;;
+0003D2 0012           00928         RETURN                  ;;
+                      00929 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00930 
+                      00931 
+                      00932 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0003D4                00933 MAIN:                           ;;
+0003D4 0004           00934         CLRWDT                  ;;
+0003D6 EC?? F???      00935         CALL TIMER_PRG          ;;
+0003DA EC?? F???      00936         CALL MAINT_PRG          ;;
+0003DE EC?? F???      00937         CALL DECLCD             ;;
+0003E2 EC?? F???      00938         CALL SPIPRG             ;;      
+0003E6 A2??           00939         BTFSS T1_F              ;;
+0003E8 D???           00940         BRA MAIN                ;;
+0003EA EC?? F???      00941         CALL OUTKEY0            ;;
+0003EE EC?? F???      00942         CALL OUTKEY1            ;;
+0003F2 EC?? F???      00943         CALL OUTKEY2            ;;
+0003F6 EC?? F???      00944         CALL OUTKEY3            ;;
+0003FA EC?? F???      00945         CALL INLED0             ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 19
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0003FE EC?? F???      00946         CALL INLED1             ;;
+000402 EC?? F???      00947         CALL INLED2             ;;
+000406 EC?? F???      00948         CALL INLED3             ;;
+00040A D???           00949         BRA MAIN                ;;
+                      00950 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00951 
+                      00952 
+                      00953 
+                      00954 
+                      00955 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00040C                00956 SPIPRG:                         ;;              
+00040C A0C7           00957         BTFSS SSPSTAT,BF        ;;
+00040E 0012           00958         RETURN                  ;;
+000410 6A??           00959         CLRF SPI_ACTT           ;;              
+000412 50C9           00960         MOVF SSPBUF,W           ;;
+000414 6E??           00961         MOVWF RR0               ;;
+000416 0EA0           00962         MOVLW 0xA0              ;;      
+000418 18??           00963         XORWF RR0,W             ;;
+00041A B4D8           00964         BTFSC PSW,Z             ;;
+00041C 6A??           00965         CLRF SPI_INX            ;;
+                      00966         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+00041E EE01 F060      00967         LFSR FSR0,SPI_BUF       ;;      
+000422 50??           00968         MOVF SPI_INX,W          ;;
+000424 0B1F           00969         ANDLW 0x1F              ;;
+000426 26E9           00970         ADDWF FSR0L             ;;      
+000428 50??           00971         MOVF RR0,W              ;;
+00042A 6EEE           00972         MOVWF POSTINC0          ;;      
+00042C EC?? F???      00973         CALL SPIOUT             ;;
+000430 2A??           00974         INCF SPI_INX            ;;
+000432 0E1A           00975         MOVLW 26                ;;
+000434 5C??           00976         SUBWF SPI_INX,W         ;;
+000436 A0D8           00977         BTFSS PSW,C             ;;
+000438 0012           00978         RETURN                  ;;
+00043A EC?? F???      00979         CALL CHK_KEYIN          ;;
+00043E 0012           00980         RETURN                  ;;
+                      00981 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;              
+                      00982 
+                      00983 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;              
+000440                00984 CHK_KEYIN:                      ;;
+000440 EE01 F061      00985         LFSR FSR0,SPI_BUF+1     ;;
+000444 50EE           00986         MOVF POSTINC0,W         ;;
+000446 6E??           00987         MOVWF RR0               ;;
+000448 50EE           00988         MOVF POSTINC0,W         ;;
+00044A 6E??           00989         MOVWF RR1               ;;
+00044C 50EE           00990         MOVF POSTINC0,W         ;;
+00044E 6E??           00991         MOVWF RR2               ;;
+000450 90D8           00992         BCF PSW,C               ;;
+000452 32??           00993         RRCF RR0                ;;
+000454 90D8           00994         BCF PSW,C               ;;
+000456 32??           00995         RRCF RR1                ;;
+000458 90D8           00996         BCF PSW,C               ;;
+00045A 32??           00997         RRCF RR2                ;;
+                      00998 
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 20
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00045C 50??           00999         MOVF RR0,W              ;;
+00045E 18??           01000         XORWF RR1,W             ;;
+000460 A4D8           01001         BTFSS PSW,Z             ;;
+000462 0012           01002         RETURN                  ;;
+000464 50??           01003         MOVF RR1,W              ;;
+000466 18??           01004         XORWF RR2,W             ;;
+000468 A4D8           01005         BTFSS PSW,Z             ;;
+00046A 0012           01006         RETURN                  ;;
+00046C 50??           01007         MOVF RR0,W              ;;
+00046E 18??           01008         XORWF PREKEY,W          ;;
+000470 B4D8           01009         BTFSC PSW,Z             ;;
+000472 0012           01010         RETURN                  ;;
+000474 1A??           01011         XORWF PREKEY            ;;
+000476 0E22           01012         MOVLW 34                ;;      
+000478 5C??           01013         SUBWF PREKEY,W          ;;
+00047A A0D8           01014         BTFSS PSW,C             ;;
+00047C D???           01015         BRA CHK_KEYIN_0         ;;
+00047E 0EFF           01016         MOVLW 255               ;;
+000480 6E??           01017         MOVWF KID               ;;
+000482 6E??           01018         MOVWF PREKEY            ;;
+000484 0012           01019         RETURN                  ;;
+000486                01020 CHK_KEYIN_0:                    ;;
+000486 50??           01021         MOVF PREKEY,W           ;;
+000488 6E??           01022         MOVWF KID               ;;
+00048A 0E12           01023         MOVLW KID_HANDFREE_ON   ;;
+00048C 18??           01024         XORWF KID,W             ;;
+00048E A4D8           01025         BTFSS PSW,Z             ;;
+000490 D???           01026         BRA CHK_KEYIN_1         ;;
+000492 EC?? F???      01027         CALL BUTCLICK           ;;
+000496 0012           01028         RETURN                  ;;
+000498                01029 CHK_KEYIN_1:                    ;;
+000498 0E13           01030         MOVLW KID_HANDFREE_OFF  ;;
+00049A 18??           01031         XORWF KID,W             ;;
+00049C A4D8           01032         BTFSS PSW,Z             ;;
+00049E D???           01033         BRA CHK_KEYIN_11        ;;
+0004A0 EC?? F???      01034         CALL BUTCLICK           ;;
+0004A4 0E10           01035         MOVLW KID_HANDSET       ;;      
+0004A6 EC?? F???      01036         CALL BUTPRESS           ;;
+0004AA 0012           01037         RETURN                  ;;
+0004AC                01038 CHK_KEYIN_11:                   ;;
+0004AC 0E10           01039         MOVLW KID_HANDSET       ;;
+0004AE 18??           01040         XORWF KID,W             ;;
+0004B0 A4D8           01041         BTFSS PSW,Z             ;;
+0004B2 D???           01042         BRA CHK_KEYIN_2         ;;
+0004B4 AE??           01043         BTFSS LED_BUF2,7        ;;
+0004B6 D???           01044         BRA CHK_KEYIN_2         ;;      
+0004B8 AA??           01045         BTFSS LED_BUF2,5        ;;
+0004BA D???           01046         BRA CHK_KEYIN_2         ;;
+                      01047         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0004BC BE??           01048         BTFSC KEYFLAG3,7        ;;
+0004BE D???           01049         BRA CHK_KEYIN_12        ;;      
+0004C0 0E12           01050         MOVLW KID_HANDFREE_ON   ;;
+0004C2 6E??           01051         MOVWF KID               ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 21
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0004C4 EC?? F???      01052         CALL BUTCLICK           ;;
+0004C8 0012           01053         RETURN                  ;;
+0004CA                01054 CHK_KEYIN_12:                   ;;
+0004CA EC?? F???      01055         CALL CLICK_HANDSET      ;;
+0004CE 0012           01056         RETURN                  ;;
+0004D0                01057 CHK_KEYIN_2:                    ;;
+0004D0 0E20           01058         MOVLW KID_PTT           ;;
+0004D2 18??           01059         XORWF KID,W             ;;
+0004D4 A4D8           01060         BTFSS PSW,Z             ;;
+0004D6 D???           01061         BRA CHK_KEYIN_3         ;;
+0004D8 EC?? F???      01062         CALL KPUSH_M1           ;;
+0004DC 86??           01063         BSF PTT_START_F         ;;
+0004DE 74??           01064         BTG PTTON_F             ;;
+0004E0 6A??           01065         CLRF PTT_TIM            ;;
+0004E2 0012           01066         RETURN                  ;;      
+0004E4                01067 CHK_KEYIN_3:                    ;;
+0004E4 0E21           01068         MOVLW KID_PTT_RESET     ;;
+0004E6 18??           01069         XORWF KID,W             ;;
+0004E8 A4D8           01070         BTFSS PSW,Z             ;;
+0004EA D???           01071         BRA CHK_KEYIN_4         ;;
+0004EC 94??           01072         BCF PTTON_F             ;;              
+0004EE 96??           01073         BCF PTT_START_F         ;;
+0004F0 0012           01074         RETURN                  ;;      
+0004F2                01075 CHK_KEYIN_4:                    ;;
+0004F2 EC?? F???      01076         CALL BUTCLICK           ;;      
+0004F6 0012           01077         RETURN                  ;;      
+                      01078 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      01079 
+                      01080         
+                      01081 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0004F8                01082 BUTPRESS:                       ;;
+0004F8 6E??           01083         MOVWF RR0               ;;
+0004FA 0E10           01084         MOVLW KID_HANDSET       ;;
+0004FC 18??           01085         XORWF RR0,W             ;;
+0004FE B4D8           01086         BTFSC PSW,Z             ;;
+000500 D???           01087         BRA BUTPRESS_HANDSET    ;;
+000502 0012           01088         RETURN                  ;;      
+                      01089         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000504                01090 BUTPRESS_HANDSET:               ;;
+000504 8E??           01091         BSF KEYFLAG3,7          ;;      
+000506 0012           01092         RETURN                  ;;      
+                      01093 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      01094                 
+                      01095 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000508                01096 BUTFREE:                        ;;
+000508 6E??           01097         MOVWF RR0               ;;
+00050A 0E10           01098         MOVLW KID_HANDSET       ;;
+00050C 18??           01099         XORWF RR0,W             ;;
+00050E B4D8           01100         BTFSC PSW,Z             ;;
+000510 D???           01101         BRA BUTFREE_HANDSET     ;;
+000512 0012           01102         RETURN                  ;;      
+                      01103         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000514                01104 BUTFREE_HANDSET:                ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 22
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000514 9E??           01105         BCF KEYFLAG0,7          ;;      
+000516 0012           01106         RETURN                  ;;      
+                      01107 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      01108 
+                      01109 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000518                01110 BUTCLICK:                       ;;
+000518 0E00           01111         MOVLW KID_M1            ;;
+00051A 18??           01112         XORWF KID,W             ;;
+00051C B4D8           01113         BTFSC PSW,Z             ;;
+00051E D???           01114         BRA CLICK_M1            ;;
+                      01115         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000520 0E01           01116         MOVLW KID_NUM1          ;;
+000522 18??           01117         XORWF KID,W             ;;
+000524 B4D8           01118         BTFSC PSW,Z             ;;
+000526 D???           01119         BRA CLICK_NUM1          ;;
+                      01120         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000528 0E02           01121         MOVLW KID_NUM2          ;;
+00052A 18??           01122         XORWF KID,W             ;;
+00052C B4D8           01123         BTFSC PSW,Z             ;;
+00052E D???           01124         BRA CLICK_NUM2          ;;
+                      01125         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000530 0E03           01126         MOVLW KID_NUM3          ;;
+000532 18??           01127         XORWF KID,W             ;;
+000534 B4D8           01128         BTFSC PSW,Z             ;;
+000536 D???           01129         BRA CLICK_NUM3          ;;
+                      01130         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000538 0E04           01131         MOVLW KID_M2            ;;
+00053A 18??           01132         XORWF KID,W             ;;
+00053C B4D8           01133         BTFSC PSW,Z             ;;
+00053E D???           01134         BRA CLICK_M2            ;;
+                      01135         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000540 0E05           01136         MOVLW KID_NUM4          ;;
+000542 18??           01137         XORWF KID,W             ;;
+000544 B4D8           01138         BTFSC PSW,Z             ;;
+000546 D???           01139         BRA CLICK_NUM4          ;;
+                      01140         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000548 0E06           01141         MOVLW KID_NUM5          ;;
+00054A 18??           01142         XORWF KID,W             ;;
+00054C B4D8           01143         BTFSC PSW,Z             ;;
+00054E D???           01144         BRA CLICK_NUM5          ;;
+                      01145         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000550 0E07           01146         MOVLW KID_NUM6          ;;
+000552 18??           01147         XORWF KID,W             ;;
+000554 B4D8           01148         BTFSC PSW,Z             ;;
+000556 D???           01149         BRA CLICK_NUM6          ;;
+                      01150         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000558 0E08           01151         MOVLW KID_M3            ;;
+00055A 18??           01152         XORWF KID,W             ;;
+00055C B4D8           01153         BTFSC PSW,Z             ;;
+00055E D???           01154         BRA CLICK_M3            ;;
+                      01155         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000560 0E09           01156         MOVLW KID_NUM7          ;;
+000562 18??           01157         XORWF KID,W             ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 23
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000564 B4D8           01158         BTFSC PSW,Z             ;;
+000566 D???           01159         BRA CLICK_NUM7          ;;
+                      01160         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000568 0E0A           01161         MOVLW KID_NUM8          ;;
+00056A 18??           01162         XORWF KID,W             ;;
+00056C B4D8           01163         BTFSC PSW,Z             ;;
+00056E D???           01164         BRA CLICK_NUM8          ;;
+                      01165         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000570 0E0B           01166         MOVLW KID_NUM9          ;;
+000572 18??           01167         XORWF KID,W             ;;
+000574 B4D8           01168         BTFSC PSW,Z             ;;
+000576 D???           01169         BRA CLICK_NUM9          ;;
+                      01170         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000578 0E0C           01171         MOVLW KID_M4            ;;
+00057A 18??           01172         XORWF KID,W             ;;
+00057C B4D8           01173         BTFSC PSW,Z             ;;
+00057E D???           01174         BRA CLICK_M4            ;;
+                      01175         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000580 0E0D           01176         MOVLW KID_STAR          ;;
+000582 18??           01177         XORWF KID,W             ;;
+000584 B4D8           01178         BTFSC PSW,Z             ;;
+000586 D???           01179         BRA CLICK_STAR          ;;
+                      01180         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000588 0E0E           01181         MOVLW KID_NUM0          ;;
+00058A 18??           01182         XORWF KID,W             ;;
+00058C B4D8           01183         BTFSC PSW,Z             ;;
+00058E D???           01184         BRA CLICK_NUM0          ;;
+                      01185         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000590 0E0F           01186         MOVLW KID_SHARP         ;;
+000592 18??           01187         XORWF KID,W             ;;
+000594 B4D8           01188         BTFSC PSW,Z             ;;
+000596 D???           01189         BRA CLICK_SHARP         ;;
+                      01190         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000598 0E10           01191         MOVLW KID_HANDSET       ;;
+00059A 18??           01192         XORWF KID,W             ;;
+00059C B4D8           01193         BTFSC PSW,Z             ;;
+00059E D???           01194         BRA CLICK_HANDSET       ;;
+                      01195         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0005A0 0E11           01196         MOVLW KID_TRIANGLE      ;;
+0005A2 18??           01197         XORWF KID,W             ;;
+0005A4 B4D8           01198         BTFSC PSW,Z             ;;
+0005A6 D???           01199         BRA CLICK_TRIANGLE      ;;
+                      01200         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0005A8 0E12           01201         MOVLW KID_HANDFREE_ON   ;;
+0005AA 18??           01202         XORWF KID,W             ;;
+0005AC B4D8           01203         BTFSC PSW,Z             ;;
+0005AE D???           01204         BRA CLICK_HANDFREE_ON   ;;
+                      01205         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0005B0 0E13           01206         MOVLW KID_HANDFREE_OFF  ;;
+0005B2 18??           01207         XORWF KID,W             ;;
+0005B4 B4D8           01208         BTFSC PSW,Z             ;;
+0005B6 D???           01209         BRA CLICK_HANDFREE_OFF  ;;
+                      01210         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 24
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0005B8 0E14           01211         MOVLW KID_OK            ;;
+0005BA 18??           01212         XORWF KID,W             ;;
+0005BC B4D8           01213         BTFSC PSW,Z             ;;
+0005BE D???           01214         BRA CLICK_OK            ;;
+                      01215         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0005C0 0E15           01216         MOVLW KID_MUTE          ;;
+0005C2 18??           01217         XORWF KID,W             ;;
+0005C4 B4D8           01218         BTFSC PSW,Z             ;;
+0005C6 D???           01219         BRA CLICK_MUTE          ;;
+                      01220         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0005C8 0E16           01221         MOVLW KID_VOLDOWN       ;;
+0005CA 18??           01222         XORWF KID,W             ;;
+0005CC B4D8           01223         BTFSC PSW,Z             ;;
+0005CE D???           01224         BRA CLICK_VOLDOWN       ;;
+                      01225         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0005D0 0E17           01226         MOVLW KID_VOLUP         ;;
+0005D2 18??           01227         XORWF KID,W             ;;
+0005D4 B4D8           01228         BTFSC PSW,Z             ;;
+0005D6 D???           01229         BRA CLICK_VOLUP         ;;
+                      01230         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0005D8 0E18           01231         MOVLW KID_UP            ;;
+0005DA 18??           01232         XORWF KID,W             ;;
+0005DC B4D8           01233         BTFSC PSW,Z             ;;
+0005DE D???           01234         BRA CLICK_UP            ;;
+                      01235         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0005E0 0E19           01236         MOVLW KID_LEFT          ;;
+0005E2 18??           01237         XORWF KID,W             ;;
+0005E4 B4D8           01238         BTFSC PSW,Z             ;;
+0005E6 D???           01239         BRA CLICK_LEFT          ;;
+                      01240         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0005E8 0E1A           01241         MOVLW KID_DOWN          ;;
+0005EA 18??           01242         XORWF KID,W             ;;
+0005EC B4D8           01243         BTFSC PSW,Z             ;;
+0005EE D???           01244         BRA CLICK_DOWN          ;;
+                      01245         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0005F0 0E1B           01246         MOVLW KID_RIGHT         ;;
+0005F2 18??           01247         XORWF KID,W             ;;
+0005F4 B4D8           01248         BTFSC PSW,Z             ;;
+0005F6 D???           01249         BRA CLICK_RIGHT         ;;
+                      01250         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0005F8 0E1C           01251         MOVLW KID_MODE          ;;
+0005FA 18??           01252         XORWF KID,W             ;;
+0005FC B4D8           01253         BTFSC PSW,Z             ;;
+0005FE D???           01254         BRA CLICK_MODE          ;;
+                      01255         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000600 0E1D           01256         MOVLW KID_INFO          ;;
+000602 18??           01257         XORWF KID,W             ;;
+000604 B4D8           01258         BTFSC PSW,Z             ;;
+000606 D???           01259         BRA CLICK_INFO          ;;
+                      01260         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000608 0E1E           01261         MOVLW KID_LIGHT         ;;
+00060A 18??           01262         XORWF KID,W             ;;
+00060C B4D8           01263         BTFSC PSW,Z             ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 25
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00060E D???           01264         BRA CLICK_LIGHT         ;;
+                      01265         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000610 0E1F           01266         MOVLW KID_BOOK          ;;
+000612 18??           01267         XORWF KID,W             ;;
+000614 B4D8           01268         BTFSC PSW,Z             ;;
+000616 D???           01269         BRA CLICK_BOOK          ;;
+000618 0012           01270         RETURN                  ;;
+                      01271 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      01272 
+                      01273 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00061A                01274 CLICK_M1:                       ;;
+00061A 84??           01275         BSF KEYFLAG1,2          ;;
+00061C 6A??           01276         CLRF CLICK_TIM          ;;
+00061E 0012           01277         RETURN                  ;;
+                      01278 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000620                01279 CLICK_NUM1:                     ;;
+000620 82??           01280         BSF KEYFLAG0,1          ;;
+000622 6A??           01281         CLRF CLICK_TIM          ;;
+000624 0012           01282         RETURN                  ;;
+                      01283 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000626                01284 CLICK_NUM2:                     ;;
+000626 84??           01285         BSF KEYFLAG0,2          ;;
+000628 6A??           01286         CLRF CLICK_TIM          ;;
+00062A 0012           01287         RETURN                  ;;
+                      01288 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00062C                01289 CLICK_NUM3:                     ;;
+00062C 86??           01290         BSF KEYFLAG0,3          ;;
+00062E 6A??           01291         CLRF CLICK_TIM          ;;
+000630 0012           01292         RETURN                  ;;
+                      01293 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000632                01294 CLICK_M2:                       ;;
+000632 86??           01295         BSF KEYFLAG1,3          ;;
+000634 6A??           01296         CLRF CLICK_TIM          ;;
+000636 0012           01297         RETURN                  ;;
+                      01298 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000638                01299 CLICK_NUM4:                     ;;
+000638 88??           01300         BSF KEYFLAG0,4          ;;
+00063A 6A??           01301         CLRF CLICK_TIM          ;;
+00063C 0012           01302         RETURN                  ;;
+                      01303 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00063E                01304 CLICK_NUM5:                     ;;
+00063E 8A??           01305         BSF KEYFLAG0,5          ;;
+000640 6A??           01306         CLRF CLICK_TIM          ;;
+000642 0012           01307         RETURN                  ;;
+                      01308 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000644                01309 CLICK_NUM6:                     ;;
+000644 8C??           01310         BSF KEYFLAG0,6          ;;
+000646 6A??           01311         CLRF CLICK_TIM          ;;
+000648 0012           01312         RETURN                  ;;
+                      01313 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00064A                01314 CLICK_M3:                       ;;
+00064A 88??           01315         BSF KEYFLAG1,4          ;;
+00064C 6A??           01316         CLRF CLICK_TIM          ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 26
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00064E 0012           01317         RETURN                  ;;
+                      01318 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000650                01319 CLICK_NUM7:                     ;;
+000650 8E??           01320         BSF KEYFLAG0,7          ;;
+000652 6A??           01321         CLRF CLICK_TIM          ;;
+000654 0012           01322         RETURN                  ;;
+                      01323 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000656                01324 CLICK_NUM8:                     ;;
+000656 80??           01325         BSF KEYFLAG1,0          ;;
+000658 6A??           01326         CLRF CLICK_TIM          ;;
+00065A 0012           01327         RETURN                  ;;
+                      01328 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00065C                01329 CLICK_NUM9:                     ;;
+00065C 82??           01330         BSF KEYFLAG1,1          ;;
+00065E 6A??           01331         CLRF CLICK_TIM          ;;
+000660 0012           01332         RETURN                  ;;
+                      01333 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000662                01334 CLICK_M4:                       ;;
+000662 8A??           01335         BSF KEYFLAG1,5          ;;
+000664 6A??           01336         CLRF CLICK_TIM          ;;
+000666 0012           01337         RETURN                  ;;
+                      01338 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000668                01339 CLICK_STAR:                     ;;<<<<
+                      01340 ;       BSF KEYFLAG3,7          ;;
+000668 80??           01341         BSF KEYFLAG3,0          ;;
+00066A 6A??           01342         CLRF CLICK_TIM          ;;
+00066C 0012           01343         RETURN                  ;;
+                      01344 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00066E                01345 CLICK_NUM0:                     ;;
+00066E 80??           01346         BSF KEYFLAG0,0          ;;
+000670 6A??           01347         CLRF CLICK_TIM          ;;
+000672 0012           01348         RETURN                  ;;
+                      01349 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000674                01350 CLICK_SHARP:                    ;;
+                      01351 ;       BSF KEYFLAG3,7          ;;
+000674 82??           01352         BSF KEYFLAG3,1          ;;
+000676 6A??           01353         CLRF CLICK_TIM          ;;
+000678 0012           01354         RETURN                  ;;
+                      01355 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00067A                01356 CLICK_HANDSET:                  ;;
+00067A 7E??           01357         BTG KEYFLAG3,7          ;; 
+00067C 6A??           01358         CLRF HOFF_TIM
+                      01359 ;       CLRF CLICK_TIM          ;;
+00067E 0012           01360         RETURN                  ;;
+                      01361 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000680                01362 CLICK_TRIANGLE:                 ;;
+                      01363 ;       BSF KEYFLAG3,7          ;;
+000680 8C??           01364         BSF KEYFLAG3,6          ;;
+000682 6A??           01365         CLRF CLICK_TIM          ;;
+000684 0012           01366         RETURN                  ;;
+                      01367 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000686                01368 CLICK_HANDFREE_ON:              ;;
+                      01369 ;       BSF KEYFLAG3,7          ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 27
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000686 86??           01370         BSF KEYFLAG3,3          ;;
+000688 6A??           01371         CLRF CLICK_TIM          ;;
+00068A 0012           01372         RETURN                  ;;
+                      01373 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00068C                01374 CLICK_HANDFREE_OFF:             ;;
+00068C 8C??           01375         BSF KEYFLAG2,6          ;;
+00068E 6A??           01376         CLRF CLICK_TIM          ;;
+000690 0012           01377         RETURN                  ;;
+                      01378 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000692                01379 CLICK_OK:                       ;;
+000692 8E??           01380         BSF KEYFLAG2,7          ;;
+000694 6A??           01381         CLRF CLICK_TIM          ;;
+000696 0012           01382         RETURN                  ;;
+                      01383 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000698                01384 CLICK_MUTE:                     ;;
+000698 80??           01385         BSF KEYFLAG2,0          ;;
+00069A 6A??           01386         CLRF CLICK_TIM          ;;
+00069C 0012           01387         RETURN                  ;;
+                      01388 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00069E                01389 CLICK_VOLDOWN:                  ;;
+00069E 84??           01390         BSF KEYFLAG2,2          ;;
+0006A0 6A??           01391         CLRF CLICK_TIM          ;;
+0006A2 0012           01392         RETURN                  ;;
+                      01393 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0006A4                01394 CLICK_VOLUP:                    ;;
+0006A4 82??           01395         BSF KEYFLAG2,1          ;;
+0006A6 6A??           01396         CLRF CLICK_TIM          ;;
+0006A8 0012           01397         RETURN                  ;;
+                      01398 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0006AA                01399 CLICK_UP:                       ;;
+0006AA 86??           01400         BSF KEYFLAG2,3          ;;
+0006AC 6A??           01401         CLRF CLICK_TIM          ;;
+0006AE 0012           01402         RETURN                  ;;
+                      01403 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0006B0                01404 CLICK_LEFT:                     ;;
+                      01405 ;       BSF KEYFLAG3,7          ;;
+0006B0 88??           01406         BSF KEYFLAG3,4          ;;
+0006B2 6A??           01407         CLRF CLICK_TIM          ;;
+0006B4 0012           01408         RETURN                  ;;
+                      01409 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0006B6                01410 CLICK_DOWN:                     ;;
+0006B6 88??           01411         BSF KEYFLAG2,4          ;;
+0006B8 6A??           01412         CLRF CLICK_TIM          ;;
+0006BA 0012           01413         RETURN                  ;;
+                      01414 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0006BC                01415 CLICK_RIGHT:                    ;;
+                      01416 ;       BSF KEYFLAG0,0          ;;
+                      01417 ;       CLRF CLICK_TIM          ;;
+0006BC 0012           01418         RETURN                  ;;
+                      01419 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0006BE                01420 CLICK_MODE:                     ;;
+                      01421 ;       BSF KEYFLAG0,0          ;;
+                      01422 ;       CLRF CLICK_TIM          ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 28
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0006BE 0012           01423         RETURN                  ;;
+                      01424 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0006C0                01425 CLICK_INFO:                     ;;
+0006C0 8E??           01426         BSF KEYFLAG3,7          ;;
+0006C2 8A??           01427         BSF KEYFLAG3,5          ;;
+0006C4 6A??           01428         CLRF CLICK_TIM          ;;
+0006C6 0012           01429         RETURN                  ;;
+                      01430 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0006C8                01431 CLICK_LIGHT:                    ;;
+                      01432 ;       BSF KEYFLAG0,0          ;;
+                      01433 ;       CLRF CLICK_TIM          ;;
+0006C8 0012           01434         RETURN                  ;;
+                      01435 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0006CA                01436 CLICK_BOOK:                     ;;
+0006CA 8E??           01437         BSF KEYFLAG3,7          ;;
+0006CC 84??           01438         BSF KEYFLAG3,2          ;;
+0006CE 6A??           01439         CLRF CLICK_TIM          ;;
+0006D0 0012           01440         RETURN                  ;;
+                      01441 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      01442 
+                      01443 
+                      01444 
+                      01445 
+                      01446 
+                      01447 
+                      01448 
+                      01449 
+                      01450 
+                      01451 
+                      01452 
+                      01453 
+                      01454         
+                      01455 
+                      01456 
+                      01457 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0006D2                01458 SPIOUT:                         ;;
+0006D2 0E14           01459         MOVLW 20                ;;      
+0006D4 5C??           01460         SUBWF SPI_INX,W         ;;
+0006D6 B0D8           01461         BTFSC PSW,C             ;;
+0006D8 D???           01462         BRA SPIOUT_1            ;;      
+0006DA EE01 F040      01463         LFSR FSR0,LCD_BUF       ;;
+0006DE 50??           01464         MOVF SPI_INX,W          ;;
+0006E0 0B1F           01465         ANDLW 0x1F              ;;
+0006E2 26E9           01466         ADDWF FSR0L             ;;
+0006E4 50EE           01467         MOVF POSTINC0,W         ;;
+0006E6 6EC9           01468         MOVWF SSPBUF            ;;
+0006E8 0012           01469         RETURN                  ;;
+                      01470 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0006EA                01471 SPIOUT_1:                       ;;
+0006EA A4D8           01472         BTFSS PSW,Z             ;;
+0006EC D???           01473         BRA SPIOUT_2            ;;
+0006EE 0E00           01474         MOVLW 0                 ;;
+0006F0 6EC9           01475         MOVWF SSPBUF            ;;
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 29
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0006F2 0012           01476         RETURN                  ;;      
+                      01477 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0006F4                01478 SPIOUT_2:                       ;;
+0006F4 0FFF           01479         ADDLW 255               ;;
+0006F6 0B03           01480         ANDLW 0x03              ;;
+0006F8 EE?? F0??      01481         LFSR FSR0,LED_BUF0      ;;
+0006FC 26E9           01482         ADDWF FSR0L             ;;
+0006FE 50EE           01483         MOVF POSTINC0,W         ;;
+000700 6EC9           01484         MOVWF SSPBUF            ;;
+000702 0012           01485         RETURN                  ;;
+                      01486 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      01487         
+                      01488         
+                      01489 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000704                01490 INIT_RAM:                       ;;
+000704 6A??           01491         CLRF FLAGA              ;;
+000706 6A??           01492         CLRF FLAGB              ;;
+000708 6A??           01493         CLRF FLAGC              ;;
+00070A 6A??           01494         CLRF FLAGD              ;;
+00070C 6A??           01495         CLRF LCDA_PTR           ;;
+00070E 6A??           01496         CLRF LCDB_PTR           ;;
+000710 90??           01497         BCF LCDHL_F             ;;      
+000712 EC?? F???      01498         CALL CLR_LCD            ;;
+000716 6A??           01499         CLRF KEYFLAG0           ;;
+000718 6A??           01500         CLRF KEYFLAG1           ;;
+00071A 6A??           01501         CLRF KEYFLAG2           ;;
+00071C 6A??           01502         CLRF KEYFLAG3           ;;
+00071E 8E??           01503         BSF KEYFLAG3,7          ;;
+000720 EC?? F???      01504         CALL KEYOUT             ;;
+000724 0012           01505         RETURN                  ;;      
+                      01506 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      01507         
+                      01508 
+                      01509 
+                      01510 
+                      01511 
+                      01512 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000726                01513 INIT_INT:                       ;;
+                      01514 ;       BSF INTCON2,RBPU        ;;      
+000726 92F2           01515         BCF INTCON,INT0IF       ;;
+000728 9CF1           01516         BCF INTCON2,INTEDG0     ;;0:FALL 1:RISE
+                      01517                                 ;;
+00072A 92F0           01518         BCF INTCON3,INT2IF      ;;
+00072C 9EF0           01519         BCF INTCON3,INT2IP      ;;0 LOW PRI 1:HIGH PRI
+00072E 88F1           01520         BSF INTCON2,INTEDG2     ;;0:FALL 1:RISE
+                      01521                                 ;;
+000730 88F2           01522         BSF INTCON,INT0IE       ;;
+000732 88F0           01523         BSF INTCON3,INT2IE      ;;
+                      01524                                 ;;
+000734 8EF2           01525         BSF INTCON,GIEH         ;;      
+000736 8CF2           01526         BSF INTCON,GIEL         ;;
+                      01527 
+                      01528 
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 30
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000738 0012           01529         RETURN                  
+                      01530 ;       MOVLW 00000101B         ;;
+                      01531 ;       MOVWF CCP1CON           ;;ADF_DCLK EVERY RISING EDGE
+                      01532 ;       BSF IPR1,CCP1IP         ;;
+                      01533 ;       BCF CCP1IF_F            ;;      
+                      01534 ;       BCF CCP1IE_F            ;;
+                      01535 ;       BSF IPR1,TMR2IP         ;;
+                      01536 ;       BCF PIR1,TMR2IF         ;;      
+                      01537 ;       BCF PIE1,TMR2IE         ;;
+                      01538         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+00073A 9A9F           01539         BCF IPR1,RC1IP          ;;
+00073C 989F           01540         BCF IPR1,TX1IP          ;;
+00073E 9A9E           01541         BCF PIR1,RC1IF          ;; 
+000740 8A9D           01542         BSF PIE1,RC1IE          ;;
+                      01543         ;;;;;;;;;;;;;;;;;;;;;;;;;;
+000742 8ED0           01544         BSF RCON,IPEN           ;;
+000744 8EF2           01545         BSF INTCON,GIEH         ;;      
+000746 8CF2           01546         BSF INTCON,GIEL         ;;
+000748 0012           01547         RETURN                  ;;
+                      01548 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      01549 
+                      01550 
+                      01551 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00074A                01552 INIT_TIMER:                     ;;
+00074A 0EB1           01553         MOVLW 10110001B         ;;
+00074C 6EB1           01554         MOVWF T3CON             ;;
+00074E 0012           01555         RETURN                  ;;
+                      01556 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      01557 
+                      01558 ;OSC=24MHZ      PREDIV=8        
+                      01559 ;TIMER_FLAG0.0=740.74US 
+                      01560 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000750                01561 TIMER_PRG:                              ;;
+000750 6A??           01562         CLRF TIMER_FLAG0                ;;      
+000752 6A??           01563         CLRF TIMER_FLAG1                ;;
+000754 50B2           01564         MOVF TMR3L,W                    ;;
+000756 50B3           01565         MOVF TMR3H,W                    ;;
+000758 18??           01566         XORWF TMR3H_BUF,W               ;;
+00075A B4D8           01567         BTFSC PSW,Z                     ;;
+00075C 0012           01568         RETURN                          ;;
+00075E 1A??           01569         XORWF TMR3H_BUF                 ;;340US
+000760 6E??           01570         MOVWF TIMER_FLAG0               ;;
+000762 AE??           01571         BTFSS TIMER_FLAG0,7             ;;
+000764 0012           01572         RETURN                          ;;
+000766 2A??           01573         INCF TMR3K_CNT                  ;;
+000768 50??           01574         MOVF TMR3K_CNT,W                ;;
+00076A 18??           01575         XORWF TMR3K_BUF,W               ;;
+00076C 6E??           01576         MOVWF TIMER_FLAG1               ;;
+00076E 1A??           01577         XORWF TMR3K_BUF                 ;;
+000770 0012           01578         RETURN                          ;;
+                      01579 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;       
+                      01580 
+                      01581 
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 31
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      01582 
+                      01583 
+                      01584 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;      
+000772                01585 DLYMS:                          ;;
+000772 0E01           01586         MOVLW 1                 ;;
+000774                01587 DLYMX:                          ;;
+000774 6E??           01588         MOVWF RR0               ;;
+000776                01589 DLY1:                           ;;
+000776 0004           01590         CLRWDT                  ;;
+000778 0EFA           01591         MOVLW 250               ;;
+00077A                01592 DLY0:                           ;;
+00077A 0FFF           01593         ADDLW 255               ;;
+00077C A4D8           01594         BTFSS PSW,Z             ;;
+00077E D???           01595         BRA DLY0                ;;
+000780 2E??           01596         DECFSZ RR0              ;;
+000782 D???           01597         BRA DLY1                ;;
+000784 0012           01598         RETURN                  ;;
+                      01599 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      01600 
+                      01601 
+                      01602 
+                      01603 
+                      01604         
+                      01605         END
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 32
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+A                                 00000000
+A16                               00000000
+A17                               00000001
+A18                               00000002
+A19                               00000003
+ABDEN                             00000000
+ABDOVF                            00000007
+ACCESS                            00000000
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ACQT0                             00000003
+ACQT1                             00000004
+ACQT2                             00000005
+AD0                               00000000
+AD1                               00000001
+AD10                              00000002
+AD11                              00000003
+AD12                              00000004
+AD13                              00000005
+AD14                              00000006
+AD15                              00000007
+AD2                               00000002
+AD3                               00000003
+AD4                               00000004
+AD5                               00000005
+AD6                               00000006
+AD7                               00000007
+AD8                               00000000
+AD9                               00000001
+ADCON0                            00000FC2
+ADCON1                            00000FC1
+ADCON2                            00000FC0
+ADCS0                             00000000
+ADCS1                             00000001
+ADCS2                             00000002
+ADDEN                             00000003
+ADDEN1                            00000003
+ADDEN2                            00000003
+ADEN                              00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADIP                              00000006
+ADON                              00000000
+ADRES                             00000FC3
+ADRESH                            00000FC4
+ADRESL                            00000FC3
+ALE                               00000000
+AN0                               00000000
+AN1                               00000001
+AN10                              00000005
+AN11                              00000006
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 33
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+AN2                               00000002
+AN3                               00000003
+AN4                               00000005
+AN5                               00000000
+AN6                               00000001
+AN7                               00000002
+AN8                               00000003
+AN9                               00000004
+ASCII_TBL                         0000002E
+BA0                               00000004
+BANKED                            00000001
+BAUDCON1                          00000F7E
+BAUDCTL1                          00000F7E
+BCLIE                             00000003
+BCLIF                             00000003
+BCLIP                             00000003
+BF                                00000000
+BGST                              00000005
+BIT_TRANS                         0000001C
+BNK                               1
+BOR                               00000000
+BR                                00000001
+BRG16                             00000003
+BRGH                              00000002
+BRGH1                             00000002
+BRGH2                             00000002
+BSR                               00000FE0
+BUTCLICK                          00000518
+BUTFREE                           00000508
+BUTFREE_HANDSET                   00000514
+BUTPRESS                          000004F8
+BUTPRESS_HANDSET                  00000504
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C1OUTF                            00000002
+C2INV                             00000005
+C2OUT                             00000007
+C2OUTF                            00000001
+CCP1                              00000002
+CCP1CON                           00000FBD
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1IP                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2B                             00000003
+CCP2C                             00000001
+CCP2CON                           00000FBA
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 34
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CCP2E                             00000007
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2IP                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCP3                              00000000
+CCP3CON                           00000FB7
+CCP3IE                            00000000
+CCP3IF                            00000000
+CCP3IP                            00000000
+CCP3M0                            00000000
+CCP3M1                            00000001
+CCP3M2                            00000002
+CCP3M3                            00000003
+CCPR1                             00000FBE
+CCPR1H                            00000FBF
+CCPR1L                            00000FBE
+CCPR2                             00000FBB
+CCPR2H                            00000FBC
+CCPR2L                            00000FBB
+CCPR3                             00000FB8
+CCPR3H                            00000FB9
+CCPR3L                            00000FB8
+CE                                00000005
+CHK_KEYIN                         00000440
+CHK_KEYIN_0                       00000486
+CHK_KEYIN_1                       00000498
+CHK_KEYIN_11                      000004AC
+CHK_KEYIN_12                      000004CA
+CHK_KEYIN_2                       000004D0
+CHK_KEYIN_3                       000004E4
+CHK_KEYIN_4                       000004F2
+CHS0                              00000002
+CHS1                              00000003
+CHS2                              00000004
+CHS3                              00000005
+CIS                               00000003
+CK                                00000006
+CK2                               00000001
+CKE                               00000006
+CKP                               00000004
+CLICK_BOOK                        000006CA
+CLICK_DOWN                        000006B6
+CLICK_HANDFREE_OFF                0000068C
+CLICK_HANDFREE_ON                 00000686
+CLICK_HANDSET                     0000067A
+CLICK_INFO                        000006C0
+CLICK_LEFT                        000006B0
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 35
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CLICK_LIGHT                       000006C8
+CLICK_M1                          0000061A
+CLICK_M2                          00000632
+CLICK_M3                          0000064A
+CLICK_M4                          00000662
+CLICK_MODE                        000006BE
+CLICK_MUTE                        00000698
+CLICK_NUM0                        0000066E
+CLICK_NUM1                        00000620
+CLICK_NUM2                        00000626
+CLICK_NUM3                        0000062C
+CLICK_NUM4                        00000638
+CLICK_NUM5                        0000063E
+CLICK_NUM6                        00000644
+CLICK_NUM7                        00000650
+CLICK_NUM8                        00000656
+CLICK_NUM9                        0000065C
+CLICK_OK                          00000692
+CLICK_RIGHT                       000006BC
+CLICK_SHARP                       00000674
+CLICK_STAR                        00000668
+CLICK_TIM                         0000001F
+CLICK_TRIANGLE                    00000680
+CLICK_UP                          000006AA
+CLICK_VOLDOWN                     0000069E
+CLICK_VOLUP                       000006A4
+CLKI                              00000007
+CLKO                              00000006
+CLR_ALLRAM                        0000032A
+CLR_ALLRAM1                       0000032E
+CLR_LCD                           000000B6
+CLR_LCD0_1                        000000C0
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             00000FB4
+CMIE                              00000006
+CMIF                              00000006
+CMIP                              00000006
+CREN                              00000004
+CREN1                             00000004
+CREN2                             00000004
+CS                                00000002
+CSRC                              00000007
+CSRC1                             00000007
+CSRC2                             00000007
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            00000FB5
+CVREF                             00000004
+CVREFF                            00000005
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 36
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+CVRSS                             00000004
+C_F                               STATUS,0
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+DC1B0                             00000004
+DC1B1                             00000005
+DC2B0                             00000004
+DC2B1                             00000005
+DC3B0                             00000004
+DC3B1                             00000005
+DCCP1X                            00000005
+DCCP1Y                            00000004
+DCCP2X                            00000005
+DCCP2Y                            00000004
+DCCP3X                            00000005
+DCCP3Y                            00000004
+DDRA                              TRISA
+DDRB                              TRISB
+DDRC                              TRISC
+DDRD                              TRISD
+DDRE                              TRISE
+DDRF                              00000F97
+DDRG                              00000F98
+DDRH                              00000F99
+DDRJ                              00000F9A
+DEBUG_CNT                         00000015
+DECLCD                            000000CA
+DECLCD_1                          000000FC
+DECLCD_2                          0000010C
+DECLCD_3                          0000010E
+DLY0                              0000077A
+DLY1                              00000776
+DLYMS                             00000772
+DLYMX                             00000774
+DONE                              00000001
+DT2                               00000002
+D_A                               00000005
+D_NOT_A                           00000005
+EBDIS                             00000007
+EN10_IO                           TRISH,3
+EN10_O                            LATH,3
+EN1_IO                            TRISE,0
+EN1_O                             LATE,0
+EN2_IO                            TRISE,1
+EN2_O                             LATE,1
+EN3_IO                            TRISE,2
+EN3_O                             LATE,2
+EN4_IO                            TRISE,3
+EN4_O                             LATE,3
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 37
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+EN7_IO                            TRISE,6
+EN7_O                             LATE,6
+EN8_IO                            TRISE,7
+EN8_O                             LATE,7
+EN9_IO                            TRISH,2
+EN9_O                             LATH,2
+FAST                              00000001
+FERR                              00000002
+FERR1                             00000002
+FERR2                             00000002
+FLAGA                             00000000
+FLAGB                             00000001
+FLAGC                             00000002
+FLAGD                             00000003
+FLTS                              00000002
+FREE_KEY                          000003C8
+FSR0                              00000000
+FSR0H                             00000FEA
+FSR0L                             00000FE9
+FSR1                              00000001
+FSR1H                             00000FE2
+FSR1H_B                           00000010
+FSR1L                             00000FE1
+FSR1L_B                           0000000F
+FSR2                              00000002
+FSR2H                             00000FDA
+FSR2L                             00000FD9
+GCEN                              00000007
+GIE                               00000007
+GIEH                              00000007
+GIEL                              00000006
+GIE_GIEH                          00000007
+GO                                00000001
+GOTOXY_LCD                        000000AC
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+HISR_VECTOR                       00000002
+HLVDCON                           00000FD2
+HLVDEN                            00000004
+HLVDIE                            00000002
+HLVDIF                            00000002
+HLVDIP                            00000002
+HLVDL0                            00000000
+HLVDL1                            00000001
+HLVDL2                            00000002
+HLVDL3                            00000003
+HOFFPRG                           00000380
+HOFF_TIM                          0000002A
+I2C_DAT                           00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+IBF                               00000007
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 38
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+IBOV                              00000005
+IDLEN                             00000007
+INDF0                             00000FEF
+INDF1                             00000FE7
+INDF2                             00000FDF
+INIT_INT                          00000726
+INIT_IO                           000002A4
+INIT_OSC                          00000296
+INIT_RAM                          00000704
+INIT_SPI                          0000025A
+INIT_TIMER                        0000074A
+INLED0                            0000014A
+INLED1                            00000162
+INLED2                            0000017A
+INLED3                            00000196
+INT0                              00000000
+INT0E                             00000004
+INT0F                             00000001
+INT0IE                            00000004
+INT0IF                            00000001
+INT0PRG                           00000058
+INT0_END                          0000009C
+INT1                              00000001
+INT1E                             00000003
+INT1F                             00000000
+INT1IE                            00000003
+INT1IF                            00000000
+INT1IP                            00000006
+INT1P                             00000006
+INT1_1                            0000007C
+INT2                              00000002
+INT2E                             00000004
+INT2F                             00000001
+INT2IE                            00000004
+INT2IF                            00000001
+INT2IP                            00000007
+INT2P                             00000007
+INT2PRG                           000000A4
+INT3                              00000003
+INT3E                             00000005
+INT3F                             00000002
+INT3IE                            00000005
+INT3IF                            00000002
+INT3IP                            00000001
+INT3P                             00000001
+INTBUF                            00000024
+INTCON                            00000FF2
+INTCON2                           00000FF1
+INTCON3                           00000FF0
+INTEDG0                           00000006
+INTEDG1                           00000005
+INTEDG2                           00000004
+INTEDG3                           00000003
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 39
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+INTSRC                            00000007
+IOFS                              00000002
+IPEN                              00000007
+IPR1                              00000F9F
+IPR2                              00000FA2
+IPR3                              00000FA5
+IRCF0                             00000004
+IRCF1                             00000005
+IRCF2                             00000006
+IRVST                             00000005
+KBI0                              00000004
+KBI1                              00000005
+KBI2                              00000006
+KBI3                              00000007
+KEYFLAG0                          00000020
+KEYFLAG1                          00000021
+KEYFLAG2                          00000022
+KEYFLAG3                          00000023
+KEYOUT                            0000021C
+KID                               0000001E
+KID_BOOK                          31
+KID_DOWN                          26
+KID_HANDFREE_OFF                  19
+KID_HANDFREE_ON                   18
+KID_HANDSET                       16
+KID_INFO                          29
+KID_LEFT                          25
+KID_LIGHT                         30
+KID_M1                            0
+KID_M2                            4
+KID_M3                            8
+KID_M4                            12
+KID_MODE                          28
+KID_MUTE                          21
+KID_NUM0                          14
+KID_NUM1                          1
+KID_NUM2                          2
+KID_NUM3                          3
+KID_NUM4                          5
+KID_NUM5                          6
+KID_NUM6                          7
+KID_NUM7                          9
+KID_NUM8                          10
+KID_NUM9                          11
+KID_OK                            20
+KID_PTT                           32
+KID_PTT_RESET                     33
+KID_RIGHT                         27
+KID_SHARP                         15
+KID_STAR                          13
+KID_TRIANGLE                      17
+KID_UP                            24
+KID_VOLDOWN                       22
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 40
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+KID_VOLUP                         23
+KPUSH_M1                          000003B0
+KPUSH_PTT                         000003BA
+LATA                              00000F89
+LATA0                             00000000
+LATA1                             00000001
+LATA2                             00000002
+LATA3                             00000003
+LATA4                             00000004
+LATA5                             00000005
+LATA6                             00000006
+LATA7                             00000007
+LATB                              00000F8A
+LATB0                             00000000
+LATB1                             00000001
+LATB2                             00000002
+LATB3                             00000003
+LATB4                             00000004
+LATB5                             00000005
+LATB6                             00000006
+LATB7                             00000007
+LATC                              00000F8B
+LATC0                             00000000
+LATC1                             00000001
+LATC2                             00000002
+LATC3                             00000003
+LATC4                             00000004
+LATC5                             00000005
+LATC6                             00000006
+LATC7                             00000007
+LATD                              00000F8C
+LATD0                             00000000
+LATD1                             00000001
+LATD2                             00000002
+LATD3                             00000003
+LATD4                             00000004
+LATD5                             00000005
+LATD6                             00000006
+LATD7                             00000007
+LATE                              00000F8D
+LATE0                             00000000
+LATE1                             00000001
+LATE2                             00000002
+LATE3                             00000003
+LATE4                             00000004
+LATE5                             00000005
+LATE6                             00000006
+LATE7                             00000007
+LATF                              00000F8E
+LATF0                             00000000
+LATF1                             00000001
+LATF2                             00000002
+LATF3                             00000003
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 41
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+LATF4                             00000004
+LATF5                             00000005
+LATF6                             00000006
+LATF7                             00000007
+LATG                              00000F8F
+LATG0                             00000000
+LATG1                             00000001
+LATG2                             00000002
+LATG3                             00000003
+LATG4                             00000004
+LATH                              00000F90
+LATH0                             00000000
+LATH1                             00000001
+LATH2                             00000002
+LATH3                             00000003
+LATH4                             00000004
+LATH5                             00000005
+LATH6                             00000006
+LATH7                             00000007
+LATJ                              00000F91
+LATJ0                             00000000
+LATJ1                             00000001
+LATJ2                             00000002
+LATJ3                             00000003
+LATJ4                             00000004
+LATJ5                             00000005
+LATJ6                             00000006
+LATJ7                             00000007
+LB                                00000006
+LCDA_PTR                          00000011
+LCDB_PTR                          00000012
+LCDCS_I                           PORTB,0
+LCDCS_IO                          TRISB,0
+LCDHL_F                           FLAGA,0
+LCDRS_F                           FLAGA,1
+LCDRS_I                           PORTB,2
+LCDRS_IO                          TRISB,2
+LCD_ACTT                          00000014
+LCD_BUF                           00000140
+LCD_INX                           00000013
+LCD_TEMP                          00000100
+LED_BUF0                          00000018
+LED_BUF1                          00000019
+LED_BUF2                          0000001A
+LED_BUF3                          0000001B
+LISR_VECTOR                       00000012
+LOOP                              00000282
+LOOP0                             00000272
+LVDCON                            00000FD2
+LVDEN                             00000004
+LVDIE                             00000002
+LVDIF                             00000002
+LVDIN                             00000005
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 42
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+LVDIP                             00000002
+LVDL0                             00000000
+LVDL1                             00000001
+LVDL2                             00000002
+LVDL3                             00000003
+LVV0                              00000000
+LVV1                              00000001
+LVV2                              00000002
+LVV3                              00000003
+MAIN                              000003D4
+MAINT_1                           00000360
+MAINT_2                           0000036E
+MAINT_PRG                         0000033C
+MCLR                              00000005
+MEMCON                            00000F9C
+N                                 00000004
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BOR                           00000000
+NOT_DONE                          00000001
+NOT_PD                            00000002
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_RI                            00000004
+NOT_T1SYNC                        00000002
+NOT_T3SYNC                        00000002
+NOT_TO                            00000003
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OBF                               00000006
+OE                                00000001
+OERR                              00000001
+OERR1                             00000001
+OERR2                             00000001
+OSC1                              00000007
+OSC2                              00000006
+OSCCON                            00000FD3
+OSCFIE                            00000007
+OSCFIF                            00000007
+OSCFIP                            00000007
+OSCTUNE                           00000F9B
+OSTS                              00000003
+OUTKEY0                           000001AC
+OUTKEY1                           000001C8
+OUTKEY2                           000001E4
+OUTKEY3                           00000200
+OV                                00000003
+P                                 00000004
+PC                                00000FF9
+PCFG0                             00000000
+PCFG1                             00000001
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 43
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000FF9
+PCLATH                            00000FFA
+PCLATU                            00000FFB
+PD                                00000002
+PEIE                              00000006
+PEIE_GIEL                         00000006
+PEN                               00000002
+PGC                               00000006
+PGD                               00000007
+PGM                               00000005
+PIE1                              00000F9D
+PIE2                              00000FA0
+PIE3                              00000FA3
+PIR1                              00000F9E
+PIR2                              00000FA1
+PIR3                              00000FA4
+PLLEN                             00000006
+PLUSW0                            00000FEB
+PLUSW1                            00000FE3
+PLUSW2                            00000FDB
+POR                               00000001
+PORTA                             00000F80
+PORTB                             00000F81
+PORTC                             00000F82
+PORTD                             00000F83
+PORTE                             00000F84
+PORTF                             00000F85
+PORTG                             00000F86
+PORTH                             00000F87
+PORTJ                             00000F88
+POSTDEC0                          00000FED
+POSTDEC1                          00000FE5
+POSTDEC2                          00000FDD
+POSTINC0                          00000FEE
+POSTINC1                          00000FE6
+POSTINC2                          00000FDE
+POWER_ON                          000002DE
+PR2                               00000FCB
+PREINC0                           00000FEC
+PREINC1                           00000FE4
+PREINC2                           00000FDC
+PREKEY                            0000001D
+PROD                              00000FF3
+PRODH                             00000FF4
+PRODL                             00000FF3
+PSA                               00000003
+PSP0                              00000000
+PSP1                              00000001
+PSP2                              00000002
+PSP3                              00000003
+PSP4                              00000004
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 44
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PSP5                              00000005
+PSP6                              00000006
+PSP7                              00000007
+PSPCON                            00000FB0
+PSPIE                             00000007
+PSPIF                             00000007
+PSPIP                             00000007
+PSPMODE                           00000004
+PSW                               STATUS
+PTTON_F                           FLAGA,2
+PTTPRG                            0000038C
+PTT_START_F                       FLAGA,3
+PTT_TIM                           0000001C
+R                                 00000002
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RA6                               00000006
+RA7                               00000007
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RBIP                              00000000
+RBPU                              00000007
+RC0                               00000000
+RC1                               00000001
+RC1IE                             00000005
+RC1IF                             00000005
+RC1IP                             00000005
+RC2                               00000002
+RC2IE                             00000005
+RC2IF                             00000005
+RC2IP                             00000005
+RC3                               00000003
+RC4                               00000004
+RC5                               00000005
+RC6                               00000006
+RC7                               00000007
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIDL                             00000006
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 45
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RCIE                              00000005
+RCIF                              00000005
+RCIP                              00000005
+RCMT                              00000006
+RCON                              00000FD0
+RCREG                             00000FAE
+RCREG1                            00000FAE
+RCREG2                            00000F6E
+RCSTA                             00000FAB
+RCSTA1                            00000FAB
+RCSTA2                            00000F6B
+RD                                00000000
+RD0                               00000000
+RD1                               00000001
+RD16                              00000007
+RD2                               00000002
+RD3                               00000003
+RD4                               00000004
+RD5                               00000005
+RD6                               00000006
+RD7                               00000007
+RE0                               00000000
+RE1                               00000001
+RE2                               00000002
+RE3                               00000003
+RE4                               00000004
+RE5                               00000005
+RE6                               00000006
+RE7                               00000007
+READ_WRITE                        00000002
+RESET_VECTOR                      00000000
+RES_END                           0000002B
+RF0                               00000000
+RF1                               00000001
+RF2                               00000002
+RF3                               00000003
+RF4                               00000004
+RF5                               00000005
+RF6                               00000006
+RF7                               00000007
+RG0                               00000000
+RG1                               00000001
+RG2                               00000002
+RG3                               00000003
+RG4                               00000004
+RG5                               00000005
+RH0                               00000000
+RH1                               00000001
+RH2                               00000002
+RH3                               00000003
+RH4                               00000004
+RH5                               00000005
+RH6                               00000006
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 46
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RH7                               00000007
+RI                                00000004
+RJ0                               00000000
+RJ1                               00000001
+RJ2                               00000002
+RJ3                               00000003
+RJ4                               00000004
+RJ5                               00000005
+RJ6                               00000006
+RJ7                               00000007
+RR0                               00000006
+RR1                               00000007
+RR2                               00000008
+RR3                               00000009
+RR4                               0000000A
+RR5                               0000000B
+RR6                               0000000C
+RR7                               0000000D
+RR8                               0000000E
+RSEN                              00000001
+RX                                00000007
+RX2                               00000002
+RX9                               00000006
+RX91                              00000006
+RX92                              00000006
+RX9D                              00000000
+RX9D1                             00000000
+RX9D2                             00000000
+R_NOT_W                           00000002
+R_W                               00000002
+S                                 00000003
+SBOREN                            00000006
+SCK                               00000003
+SCKP                              00000004
+SCK_I                             PORTC,3
+SCK_IO                            TRISC,3
+SCK_O                             LATC,3
+SCL                               00000003
+SCS0                              00000000
+SCS1                              00000001
+SDA                               00000004
+SDI                               00000004
+SDI_I                             PORTC,4
+SDI_IO                            TRISC,4
+SDO                               00000005
+SDO_IO                            TRISC,5
+SDO_O                             LATC,5
+SEN                               00000000
+SENDB                             00000003
+SENDB1                            00000003
+SENDB2                            00000003
+SMP                               00000007
+SPBRG                             00000FAF
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 47
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+SPBRG1                            00000FAF
+SPBRG2                            00000F6F
+SPBRGH1                           00000F7F
+SPEN                              00000007
+SPEN1                             00000007
+SPEN2                             00000007
+SPIOUT                            000006D2
+SPIOUT_1                          000006EA
+SPIOUT_2                          000006F4
+SPIPRG                            0000040C
+SPI_ACTT                          00000016
+SPI_BUF                           00000160
+SPI_INX                           00000017
+SREN                              00000005
+SREN1                             00000005
+SREN2                             00000005
+SS                                00000007
+SSPADD                            00000FC8
+SSPBUF                            00000FC9
+SSPCON1                           00000FC6
+SSPCON2                           00000FC5
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPIP                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPOV                             00000006
+SSPSTAT                           00000FC7
+STATUS                            00000FD8
+STATUS_TEMP                       00000005
+STKFUL                            00000007
+STKOVF                            00000007
+STKPTR                            00000FFC
+STKPTR0                           00000000
+STKPTR1                           00000001
+STKPTR2                           00000002
+STKPTR3                           00000003
+STKPTR4                           00000004
+STKUNF                            00000006
+SWDTE                             00000000
+SWDTEN                            00000000
+SYNC                              00000004
+SYNC1                             00000004
+SYNC2                             00000004
+T08BIT                            00000006
+T0CKI                             00000004
+T0CON                             00000FD5
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 48
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+T0IP                              00000002
+T0PS0                             00000000
+T0PS1                             00000001
+T0PS2                             00000002
+T0SE                              00000004
+T0_F                              TIMER_FLAG0,0
+T10_F                             TIMER_FLAG1,3
+T11_F                             TIMER_FLAG1,4
+T12_F                             TIMER_FLAG1,5
+T13CKI                            00000000
+T13_F                             TIMER_FLAG1,6
+T14_F                             TIMER_FLAG1,7
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000FCD
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1OSI                             00000001
+T1OSO                             00000000
+T1RUN                             00000006
+T1SYNC                            00000002
+T1_F                              TIMER_FLAG0,1
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000FCA
+T2OUTPS0                          00000003
+T2OUTPS1                          00000004
+T2OUTPS2                          00000005
+T2OUTPS3                          00000006
+T2_F                              TIMER_FLAG0,2
+T3CCP1                            00000003
+T3CCP2                            00000006
+T3CKPS0                           00000004
+T3CKPS1                           00000005
+T3CON                             00000FB1
+T3INSYNC                          00000002
+T3SYNC                            00000002
+T3_F                              TIMER_FLAG0,3
+T4_F                              TIMER_FLAG0,4
+T5_F                              TIMER_FLAG0,5
+T6_F                              TIMER_FLAG0,6
+T7_F                              TIMER_FLAG0,7
+T8_F                              TIMER_FLAG1,1
+T9_F                              TIMER_FLAG1,2
+TABLAT                            00000FF5
+TBLPTR                            00000FF6
+TBLPTRH                           00000FF7
+TBLPTRL                           00000FF6
+TBLPTRU                           00000FF8
+TEST_IO                           TRISH,0
+TEST_O                            LATH,0
+TEST_OSC                          0000030C
+TEST_OSC_1                        0000030E
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 49
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TEST_SPI                          0000026A
+TEST_SPI_1                        0000026C
+TIMER_FLAG0                       00000025
+TIMER_FLAG1                       00000026
+TIMER_PRG                         00000750
+TMR0                              00000FD6
+TMR0H                             00000FD7
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR0IP                            00000002
+TMR0L                             00000FD6
+TMR0ON                            00000007
+TMR1                              00000FCE
+TMR1CS                            00000001
+TMR1H                             00000FCF
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1IP                            00000000
+TMR1L                             00000FCE
+TMR1ON                            00000000
+TMR2                              00000FCC
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2IP                            00000001
+TMR2ON                            00000002
+TMR3                              00000FB2
+TMR3CS                            00000001
+TMR3H                             00000FB3
+TMR3H_BUF                         00000027
+TMR3IE                            00000001
+TMR3IF                            00000001
+TMR3IP                            00000001
+TMR3K_BUF                         00000028
+TMR3K_CNT                         00000029
+TMR3L                             00000FB2
+TMR3ON                            00000000
+TO                                00000003
+TOS                               00000FFD
+TOSH                              00000FFE
+TOSL                              00000FFD
+TOSU                              00000FFF
+TRANS_FASC                        00000122
+TRANS_FASC_1                      0000012E
+TRANS_FASC_2                      0000013A
+TRANS_FASC_3                      00000146
+TRIG1_IO                          TRISH,0
+TRIG1_O                           LATH,0
+TRISA                             00000F92
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 50
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TRISA5                            00000005
+TRISA6                            00000006
+TRISA7                            00000007
+TRISB                             00000F93
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRISC                             00000F94
+TRISC0                            00000000
+TRISC1                            00000001
+TRISC2                            00000002
+TRISC3                            00000003
+TRISC4                            00000004
+TRISC5                            00000005
+TRISC6                            00000006
+TRISC7                            00000007
+TRISD                             00000F95
+TRISD0                            00000000
+TRISD1                            00000001
+TRISD2                            00000002
+TRISD3                            00000003
+TRISD4                            00000004
+TRISD5                            00000005
+TRISD6                            00000006
+TRISD7                            00000007
+TRISE                             00000F96
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRISE3                            00000003
+TRISE4                            00000004
+TRISE5                            00000005
+TRISE6                            00000006
+TRISE7                            00000007
+TRISF                             00000F97
+TRISF0                            00000000
+TRISF1                            00000001
+TRISF2                            00000002
+TRISF3                            00000003
+TRISF4                            00000004
+TRISF5                            00000005
+TRISF6                            00000006
+TRISF7                            00000007
+TRISG                             00000F98
+TRISG0                            00000000
+TRISG1                            00000001
+TRISG2                            00000002
+TRISG3                            00000003
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 51
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TRISG4                            00000004
+TRISH                             00000F99
+TRISH0                            00000000
+TRISH1                            00000001
+TRISH2                            00000002
+TRISH3                            00000003
+TRISH4                            00000004
+TRISH5                            00000005
+TRISH6                            00000006
+TRISH7                            00000007
+TRISJ                             00000F9A
+TRISJ0                            00000000
+TRISJ1                            00000001
+TRISJ2                            00000002
+TRISJ3                            00000003
+TRISJ4                            00000004
+TRISJ5                            00000005
+TRISJ6                            00000006
+TRISJ7                            00000007
+TRMT                              00000001
+TRMT1                             00000001
+TRMT2                             00000001
+TUN0                              00000000
+TUN1                              00000001
+TUN2                              00000002
+TUN3                              00000003
+TUN4                              00000004
+TX                                00000006
+TX1IE                             00000004
+TX1IF                             00000004
+TX1IP                             00000004
+TX2                               00000001
+TX2IE                             00000004
+TX2IF                             00000004
+TX2IP                             00000004
+TX8_9                             00000006
+TX9                               00000006
+TX91                              00000006
+TX92                              00000006
+TX9D                              00000000
+TX9D1                             00000000
+TX9D2                             00000000
+TXD8                              00000000
+TXEN                              00000005
+TXEN1                             00000005
+TXEN2                             00000005
+TXIE                              00000004
+TXIF                              00000004
+TXIP                              00000004
+TXREG                             00000FAD
+TXREG1                            00000FAD
+TXREG2                            00000F6D
+TXSTA                             00000FAC
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 52
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TXSTA1                            00000FAC
+TXSTA2                            00000F6C
+UA                                00000001
+UB                                00000007
+URX_LEN_LIM_K                     00000040
+VCFG0                             00000004
+VCFG1                             00000005
+VDIRMAG                           00000007
+VER_K                             10
+VPP                               00000005
+VREFM                             00000002
+VREFP                             00000003
+W                                 00000000
+WAIT0                             00000004
+WAIT1                             00000005
+WAKEUP                            000002DE
+WCOL                              00000007
+WDTCON                            00000FD1
+WM0                               00000000
+WM1                               00000001
+WR                                00000001
+WREG                              00000FE8
+WRH                               00000003
+WRL                               00000002
+WUE                               00000001
+W_TEMP                            00000004
+Z                                 00000002
+Z_F                               STATUS,2
+_BOREN_NOSLP_2L                   000000FD
+_BOREN_OFF_2L                     000000F9
+_BOREN_ON_2L                      000000FB
+_BOREN_SBORDIS_2L                 000000FF
+_BORV_0_2L                        000000E7
+_BORV_1_2L                        000000EF
+_BORV_2_2L                        000000F7
+_BORV_3_2L                        000000FF
+_BW_16_3L                         000000FF
+_BW_8_3L                          000000BF
+_CCP2MX_PORTBE_3H                 000000FE
+_CCP2MX_PORTC_3H                  000000FF
+_CONFIG1H                         00300001
+_CONFIG2H                         00300003
+_CONFIG2L                         00300002
+_CONFIG3H                         00300005
+_CONFIG3L                         00300004
+_CONFIG4L                         00300006
+_CONFIG5L                         00300008
+_CONFIG7L                         0030000C
+_CP_OFF_5L                        000000FF
+_CP_ON_5L                         000000FE
+_DEBUG_OFF_4L                     000000FF
+_DEBUG_ON_4L                      0000007F
+_DEVID1                           003FFFFE
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 53
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_DEVID2                           003FFFFF
+_EBTR_OFF_7L                      000000FF
+_EBTR_ON_7L                       000000FE
+_FCMEN_OFF_1H                     000000BF
+_FCMEN_ON_1H                      000000FF
+_IDLOC0                           00200000
+_IDLOC1                           00200001
+_IDLOC2                           00200002
+_IDLOC3                           00200003
+_IDLOC4                           00200004
+_IDLOC5                           00200005
+_IDLOC6                           00200006
+_IDLOC7                           00200007
+_IESO_OFF_1H                      0000007F
+_IESO_ON_1H                       000000FF
+_LPT1OSC_OFF_3H                   000000FB
+_LPT1OSC_ON_3H                    000000FF
+_MCLRE_OFF_3H                     0000007F
+_MCLRE_ON_3H                      000000FF
+_OSC_ECIO_1H                      000000F5
+_OSC_EC_1H                        000000F4
+_OSC_HSPLL_1H                     000000F6
+_OSC_HS_1H                        000000F2
+_OSC_INTIO67_1H                   000000F8
+_OSC_INTIO7_1H                    000000F9
+_OSC_LP_1H                        000000F0
+_OSC_RCIO_1H                      000000F7
+_OSC_RC_1H                        000000F3
+_OSC_XT_1H                        000000F1
+_PM_EM_3L                         000000FC
+_PM_MC_3L                         000000FF
+_PM_MPB_3L                        000000FD
+_PM_MP_3L                         000000FE
+_PWRT_OFF_2L                      000000FF
+_PWRT_ON_2L                       000000FE
+_STVREN_OFF_4L                    000000FE
+_STVREN_ON_4L                     000000FF
+_WAIT_OFF_3L                      000000FF
+_WAIT_ON_3L                       0000007F
+_WDTPS_1024_2H                    000000F5
+_WDTPS_128_2H                     000000EF
+_WDTPS_16384_2H                   000000FD
+_WDTPS_16_2H                      000000E9
+_WDTPS_1_2H                       000000E1
+_WDTPS_2048_2H                    000000F7
+_WDTPS_256_2H                     000000F1
+_WDTPS_2_2H                       000000E3
+_WDTPS_32768_2H                   000000FF
+_WDTPS_32_2H                      000000EB
+_WDTPS_4096_2H                    000000F9
+_WDTPS_4_2H                       000000E5
+_WDTPS_512_2H                     000000F3
+_WDTPS_64_2H                      000000ED
+MPASM  5.51                      SIXONEMA.ASM   3-10-2023  18:13:59         PAGE 54
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_WDTPS_8192_2H                    000000FB
+_WDTPS_8_2H                       000000E7
+_WDT_OFF_2H                       000000FE
+_WDT_ON_2H                        000000FF
+_XINST_OFF_4L                     000000BF
+_XINST_ON_4L                      000000FF
+__18F8310                         00000001
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
+
+
