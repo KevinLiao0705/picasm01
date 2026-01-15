@@ -1,0 +1,1065 @@
+;ICD2 USE REGISTER OF 0x800-0x822
+;..............................................................................
+    .EQU NEWLCD_K 		, 1
+
+	.EQU SP_T0_K		,1200
+	.EQU SP_T1_K		,2400
+	.EQU SP_T2_K		,7200
+
+
+    .EQU SET_AMT_K 		, 20
+    .EQU ICON_AMT_K 	, 2
+	.EQU SONG_BASET_K 	,600
+	.EQU SHAKE_ON_TIM_K ,1000
+	.EQU SHAKE_TIM_K 	,10000
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	.EQU SHORT_K 	,3
+	.EQU MID_K 		,12
+	.EQU LONG_K 	,20
+	.EQU START_K 	,6
+
+
+;350/37.5
+;	.EQU SHORT_K 	,2
+;	.EQU MID_K 		,14
+;	.EQU LONG_K 	,23
+;	.EQU START_K 	,4
+
+
+	.EQU SHORT_KP 	,50
+	.EQU MID_KP 	,225
+	.EQU LONG_KP 	,400
+	.EQU START_KP 	,100
+
+
+;300/37.5
+	.EQU SHORT_KT 	,2
+	.EQU MID_KT 	,12
+	.EQU LONG_KT 	,20
+	.EQU START_KT 	,4
+
+
+	.EQU SHORT_KTP 	,50
+	.EQU MID_KTP 	,225
+	.EQU LONG_KTP 	,400
+	.EQU START_KTP 	,100
+
+
+
+
+
+
+
+	.EQU C_WHITE,0xFFFF
+	.EQU C_BLACK,0x0000
+	.EQU C_YELLOW,0x07FF
+	.EQU C_RED,0x001F
+	.EQU C_GREEN,0x07E0
+	.EQU C_BLUE,0xF800
+;..............................................................................
+;Global Declarations:
+;..............................................................................
+    .global __reset          ;The label for the first line of code. 
+    .global __T1Interrupt    ;Declare Timer 1 ISR name global
+  	.global __T4Interrupt    ;Declare Timer 4 ISR name global
+	.global __CNInterrupt
+    .global __INT1Interrupt   
+    .global __INT2Interrupt   
+
+
+
+
+      
+;************************                
+.MACRO WLCDP XX,YY
+	BCLR LCDCS,#LCDCS_P
+	;;;;;;;;;;;;;;
+	MOV #\XX,W0
+	CALL LCDWC
+	MOV #\YY,W0
+	CALL LCDWD
+	BSET LCDCS,#LCDCS_P
+	.ENDM
+;-------------------------
+
+;************************                
+.MACRO W0LCD XX
+	BCLR LCDCS,#LCDCS_P
+	;;;;;;;;;;;;;;
+	MOV #\XX,W0
+	CALL LCDWC8
+	BSET LCDCS,#LCDCS_P
+	.ENDM
+;-------------------------
+;************************                
+.MACRO W8LCD XX,YY
+	BCLR LCDCS,#LCDCS_P
+	;;;;;;;;;;;;;;
+	MOV #\XX,W0
+	CALL LCDWC8
+	MOV #\YY,W0
+	CALL LCDWD8
+	BSET LCDCS,#LCDCS_P
+	.ENDM
+;-------------------------
+;************************                
+.MACRO W16LCD XX,YY
+	BCLR LCDCS,#LCDCS_P
+	;;;;;;;;;;;;;;
+	MOV #\XX,W0
+	CALL LCDWC8
+	MOV #\YY,W0
+	CALL LCDWD16
+	BSET LCDCS,#LCDCS_P
+	.ENDM
+;-------------------------
+
+
+
+
+;*************************
+.MACRO LXY XX,YY
+	MOV #\XX,W0
+	MOV W0,LCDX
+	MOV #\YY,W0
+	MOV W0,LCDY
+	.ENDM
+;-------------------------
+
+
+;*************************
+.MACRO LFADR XX
+	MOV #&XX&0,W0
+	MOV W0,FADR0
+	MOV #&XX&1,W0
+	MOV W0,FADR1
+	.ENDM
+;-------------------------
+
+.MACRO BSF XX
+	BSET \XX,#&XX&_P
+	.ENDM
+.MACRO BCF XX
+	BCLR \XX,#&XX&_P
+	.ENDM
+
+
+
+
+.MACRO LDPTR XX
+    MOV #tbloffset(\XX),W1
+	.ENDM
+
+.MACRO LOFFS0 XX
+        MOV #tbloffset(\XX),W0
+	.ENDM
+.MACRO LOFFS1 XX
+        MOV #tbloffset(\XX),W1
+	.ENDM
+.MACRO LOFFS2 XX
+        MOV #tbloffset(\XX),W2
+	.ENDM
+.MACRO LOFFS3 XX
+        MOV #tbloffset(\XX),W3
+	.ENDM
+.MACRO LOFFS4 XX
+        MOV #tbloffset(\XX),W4
+	.ENDM
+.MACRO LOFFS5 XX
+        MOV #tbloffset(\XX),W5
+	.ENDM
+.MACRO LOFFS6 XX
+        MOV #tbloffset(\XX),W6
+	.ENDM
+.MACRO LOFFS7 XX
+        MOV #tbloffset(\XX),W7
+	.ENDM
+
+.MACRO MOVLF XX,YY
+        MOV #\XX,W0
+		MOV W0,\YY
+	.ENDM
+
+
+
+;..............................................................................
+;Constants stored in Program space
+;..............................................................................
+
+        .section .CONST, code
+        .palign 2                ;Align next word stored in Program space to an
+                                 ;address that is a multiple of 2
+                
+
+
+;..............................................................................
+;Uninitialized variables in Near data memory (Lower 8Kb of RAM)
+;..............................................................................
+
+          .section .nbss, bss, near
+
+ICD2_USE: 	.SPACE 128
+R0:    	.SPACE 2		
+R1:		.SPACE 2		
+R2:		.SPACE 2		
+R3:		.SPACE 2		
+R4:		.SPACE 2		
+R5:		.SPACE 2		
+R6:		.SPACE 2		
+R7:		.SPACE 2		
+R8:		.SPACE 2		
+R9:		.SPACE 2		
+
+KEY0:		.SPACE 2		
+KEY1:		.SPACE 2		
+KEY2:		.SPACE 2		
+KEY3:		.SPACE 2		
+KEY4:		.SPACE 2		
+KEY5:		.SPACE 2		
+KEY6:		.SPACE 2		
+KEY7:		.SPACE 2		
+
+FACBUF0:	.SPACE 2		
+FACBUF1:	.SPACE 2		
+BATV_BUF:	.SPACE 2		
+
+
+FUNCB:		.SPACE 2		
+HOP0:		.SPACE 2		
+HOP1:		.SPACE 2		
+HOP2:		.SPACE 2		
+TCHKSUM:	.SPACE 2		
+HOP3:		.SPACE 2		
+HOP4:		.SPACE 2		
+
+CODE0:		.SPACE 2		
+CODE1:		.SPACE 2
+TX_COUNT:	.SPACE 2		
+TXDATA:		.SPACE 2
+TXDATA_ID:	.SPACE 2
+KEYBUF:		.SPACE 2
+OSC_CNT:	.SPACE 2
+
+OP_TYPE:		.SPACE 2
+SONG_BASET_KK:	.SPACE 2
+
+
+TXRF_CNT:	.SPACE 2
+MOD_TYPE:	.SPACE 2
+MOD_ACTION:	.SPACE 2
+MOD_FLAG:	.SPACE 2
+ACTION_KEY:	.SPACE 2
+SENPASS_CNT: .SPACE 2
+ALM_FLAG:	.SPACE 2
+ACTION_CNT:	.SPACE 2
+DRAW_ACTION_CNT:	.SPACE 2
+DEBUG_CNT:	.SPACE 2
+OFFSET_FXY:	.SPACE 2
+
+TPMSALM_TYP:		.SPACE 2
+DLYBKL_TIM:			.SPACE 2
+
+TPMSV_CNT:		.SPACE 2
+TPMSV_BUF:		.SPACE 40
+FCOLOR:			.SPACE 2
+TPMS_DATA:		.SPACE 8*5
+	.EQU TIREV0A  ,TPMS_DATA+8*0+0
+	.EQU TIREV0B  ,TPMS_DATA+8*0+2
+	.EQU TIREV1A  ,TPMS_DATA+8*1+0
+	.EQU TIREV1B  ,TPMS_DATA+8*1+2
+	.EQU TIREV2A  ,TPMS_DATA+8*2+0
+	.EQU TIREV2B  ,TPMS_DATA+8*2+2
+	.EQU TIREV3A  ,TPMS_DATA+8*3+0
+	.EQU TIREV3B  ,TPMS_DATA+8*3+2
+	.EQU TIREV4A  ,TPMS_DATA+8*4+0
+	.EQU TIREV4B  ,TPMS_DATA+8*4+2
+
+TFT_ON_TIM:		.SPACE 2
+TPMSD_CNT:		.SPACE 2
+TPMSSET_BUF: 	.SPACE 2
+TPMSI_CNT:		.SPACE 2
+LENSAME_CNT:	.SPACE 2
+LENSAME_BUF:	.SPACE 2
+DISPCF_TIM:		.SPACE 2	
+TPMS_ALM_CNT:	.SPACE 2
+FLASH_TIM:		.SPACE 2
+DISCN10S_CNT:	.SPACE 2
+DISCN10S_TIM:	.SPACE 2
+SLEEP_WK_TIM:	.SPACE 2
+SLEEP_WK_CNT:	.SPACE 2
+TPMS_ALMBB_TIM:	.SPACE 2
+TPMS_ALMBB_CNT:	.SPACE 2
+
+FACB0:			.SPACE 2	
+FACB1:			.SPACE 2	
+FACB2:			.SPACE 2	
+FACB3:			.SPACE 2	
+
+RADIUS:			.SPACE 2	
+DEGREE:			.SPACE 2	
+DEG_A:			.SPACE 2	
+DEG_B:			.SPACE 2	
+HV_BUF:			.SPACE 2	
+RV_BUF:			.SPACE 2	
+PV_BUF:			.SPACE 2	
+PVD_BUF:		.SPACE 2	
+HV_TEMP:		.SPACE 2	
+RV_TEMP:		.SPACE 2	
+PV_TEMP:		.SPACE 2	
+PVD_TEMP:		.SPACE 2	
+U1RX_BUF:		.SPACE 130
+U1RX_BYTE_PTR:	.SPACE 2	
+U1RX_BYTE:		.SPACE 2	
+U1RXP_TEMP:		.SPACE 24
+
+DDA_BUF:		.SPACE 20
+DDB_BUF:		.SPACE 20
+DDC_BUF:		.SPACE 20
+
+DEG_BUFA:		.SPACE 122	
+DEG_BUFB:		.SPACE 122	
+
+
+
+
+FLAGA:	        .SPACE 2
+FLAGB:	        .SPACE 2
+FLAGC:	        .SPACE 2
+FLAGD:	        .SPACE 2
+FLAGE:	        .SPACE 2
+FLAGF:	        .SPACE 2
+FLAGG:	        .SPACE 2
+LCDBF: 			.SPACE 2
+LCDX:	        .SPACE 2
+LCDY:	        .SPACE 2
+COLOR_F:       	.SPACE 2
+COLOR_B:       	.SPACE 2
+KEY_BUF:       	.SPACE 2
+KEY_FLAG0:      	.SPACE 2
+KEY_FLAG1:     	.SPACE 2
+NOKEY_CNT:     	.SPACE 2
+YESKEY_CNT:     .SPACE 2
+CONKEY_CNT:     .SPACE 2
+DBCLK_CNT:     	.SPACE 2
+DBCLK_BUF0:    	.SPACE 2
+DBCLK_BUF1:    	.SPACE 2
+DBCLK_BUF2:    	.SPACE 2
+DBCLK_BUF3:    	.SPACE 2
+WAIT_TIME_CNT: 	.SPACE 2
+DPP_ONCE_CNT: 	.SPACE 2
+GETRF_TIM: 		.SPACE 2
+WAITOSC8M_TIM: 	.SPACE 2
+
+RAMSTR_CNT:    	.SPACE 2
+RAMSTR_BUF:    	.SPACE 60
+
+DETBAT_TIM:		.SPACE 2
+
+MENU_CNT:     	.SPACE 2
+ERASE_CNT:     	.SPACE 2
+ICONB:			.SPACE 240	;2*3*40
+ICONP_BUF:		.SPACE 480	;2*6*40		
+ICONL_CNT:		.SPACE 2	
+ICONP_CNT:		.SPACE 2	
+
+ICON_DTIM:		.SPACE 48
+
+
+TMR2_BUF:       .SPACE 2
+TMR2_FLAG:      .SPACE 2
+TMR2_IORF:      .SPACE 2
+WAIT_TIM:       .SPACE 2
+ATALM_TIM:      .SPACE 2
+CTALM_TIM:      .SPACE 2
+
+FADR0:       	.SPACE 2
+FADR1:      	.SPACE 2
+
+LCDX_LIM0:   	.SPACE 2
+LCDX_LIM1:  	.SPACE 2
+LCDY_LIM0:   	.SPACE 2
+LCDY_LIM1:  	.SPACE 2
+BMPX:        	.SPACE 2
+BMPY:       	.SPACE 2
+BMPC:	    	.SPACE 512	       
+
+DPP_CNT:	    .SPACE 2
+DPP_AMT:	    .SPACE 2
+DPPBUF:			.SPACE 192 ;2*6*16
+DPPSEL_CNT:	    .SPACE 2
+DPPSEL_PRE:	    .SPACE 2
+DPPSET_CNT:	    .SPACE 2
+DPPSET_PRE:	    .SPACE 2
+DPPB0:			.SPACE 2	
+DPPB1:			.SPACE 2	
+DPPB2:			.SPACE 2	
+DPPB3:			.SPACE 2	
+DPPB4:			.SPACE 2	
+DPPB5:			.SPACE 2
+DPPB6:			.SPACE 2	
+DPPB7:			.SPACE 2
+DYBMP_BUF:		.SPACE 240 ;2*6*20			
+DYBMP_AMT:		.SPACE 2  
+DYBMP_CNT:		.SPACE 2  
+
+	
+
+DFFBUF:   		.SPACE 360 ;2*6*30			
+DFF_CNT:  		.SPACE 2  
+DFF_AMT:		.SPACE 2  
+SEC:  			.SPACE 2  
+MIN:  			.SPACE 2  
+HOUR:			.SPACE 2  
+NTIME:			.SPACE 2  
+LTIME:			.SPACE 2  
+CTIME:			.SPACE 2  
+CTIME_SET:		.SPACE 2  
+P_SEC:  		.SPACE 2  
+SIGNAL_CNT: 	.SPACE 2  
+SHAKE_CNT: 		.SPACE 2  
+SHAKE_TIM: 		.SPACE 2  
+MENU_ESC_TIM: 	.SPACE 2  
+POWV_BUF: 	.SPACE 2  
+POWV_TEMP: 	.SPACE 2  
+DETPOW_TIM: 	.SPACE 2  
+POWV_CNT: 	.SPACE 2  
+POWV_BUF0: 	.SPACE 2  
+POWV_BUF1: 	.SPACE 2  
+
+
+
+
+A_MIN:  		.SPACE 2  
+A_HOUR:			.SPACE 2  
+A_ONOFF:  		.SPACE 2  
+
+C_HOUR:  		.SPACE 2  
+C_MIN:			.SPACE 2  
+C_SEC:  		.SPACE 2  
+
+
+DEMO_TIM:		.SPACE 2  
+DEMO_CNT:		.SPACE 2  
+DEMO_ACTION_CNT: .SPACE 2  
+DEMO_ACTION_TIM: .SPACE 2  
+
+
+MENU_STK_CNT:	.SPACE 2
+MENU_STK_BUF:	.SPACE 20
+MENU_ADR:		.SPACE 2
+MENU_AMT:	    .SPACE 2
+MENU_KADR:	    .SPACE 2
+
+FONT_TYP: 		.SPACE 2
+STR_LEN:		.SPACE 2		
+FONT_X: 		.SPACE 2		
+FONT_Y: 		.SPACE 2		
+FONT_WB:		.SPACE 2		
+
+SONG_AMT: 		.SPACE 2
+SONG_POTB:		.SPACE 2		
+SONG_CNT: 		.SPACE 2
+SONG_TIM:		.SPACE 2		
+SONG_POT: 		.SPACE 2	
+SONG_BASET:		.SPACE 2		
+	
+
+ERR_CNT: 		.SPACE 2
+DEERR_BUF: 		.SPACE 2
+
+
+RF_CNT: 		.SPACE 2
+RFBUF_PCNT0:	.SPACE 2				
+RFBUF_PCNT1:	.SPACE 2
+RFTX_TIM:		.SPACE 2						
+MTXBIT_CNT:		.SPACE 2		
+MTXBYTE_CNT:	.SPACE 2		
+MTX_COUNT:		.SPACE 2		
+CONCON_TIM:		.SPACE 2		
+
+RXBYTE_BUF:		.SPACE 2		
+TCODE1:			.SPACE 2
+RFBIT_CNT:		.SPACE 2
+TCODE2:			.SPACE 2
+TCODE2_CNT:		.SPACE 2
+RFPUS_TIM:		.SPACE 2
+CLRRF_CNT:		.SPACE 2
+SLEEP_CNT:		.SPACE 2
+SLEEP_WAIT:		.SPACE 2
+PUSYES_CNT:		.SPACE 2
+PUSERR_CNT:		.SPACE 2
+TEMPC_DAT:		.SPACE 2
+POWV_DAT:		.SPACE 2
+
+
+
+
+TRXBYTE_BUF:		.SPACE 2		
+TTCODE1:			.SPACE 2
+TRFBIT_CNT:			.SPACE 2
+TTCODE2:			.SPACE 2
+TTCODE2_CNT:		.SPACE 2
+TCLRRF_CNT:			.SPACE 2
+
+
+
+
+
+
+
+
+
+
+;ID0:			.SPACE 2
+;ID1:			.SPACE 2
+;ID2:			.SPACE 2
+;ID3:			.SPACE 2
+;CHKSUM:			.SPACE 2
+;TEMPCF:			.SPACE 2
+;PRESSURE:		.SPACE 2
+;SPARE:			.SPACE 2
+			
+TR0:			.SPACE 2
+TR1:			.SPACE 2
+TR2:			.SPACE 2
+TR3:			.SPACE 2
+TR4:			.SPACE 2
+TR5:			.SPACE 2
+TR6:			.SPACE 2
+
+RX0:			.SPACE 2
+RX1:			.SPACE 2
+RX2:			.SPACE 2
+RX3:			.SPACE 2
+RX4:			.SPACE 2
+RX5:			.SPACE 2
+RX6:  			.SPACE 2
+RX7:			.SPACE 2
+
+TRX0:			.SPACE 2
+TRX1:			.SPACE 2
+TRX2:			.SPACE 2
+TRX3:			.SPACE 2
+TRX4:			.SPACE 2
+TRX5:			.SPACE 2
+TRX6:  			.SPACE 2
+TRX7:			.SPACE 2
+
+TRX0_BUF:			.SPACE 2
+TRX1_BUF:			.SPACE 2
+TRX2_BUF:			.SPACE 2
+TRX3_BUF:			.SPACE 2
+TRX4_BUF:			.SPACE 2
+TRX5_BUF:			.SPACE 2
+TRX6_BUF:  			.SPACE 2
+TRX7_BUF:			.SPACE 2
+
+RX0B:			.SPACE 2
+RX1B:			.SPACE 2
+RX2B:			.SPACE 2
+RX3B:			.SPACE 2
+RX4B:			.SPACE 2
+RX5B:			.SPACE 2
+RX6B:			.SPACE 2
+
+
+CLRTPMS_TIM:	.SPACE 2
+
+
+
+RXBUF: 			.SPACE 2*64		
+TXBUF:			.SPACE 2*8
+
+T4ITMR_B:		.SPACE 2
+T4ITMR:			.SPACE 2
+
+
+SETM_ADR:		.SPACE 2
+SETMSEL_CNT:	.SPACE 2
+SETMNOW_CNT:	.SPACE 2
+SETMSEL_AMT:	.SPACE 2
+SETM_STK_CNT:	.SPACE 2
+SETM_KADR:		.SPACE 2	
+SETM_STK_BUF:	.SPACE 20
+
+
+
+
+
+
+
+
+;######################################
+SET_BUF:		.SPACE 0 ;256
+LANG_SET:		.SPACE 2
+TITLE_SET:		.SPACE 2
+TABLE_SET:		.SPACE 2
+VIBRATION_SET:	.SPACE 2
+KEYLOCK_SET:	.SPACE 2
+CF_SET:			.SPACE 2
+MUSIC_SET:		.SPACE 2
+POWER_SAVE_SET:	.SPACE 2
+TPMS_PUNIT_SET:	.SPACE 2
+TPMS_TUNIT_SET:	.SPACE 2
+W5_EN_SET:		.SPACE 2
+;===================================
+SETM_A_SET:		.SPACE 2
+	.EQU	CH3_SETM			,SETM_A_SET
+SETM_B_SET:		.SPACE 2
+	.EQU	SIREN_SETM			,SETM_B_SET
+SETM_C_SET:		.SPACE 2
+	.EQU	DOORLOCK_TIME_SETM	,SETM_C_SET
+SETM_D_SET:		.SPACE 2
+	.EQU	DOORLOCK_FUNC_SETM	,SETM_D_SET
+;====================================
+SETM_E_SET:		.SPACE 2
+	.EQU	ARM_FUNC_SETM		,SETM_E_SET
+SETM_F_SET:		.SPACE 2
+	.EQU	DOME_LIGHT_SETM		,SETM_F_SET
+SETM_G_SET:		.SPACE 2
+	.EQU	CH2_SETM			,SETM_G_SET
+SETM_H_SET:		.SPACE 2
+	.EQU	PARK_LIGHT_SETM		,SETM_H_SET
+;===================================
+SETM_I_SET:		.SPACE 2
+	.EQU	STARTER_STATUS_SETM	,SETM_I_SET
+SETM_J_SET:		.SPACE 2
+	.EQU	KILL_RELAY_SETM		,SETM_J_SET
+SETM_K_SET:		.SPACE 2
+	.EQU	LAST_ARM_SETM		,SETM_K_SET
+SETM_L_SET:		.SPACE 2
+	.EQU	TURBO_ENGINE_SETM	,SETM_L_SET
+;===================================
+SETM_M_SET:		.SPACE 2
+	.EQU	REMOTE_START_TIME_SETM		,SETM_M_SET
+SETM_N_SET:		.SPACE 2
+	.EQU	CHANGE_RUN_TIME_SETM		,SETM_N_SET
+SETM_O_SET:		.SPACE 2
+	.EQU	TEMP_AUTO_START_SETM		,SETM_O_SET
+SETM_P_SET:		.SPACE 2
+	.EQU	SCHED_AUTO_START_SETM		,SETM_P_SET
+;===================================
+SETM_Q_SET:		.SPACE 2
+	.EQU	AUTO_MANUAL_GEAR_SETM		,SETM_Q_SET
+SETM_R_SET:		.SPACE 2
+	.EQU	ENERGE_SAVE_SETM		,SETM_R_SET
+SETM_S_SET:		.SPACE 2
+SETM_T_SET:		.SPACE 2
+;=================================
+SETM_X1_SET:		.SPACE 2
+SETM_X2_SET:		.SPACE 2
+SETM_X3_SET:		.SPACE 2
+SETM_X4_SET:		.SPACE 2
+;=================================
+SETM_X5_SET:		.SPACE 2
+SETM_X6_SET:		.SPACE 2
+SETM_X7_SET:		.SPACE 2
+SETM_X8_SET:		.SPACE 2
+;=================================
+TPMS_LOP_SETA:	.SPACE 2
+TPMS_HIP_SETA:	.SPACE 2
+TPMS_HIT_SETA:	.SPACE 2
+TPMS_LOP_SETB:	.SPACE 2
+TPMS_HIP_SETB:	.SPACE 2
+TPMS_HIT_SETB:	.SPACE 2
+
+
+WID00:			.SPACE 2
+WID01:			.SPACE 2
+WID02:			.SPACE 2
+WID10:			.SPACE 2
+WID11:			.SPACE 2
+WID12:			.SPACE 2
+WID20:			.SPACE 2
+WID21:			.SPACE 2
+WID22:			.SPACE 2
+WID30:			.SPACE 2
+WID31:			.SPACE 2
+WID32:			.SPACE 2
+WID40:			.SPACE 2
+WID41:			.SPACE 2
+WID42:			.SPACE 2
+
+WID_CHKSUM:		.SPACE 2
+NONE2:			.SPACE 2
+NONE3:			.SPACE 2
+NONE4:			.SPACE 2
+NONE5:			.SPACE 2
+
+TPMSV_0A:		.SPACE 2
+TPMSV_0B:		.SPACE 2
+TPMSV_1A:		.SPACE 2
+TPMSV_1B:		.SPACE 2
+TPMSV_2A:		.SPACE 2
+TPMSV_2B:		.SPACE 2
+TPMSV_3A:		.SPACE 2
+TPMSV_3B:		.SPACE 2
+TPMSV_4A:		.SPACE 2
+TPMSV_4B:		.SPACE 2
+
+	
+;=================================
+SET_END:		.SPACE 0
+SET_SPARE:		.SPACE (250+SET_BUF-SET_END)
+MYID0:			.SPACE 2
+MYID1:			.SPACE 2
+MYID2:			.SPACE 2
+
+
+END_RAM:		.SPACE 2
+
+
+.EQU DISPB0			,DFFBUF+2+12*0
+.EQU DISPB1			,DFFBUF+2+12*1
+.EQU DISPB2			,DFFBUF+2+12*2
+.EQU DISPB3			,DFFBUF+2+12*3
+.EQU DISPB4			,DFFBUF+2+12*4
+.EQU DISPB5			,DFFBUF+2+12*5
+.EQU DISPB6			,DFFBUF+2+12*6
+.EQU DISPB7			,DFFBUF+2+12*7
+.EQU DISPB8			,DFFBUF+2+12*8
+.EQU DISPB9			,DFFBUF+2+12*9
+.EQU DISPB10		,DFFBUF+2+12*10
+.EQU DISPB11		,DFFBUF+2+12*11
+.EQU DISPB12		,DFFBUF+2+12*12
+.EQU DISPB13		,DFFBUF+2+12*13
+.EQU DISPB14		,DFFBUF+2+12*14
+.EQU DISPB15		,DFFBUF+2+12*15
+.EQU DISPB16		,DFFBUF+2+12*16
+.EQU DISPB17		,DFFBUF+2+12*17
+.EQU DISPB18		,DFFBUF+2+12*18
+.EQU DISPB19		,DFFBUF+2+12*19
+.EQU DISPB20		,DFFBUF+2+12*20
+.EQU DISPB21		,DFFBUF+2+12*21
+.EQU DISPB22		,DFFBUF+2+12*22
+.EQU DISPB23		,DFFBUF+2+12*23
+.EQU DISPB24		,DFFBUF+2+12*24
+.EQU DISPB25		,DFFBUF+2+12*25
+
+	
+
+.EQU     FCS   	,LATA
+.EQU     MRXE  	,LATA
+.EQU     MTXE  	,LATA
+.EQU     LCDWR 	,LATA
+.EQU     MTX   	,LATA
+.EQU     MRX   	,PORTA
+.EQU     LCDRD 	,LATA
+;;;;;;;;;;;;;;;;;;;;;;;;
+.EQU     VDET  	,PORTB
+.EQU     SHAKE 	,LATB
+.EQU     MPUCS 	,LATB
+.EQU     HTCS  	,LATB
+.EQU     BKLCE 	,LATB
+.EQU     TEST	,LATB
+.EQU     FSCK	,LATB
+.EQU     K1	,PORTB
+.EQU     K2	,PORTB
+.EQU     K3	,PORTB
+.EQU     LCDRST ,LATB
+.EQU     LCDRS  ,LATB
+.EQU     LCDCS	,LATB
+;;;;;;;;;;;;;;;;;;;;;;;;
+.EQU     FSD0   ,PORTC 
+.EQU     FSD1	,PORTC  
+
+
+.EQU VBATL_P	,3
+.EQU SHAKE_P	,6		;3
+
+
+.EQU     FCS_P    ,0
+.EQU     MRXE_P   ,1
+.EQU     LCDWR_P  ,7
+.EQU     MTX_P    ,8
+.EQU     MRX_P    ,9
+.EQU 	 LCDRD_P  ,10
+;;;;;;;;;;;;;;;;;;;;;
+.EQU 	 VDET_P   ,2
+;.EQU     SHAKE_P  ,3
+.EQU     MPUCS_P  ,5
+;.EQU     HTCS_P   ,6
+.EQU     BKLCE_P  ,7
+.EQU     TEST_P   ,8
+.EQU     FSCK_P	  ,9
+.EQU     K1_P	  ,10
+.EQU     K2_P	  ,11
+.EQU     K3_P	  ,12
+.EQU     LCDRST_P ,13
+.EQU     LCDRS_P  ,14
+.EQU     LCDCS_P  ,15
+;;;;;;;;;;;;;;;;;;;;;
+.EQU     FSD0_P   ,8 
+.EQU     FSD1_P	  ,9  
+
+
+
+
+
+
+;FLAGA
+.EQU     ENF_SHORT_F    ,0
+.EQU     ENF_2X_F       ,1
+.EQU     FLASH_BLANK_CHKA_F ,2
+.EQU	 PGMBLK_F	,3
+.EQU	 GOTOXY_F	,4
+.EQU	 STRLEN_F	,5
+.EQU	 BUF_F		,6
+.EQU	 ICONP_F	,7
+.EQU	 THF_F		,8
+.EQU	 RFLH_F		,9
+.EQU	 OSCL_F		,10
+.EQU	 MTXE_F		,11
+.EQU	 SONG_F		,12
+.EQU	 MRXE_F		,13
+.EQU	 MTXPRE_F	,14
+;.EQU	 MTXPRE_F	,15
+
+
+;FLAGB
+.EQU    RXIN_F      ,0
+.EQU    RFERR_F     ,1
+.EQU    TXKEY_F     ,2
+.EQU	TEST_F		,3
+.EQU	TXKEY_F		,4
+.EQU	TXRF_F		,5
+.EQU	CLRRF_F		,6
+.EQU	RFCON_F		,7
+.EQU	DPP_ONCE_F	,8
+.EQU	DPP_ON_F	,9
+.EQU	TALMED_F	,10
+.EQU	DISKR_F		,11
+.EQU	DISKK_F		,12
+.EQU	NOKEY_F 	,13
+.EQU	BATLOW_F	,14
+;.EQU	 MTXPRE_F	,15
+
+
+.EQU VDET_R ,FLAGC
+
+;FLAGC
+.EQU   RXINK_F      ,0
+.EQU   VDET_F	  ,1
+.EQU   EN_ROB_F     ,2
+;EQU	FBC_F		,3
+.EQU   FREAD_RTIME_F	,4
+.EQU   C_TIME_START_F ,5
+.EQU	KEYLOCK_F	,6
+.EQU	RAMSTR_F	,7
+.EQU	INITIAL_F	,8
+.EQU	TXDATA_F	,9
+.EQU	CNCHG_F	,10
+.EQU	HALFSEC_F	,11	;FIX
+.EQU	SET_RETURN_F		,12
+.EQU	OSC8M_F 	,13
+.EQU	CHKRF_F		,14
+.EQU	ESCAPE_BMP8_F	,15
+
+.EQU VPOW_R ,FLAGD
+
+
+;FLAGD
+.EQU   ATALM_F	     	,0
+.EQU   SONG_KP_STOP_F   ,1
+.EQU   CTALM_F	    	,2
+.EQU   POWER_SAVE_F		,3
+.EQU   MAINP_F			,4
+.EQU   MENUP_F			,5
+.EQU   PULSP_F			,6
+.EQU 	MENUP_ESC_F		,7
+.EQU	PULSP_ESC_F		,8
+.EQU	PDEMO_F			,9
+.EQU	F24P_F			,10
+.EQU	S1P_F  			,11	
+.EQU	S2P_F   		,12
+.EQU	TPMSSET_F 		,13
+.EQU	DISPCF_F		,14
+.EQU	VPOW_F			,15
+		
+;FLAGE
+.EQU   TPMS_LEN_F   	,0
+.EQU   TCLRRF_F			,1
+.EQU   RFIN_TPMSCT_F	,2
+.EQU   RFIN_CAR_F		,3
+.EQU   TRFERR_F			,4
+.EQU   TRXIN_F			,5
+
+.EQU   TPMS_ALMED_F		,6
+.EQU   TPMS_ALMBBB_F	,7
+.EQU	PDEMO_AUTO_F	,8
+.EQU	OPPOF_F			,9
+.EQU	MESSAGE_F		,10
+.EQU	EDITED_F		,11	
+.EQU	OPEN_ENG_F 		,12
+.EQU	TPMS_FIRST_F 	,13
+.EQU	BATLL_F  		,14
+.EQU	BATLLL_F		,15
+
+
+
+
+;FLAGF
+.EQU   BKLCE_F   		,0
+.EQU   TPMS_ESC_F		,1
+.EQU   DEMO_F			,2
+.EQU   PUSHCC_F			,3
+.EQU   FLASH_F			,4
+.EQU   WAKEUP_LMOD_F	,5
+
+.EQU   ALARM_LMOD_F		,6
+.EQU   PUSHK_LMOD_F		,7
+.EQU   CTA_F	    	,8
+.EQU   INT1_MF			,9
+.EQU   T1_MF			,10
+.EQU   CNCHG_MF			,11	
+.EQU   DISCN10S_F 		,12
+.EQU   TPMS_LENST_F 	,13
+.EQU   LENALL_F  		,14
+.EQU   DISP_W5_F		,15
+
+
+;FLAGG
+.EQU   INT2_MF   		,0
+.EQU   FORCE_DRAW_F		,1
+.EQU   U1RX_PACK_F		,2
+;.EQU   PUSHCC_F			,3
+;.EQU   FLASH_F			,4
+;.EQU   WAKEUP_LMOD_F	,5
+;.EQU   ALARM_LMOD_F		,6
+;.EQU   PUSHK_LMOD_F		,7
+;.EQU   CTA_F	    	,8
+;.EQU   INT1_MF			,9
+;.EQU   T1_MF			,10
+;.EQU   CNCHG_MF			,11	
+;.EQU   DISCN10S_F 		,12
+;.EQU   TPMS_LENST_F 	,13
+;.EQU   LENALL_F  		,14
+;.EQU   DISP_W5_F		,15
+
+
+
+
+
+
+
+
+;MOD_FLAG:
+;.EQU    LOCK_MF     ,0
+;.EQU    UNLOCK_MF   ,1
+;.EQU    ARM_MF      ,2
+;.EQU	DISARM_MF	,3
+;.EQU	ARMS_MF		,4
+;.EQU	JACK_MF		,5
+;.EQU	CH3_MF		,6
+;.EQU	CH2_MF		,7
+;.EQU	DPP_ONCE_F	,8
+;.EQU	DPP_ON_F	,9
+;.EQU	TALMED_F	,10
+;.EQU	DISKR_F		,11
+;.EQU	 SONG_F		,12
+;.EQU	 MRXE_F		,13
+;.EQU	 MTXPRE_F	,14
+;.EQU	 MTXPRE_F	,15
+
+
+;CAR_STATUS:
+.EQU   SENSOR_L_SF  ,0
+.EQU   SENSOR_H_SF  ,1
+.EQU   ACC_SF       ,2
+.EQU   DOOR_SF  	,3
+.EQU   ENGC_SF 		,4
+.EQU   TRUNK_SF 	,5
+.EQU   LOCK_SF		,6
+;EQU				,7
+;;;;;;;;;;;;;;;;;;;;;;;
+;.EQU	-	,8
+;.EQU	-	,9
+;.EQU	-	,10
+;.EQU	-	,11
+;.EQU	-	,12
+;.EQU	-	,13
+;.EQU	-	,14
+;.EQU	-	,15
+
+
+;TMR2_IORF
+.EQU    T16U_IF      ,0
+.EQU    T32U_IF      ,1
+.EQU    T64U_IF      ,2
+.EQU	T128U_IF		,3
+.EQU	T256U_IF		,4
+.EQU	T512U_IF		,5
+.EQU	T1M_IF		,6
+.EQU	T2M_IF		,7
+.EQU	T4M_IF		,8
+.EQU	T8M_IF		,9
+.EQU	T16M_IF 		,10
+.EQU	T32M_IF		,11
+.EQU	T64M_IF		,12
+.EQU	T128M_IF		,13
+.EQU	T256M_IF		,14
+.EQU	T512M_IF		,15
+
+;TMR2_FLAG
+.EQU    T16U_F      ,0
+.EQU    T32U_F      ,1
+.EQU    T64U_F      ,2
+.EQU	T128U_F		,3
+.EQU	T256U_F		,4
+.EQU	T512U_F		,5
+.EQU	T1M_F		,6
+.EQU	T2M_F		,7
+.EQU	T4M_F		,8
+.EQU	T8M_F		,9
+.EQU	T16M_F 		,10
+.EQU	T32M_F		,11
+.EQU	T64M_F		,12
+.EQU	T128M_F		,13
+.EQU	T256M_F		,14
+.EQU	T512M_F		,15
+
+
+;KEY_FLAG
+.EQU    KP0_F       ,0
+.EQU    KP1_F       ,1
+.EQU    KP2_F       ,2
+;;.EQU	T128U_F		,3
+.EQU	KD0_F   	,4
+.EQU	KD1_F   	,5
+.EQU	KD2_F 		,6
+;;.EQU	T2M_F		,7
+.EQU	KR0_F		,8
+.EQU	KR1_F		,9
+.EQU	KR2_F  		,10
+;;.EQU	T32M_F		,11
+;EQU	KCC0_F		,12
+;EQU	KCC1_F 		,13
+;EQU	KCC2_F 		,14
+;;.EQU	T512M_F		,15
+
+
+;KEY_FLAG1
+.EQU    KCS0_F       ,0
+.EQU    KCS1_F       ,1
+.EQU    KCS2_F       ,2
+;;.EQU	T128U_F		,3
+.EQU	KCL0_F   	,4
+.EQU	KCL1_F   	,5
+.EQU	KCL2_F 		,6
+;;.EQU	T2M_F		,7
+.EQU	KCP0_F		,8
+.EQU	KCP1_F		,9
+.EQU	KCP2_F  		,10
+;;.EQU	T32M_F		,11
+;.EQU	KCC0_F		,12
+;EQU	KCC1_F 		,13
+;EQU	KCC2_F 		,14
+;;.EQU	T512M_F		,15
+
+
+
+
+
+
+
+

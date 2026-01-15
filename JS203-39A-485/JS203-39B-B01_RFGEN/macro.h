@@ -1,0 +1,176 @@
+.MACRO  WLRRB ADDR,VALUE
+	MOV #\ADDR,W2
+	MOV #\VALUE,W0
+	CALL SPI_WBYTE
+.ENDM
+
+.MACRO  WLRRR ADDR,REG
+	PUSH W1
+	MOV #\ADDR,W2
+	MOV #\REG,W1
+	MOV [W1],W0
+	CALL SPI_WBYTE
+	POP W1
+.ENDM
+
+.MACRO  WLRRW ADDR
+	MOV #\ADDR,W2
+	CALL SPI_WBYTE
+.ENDM
+
+
+.MACRO WSXBR ADDR,REG
+	PUSH W1
+	MOV #\ADDR,W2
+	MOV #\REG,W1
+	MOV [W1],W0
+	CALL SPI_WBYTE
+	POP W1
+.ENDM
+
+.MACRO  WSXB ADDR,VALUE
+	MOV #\ADDR,W2
+	MOV #\VALUE,W0
+	CALL SPI_WBYTE
+.ENDM
+
+.MACRO  RSXB ADDR
+	MOV #\ADDR,W2
+	CALL SPI_RBYTE
+.ENDM
+
+
+.MACRO  RWSXB ADDR,VALUE,MASK
+	MOV #\ADDR,W2
+	MOV #\VALUE,W0
+	MOV #\MASK,W3
+	CALL LRRW
+.ENDM
+
+
+.MACRO  RWSXR ADDR,REG,MASK
+	MOV #\ADDR,W2
+	MOV #\MASK,W3
+	MOV #\REG,W1
+	MOV [W1],W0
+	CALL LRRW
+.ENDM
+
+.MACRO  RWSXW ADDR,MASK
+	MOV #\ADDR,W2
+	MOV #\MASK,W3
+	CALL LRRW
+.ENDM
+
+
+
+.MACRO 	MOVFF XX,YY
+	PUSH \XX
+	POP \YY
+.ENDM
+
+
+;************************                
+;-------------------------
+
+
+      
+
+;************************                
+.MACRO 	W0LCD XX
+	BCF LCDCS_O
+	MOV #\XX,W0
+	CALL LCDWC8
+	BSF LCDCS_O
+.ENDM
+;-------------------------
+;************************                
+.MACRO 	W8LCD XX,YY
+	BCF LCDCS_O
+	MOV #\XX,W0
+	CALL LCDWC8
+	MOV #\YY,W0
+	CALL LCDWD8
+	BSF LCDCS_O
+.ENDM
+;-------------------------
+
+;*************************
+.MACRO 	LXY XX,YY
+	MOV #\XX,W0
+	MOV W0,LCDX
+	MOV #\YY,W0
+	MOV W0,LCDY
+.ENDM
+;-------------------------
+;*************************
+.MACRO 	LFADR XX
+	MOV #&XX&0,W0
+	MOV W0,FADR0
+	MOV #&XX&1,W0
+	MOV W0,FADR1
+.ENDM
+;-------------------------
+
+.MACRO 	BSF XX
+	BSET \XX,#&XX&_P
+.ENDM
+.MACRO 	BCF XX
+	BCLR \XX,#&XX&_P
+.ENDM
+.MACRO 	TG XX
+	BTG \XX,#&XX&_P
+.ENDM
+.MACRO 	BTFSS XX
+	BTSS \XX,#&XX&_P
+.ENDM
+.MACRO 	BTFSC XX
+	BTSC \XX,#&XX&_P
+.ENDM
+
+
+.MACRO 	LDPTR XX
+    	MOV #tbloffset(\XX),W1
+.ENDM
+
+.MACRO 	LOFFS0 XX
+        MOV #tbloffset(\XX),W0
+.ENDM
+.MACRO 	LOFFS1 XX
+        MOV #tbloffset(\XX),W1
+.ENDM
+.MACRO 	LOFFS2 XX
+        MOV #tbloffset(\XX),W2
+.ENDM
+.MACRO 	LOFFS3 XX
+        MOV #tbloffset(\XX),W3
+.ENDM
+.MACRO 	LOFFS4 XX
+        MOV #tbloffset(\XX),W4
+.ENDM
+.MACRO 	LOFFS5 XX
+        MOV #tbloffset(\XX),W5
+.ENDM
+.MACRO 	LOFFS6 XX
+       	MOV #tbloffset(\XX),W6
+.ENDM
+.MACRO 	LOFFS7 XX
+        MOV #tbloffset(\XX),W7
+.ENDM
+
+.MACRO 	MOVLF XX,YY
+        MOV #\XX,W0
+	MOV W0,\YY
+.ENDM
+
+
+.MACRO 	MLF XX,YY
+        MOV #\XX,W0
+	MOV W0,\YY
+.ENDM
+
+
+.MACRO  MRR REG0,REG1
+	PUSH \REG0
+	POP \REG1
+.ENDM
