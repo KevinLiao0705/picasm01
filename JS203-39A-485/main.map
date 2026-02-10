@@ -1,4 +1,4 @@
-Microchip Technology Inc, vv3_31 (A) t
+Microchip Technology Inc, vv3_31 (A) ½
 
 Tool Name:
   C:\Program Files (x86)\Microchip\MPLAB ASM30 Suite\bin\bin/pic30-coff-ld.exe
@@ -31,9 +31,9 @@ Data Memory  [Origin = 0x1000, Length = 0x2000]
 
 section                    address      alignment gaps    total length  (dec)
 -------                    -------      --------------    -------------------
-.nbss                       0x1000                   0           0x3a0  (928)
+.nbss                       0x1000                   0           0x3ca  (970)
 
-                        Total data memory used (bytes):          0x3a0  (928) 11%
+                        Total data memory used (bytes):          0x3ca  (970) 11%
 
 
 Dynamic Memory Usage
@@ -41,27 +41,29 @@ Dynamic Memory Usage
 region                     address                      maximum length  (dec)
 ------                     -------                      ---------------------
 heap                             0                                   0  (0)
-stack                       0x13a0                              0x1c60  (7264)
+stack                       0x13ca                              0x1c36  (7222)
 
-                        Maximum dynamic memory (bytes):         0x1c60  (7264)
+                        Maximum dynamic memory (bytes):         0x1c36  (7222)
 
 
 External Symbols in Program Memory (by address):
 
                   0x000200                  __DefaultInterrupt
                   0x000204                  __reset
-                  0x000d9c                  __INT1Interrupt
-                  0x000dac                  __U1RXInterrupt
-                  0x000e4c                  __U1TXInterrupt
-                  0x000e80                  __U2TXInterrupt
+                  0x000746                  __U2RXInterrupt
+                  0x00177c                  __INT1Interrupt
+                  0x00178c                  __U1RXInterrupt
+                  0x00182c                  __U1TXInterrupt
+                  0x001860                  __U2TXInterrupt
 
 External Symbols in Program Memory (by name):
 
                   0x000200                  __DefaultInterrupt
-                  0x000d9c                  __INT1Interrupt
-                  0x000dac                  __U1RXInterrupt
-                  0x000e4c                  __U1TXInterrupt
-                  0x000e80                  __U2TXInterrupt
+                  0x00177c                  __INT1Interrupt
+                  0x00178c                  __U1RXInterrupt
+                  0x00182c                  __U1TXInterrupt
+                  0x000746                  __U2RXInterrupt
+                  0x001860                  __U2TXInterrupt
                   0x000204                  __reset
 
 Memory Configuration
@@ -210,8 +212,8 @@ __FUID3
                   0x000024          0x4 LONG 0x200 DEFINED (__T3Interrupt)?ABSOLUTE (__T3Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000026          0x4 LONG 0x200 DEFINED (__SPI1ErrInterrupt)?ABSOLUTE (__SPI1ErrInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000028          0x4 LONG 0x200 DEFINED (__SPI1Interrupt)?ABSOLUTE (__SPI1Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x00002a          0x4 LONG 0xdac DEFINED (__U1RXInterrupt)?ABSOLUTE (__U1RXInterrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x00002c          0x4 LONG 0xe4c DEFINED (__U1TXInterrupt)?ABSOLUTE (__U1TXInterrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00002a          0x4 LONG 0x178c DEFINED (__U1RXInterrupt)?ABSOLUTE (__U1RXInterrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00002c          0x4 LONG 0x182c DEFINED (__U1TXInterrupt)?ABSOLUTE (__U1TXInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00002e          0x4 LONG 0x200 DEFINED (__AD1Interrupt)?ABSOLUTE (__AD1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000030          0x4 LONG 0x200 DEFINED (__DMA1Interrupt)?ABSOLUTE (__DMA1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000032          0x4 LONG 0x200 DEFINED (__Interrupt15)?ABSOLUTE (__Interrupt15):ABSOLUTE (__DefaultInterrupt)
@@ -219,7 +221,7 @@ __FUID3
                   0x000036          0x4 LONG 0x200 DEFINED (__MI2C1Interrupt)?ABSOLUTE (__MI2C1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000038          0x4 LONG 0x200 DEFINED (__CM1Interrupt)?ABSOLUTE (__CM1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00003a          0x4 LONG 0x200 DEFINED (__CNInterrupt)?ABSOLUTE (__CNInterrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x00003c          0x4 LONG 0xd9c DEFINED (__INT1Interrupt)?ABSOLUTE (__INT1Interrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x00003c          0x4 LONG 0x177c DEFINED (__INT1Interrupt)?ABSOLUTE (__INT1Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00003e          0x4 LONG 0x200 DEFINED (__Interrupt21)?ABSOLUTE (__Interrupt21):ABSOLUTE (__DefaultInterrupt)
                   0x000040          0x4 LONG 0x200 DEFINED (__Interrupt22)?ABSOLUTE (__Interrupt22):ABSOLUTE (__DefaultInterrupt)
                   0x000042          0x4 LONG 0x200 DEFINED (__Interrupt23)?ABSOLUTE (__Interrupt23):ABSOLUTE (__DefaultInterrupt)
@@ -229,8 +231,8 @@ __FUID3
                   0x00004a          0x4 LONG 0x200 DEFINED (__T4Interrupt)?ABSOLUTE (__T4Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00004c          0x4 LONG 0x200 DEFINED (__T5Interrupt)?ABSOLUTE (__T5Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x00004e          0x4 LONG 0x200 DEFINED (__INT2Interrupt)?ABSOLUTE (__INT2Interrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x000050          0x4 LONG 0x200 DEFINED (__U2RXInterrupt)?ABSOLUTE (__U2RXInterrupt):ABSOLUTE (__DefaultInterrupt)
-                  0x000052          0x4 LONG 0xe80 DEFINED (__U2TXInterrupt)?ABSOLUTE (__U2TXInterrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000050          0x4 LONG 0x746 DEFINED (__U2RXInterrupt)?ABSOLUTE (__U2RXInterrupt):ABSOLUTE (__DefaultInterrupt)
+                  0x000052          0x4 LONG 0x1860 DEFINED (__U2TXInterrupt)?ABSOLUTE (__U2TXInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000054          0x4 LONG 0x200 DEFINED (__SPI2ErrInterrupt)?ABSOLUTE (__SPI2ErrInterrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000056          0x4 LONG 0x200 DEFINED (__SPI2Interrupt)?ABSOLUTE (__SPI2Interrupt):ABSOLUTE (__DefaultInterrupt)
                   0x000058          0x4 LONG 0x200 DEFINED (__Interrupt34)?ABSOLUTE (__Interrupt34):ABSOLUTE (__DefaultInterrupt)
@@ -1329,16 +1331,17 @@ OUTPUT(main.cof coff-pic30)
 LOAD data_init
 LOAD default_isr
 
-.nbss               0x1000        0x3a0
- .nbss              0x1000        0x3a0 main.o
+.nbss               0x1000        0x3ca
+ .nbss              0x1000        0x3ca main.o
 
 .text             0x000204       0x9ffc
  .text            0x000204       0x9ffc main.o
                   0x000204                  _reset
-                  0x000d9c                  _INT1Interrupt
-                  0x000dac                  _U1RXInterrupt
-                  0x000e4c                  _U1TXInterrupt
-                  0x000e80                  _U2TXInterrupt
+                  0x000746                  _U2RXInterrupt
+                  0x00177c                  _INT1Interrupt
+                  0x00178c                  _U1RXInterrupt
+                  0x00182c                  _U1TXInterrupt
+                  0x001860                  _U2TXInterrupt
 
 .dinit            0x00a200          0x8
  .dinit           0x00a200          0x8 data_init
