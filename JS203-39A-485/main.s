@@ -18,12 +18,12 @@ fiber
         .include "p24ep64gp206.inc"
 
 ;BY DEFINE=============================
-;	.EQU JS203_39A_F01_02	,1      ;SSPA DRIVER
+	.EQU JS203_39A_F01_02	,1      ;SSPA DRIVER
 ;	.EQU JS203_39A_L01_02	,1      ;LA
 ;        .EQU JS203_39A_C01_04  ,1       ;FIBER
 ;       .EQU JS203_39A_K01_01   ,1      ;io
 ;        .EQU JS203_39A_K01_02   ,1      ;io
-        .EQU JS203_39A_M01_01   ,1      ;RF
+;        .EQU JS203_39A_M01_01   ,1      ;RF
 ;       .EQU JS203_39A_A01_03   ,1      ;IPC
 ;
 ;	.EQU DEBUG_SLOT_ID_K	        ,0x0001
@@ -523,6 +523,15 @@ UTX_CHKSUM0:		.SPACE 2
 UTX_CHKSUM1:		.SPACE 2	
 UTX_BTX:		.SPACE 2	
 UTX_BUFFER_LEN:		.SPACE 2	
+UTX_BUFFER_B00:		.SPACE 2	
+UTX_BUFFER_B01:		.SPACE 2	
+UTX_BUFFER_B02:		.SPACE 2	
+UTX_BUFFER_B03:		.SPACE 2	
+UTX_BUFFER_B04:		.SPACE 2	
+IZERO_TH:		.SPACE 2	
+ISUM_SHIFT:		.SPACE 2	
+I32_TH:		        .SPACE 2	
+I50_TH:		        .SPACE 2	
 
 
 RS485_CMD:		.SPACE 2	
@@ -5613,6 +5622,11 @@ MAIN:	                                ;;
 	BSF U2RX_EN_F			;;
         MOVLF #2,SLOT_STATUS            ;;
         CLR SLOT_TEST_STATUS            ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOVLF #10000,IZERO_TH           ;;
+        MOVLF #5,ISUM_SHIFT             ;;
+        MOVLF #0x6030,I32_TH            ;;
+        MOVLF #0x6030,I50_TH            ;;
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 MAIN_LOOP:				;;
         CLRWDT                          ;;
@@ -5625,7 +5639,7 @@ MAIN_LOOP:				;;
 	TG TP1_O			;;
 	CLRWDT				;;
         BTFSC T16M_F                    ;;
-        CALL DRVSON_CLR_PRG             ;;
+        CALL DRVSON_CLR_PRG             ;;5
 
 	BTFSC T128M_F			;;
         CALL DEBUG_PRG
@@ -5673,15 +5687,22 @@ SON_CMD:                                ;;
 	MOVFF RS485_CMD_PARA3,UTX_PARA3 ;;
         CLR UTX_BUFFER_LEN              ;;        
         BRA U2TX_PRG_1                  ;;
-GET_SON_INF:
+GET_SON_INF:                            ;;
 	MOV #0x1000,W0                  ;;
 	MOV W0,UTX_CMD                  ;;
-        CLR UTX_PARA0           
-        CLR UTX_PARA1           
-        CLR UTX_PARA2           
-        CLR UTX_PARA3           
-        CLR UTX_BUFFER_LEN              ;;        
-U2TX_PRG_1:                              ;;
+        CLR UTX_PARA0                   ;;        
+        CLR UTX_PARA1                   ;;        
+        CLR UTX_PARA2                   ;;        
+        CLR UTX_PARA3                   ;;        
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOVLF #0x08B0,UTX_BUFFER_B00    ;;
+        MOVFF IZERO_TH,UTX_BUFFER_B01   ;;
+        MOVFF ISUM_SHIFT,UTX_BUFFER_B02 ;;
+        MOVFF I32_TH,UTX_BUFFER_B03     ;;
+        MOVFF I50_TH,UTX_BUFFER_B04     ;;
+        MOVLF #10,UTX_BUFFER_LEN        ;;        
+        MOV #UTX_BUFFER_B00,W3          ;;
+U2TX_PRG_1:                             ;;
         CLR RS485_CMD                   ;;
         CLR RS485_CMD_PARA0             ;;
         CLR RS485_CMD_PARA1             ;;
@@ -5865,6 +5886,25 @@ CHK_U1RX_3:				;;
         AND #255,W0                     ;;
         MOV W0,RFRXCHA1                 ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	MOV [W1++],W0			;;
+        MOV #0x08B0,W2                  ;;
+        CP W0,W2                        ;;
+        BRA NZ,CHK_U1RX_4                ;;
+	MOV [W1++],W0			;;
+        MOV W0,IZERO_TH                 ;;
+	MOV [W1++],W0			;;
+        AND #255,W0                     ;;
+        MOV W0,ISUM_SHIFT               ;;
+	MOV [W1++],W0			;;
+        MOV W0,I32_TH                   ;;
+	MOV [W1++],W0			;;
+        MOV W0,I50_TH                   ;;
+
+
+
+
+
+CHK_U1RX_4:				;;
 	MOV RX_CMD,W0			;;	
 	SWAP W0				;;
 	AND #255,W0			;;

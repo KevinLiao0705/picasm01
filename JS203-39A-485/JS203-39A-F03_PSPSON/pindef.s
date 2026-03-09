@@ -32,15 +32,15 @@
 .EQU ADDR_A1_I_P		,3
 .EQU ADDR_A1_IO_P		,3
 ;=======================PIN8 
-;.EQU RS422_RX_I		,PORTB
-;.EQU RS422_RX_IO		,TRISB
-;.EQU RS422_RX_I_P		,4
-;.EQU RS422_RX_IO_P		,4
+.EQU TP1_O		,LATB
+.EQU TP1_IO		,TRISB
+.EQU TP1_O_P		,4
+.EQU TP1_IO_P		,4
 ;=======================PIN9	VSS 
-;.EQU RS422_TX_O	        ,LATA
-;.EQU RS422_TX_IO		,TRISA
-;.EQU RS422_TX_O_P		,4
-;.EQU RS422_TX_IO_P		,4
+.EQU TP2_O	        ,LATA
+.EQU TP2_IO		,TRISA
+.EQU TP2_O_P		,4
+.EQU TP2_IO_P		,4
 ;=======================PIN10 	VDD
 ;=======================PIN11 
 ;PGD

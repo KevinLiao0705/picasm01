@@ -315,10 +315,13 @@ TMP13:			.SPACE 2
 TMP14:			.SPACE 2				
 TMP15:			.SPACE 2				
 
+TEST_CNT:		        .SPACE 2		
+TEST_BUF:		        .SPACE 2		
 
 
 ADTEST:		        .SPACE 2		
 ADWAIT_TIM:	        .SPACE 2		
+TP2_TIME:		.SPACE 2		
 
 
 TMR2_BUF:		.SPACE 2		
@@ -328,6 +331,7 @@ TMR2_IORF:		.SPACE 2
 TMR3_BUF:		.SPACE 2		
 TMR3_FLAG:		.SPACE 2		
 TMR3_IORF:		.SPACE 2		
+
 DELAY_CNT:		.SPACE 2		
 DELAY_ACT:		.SPACE 2		
 DELAY_BASE_TIM:		.SPACE 2		
@@ -348,6 +352,37 @@ ADBUF0:			.SPACE 2
 ADBUF1:			.SPACE 2		
 ADBUF2:			.SPACE 2		
 ADBUF3:			.SPACE 2		
+
+
+I32CNT:		        .SPACE 2		
+I32BUF0:		.SPACE 2		
+I32BUF1:		.SPACE 2		
+I32BUF2:		.SPACE 2		
+I32BUF3:		.SPACE 2		
+I32SUM:		        .SPACE 2		
+I32SUM_CNT:	        .SPACE 2		
+I32TH_H:		.SPACE 2		
+I32TH_L:	        .SPACE 2		
+I32ZERO_CNT0:		.SPACE 2		
+I32ZERO_CNT1:		.SPACE 2		
+
+
+
+I50CNT:		        .SPACE 2		
+I50BUF0:		.SPACE 2		
+I50BUF1:		.SPACE 2		
+I50BUF2:		.SPACE 2		
+I50BUF3:		.SPACE 2		
+I50SUM:		        .SPACE 2		
+I50SUM_CNT:	        .SPACE 2		
+I50TH_H:		.SPACE 2		
+I50TH_L:	        .SPACE 2		
+I50ZERO_CNT0:		.SPACE 2		
+I50ZERO_CNT1:		.SPACE 2		
+IZERO_TH:		.SPACE 2		
+ISUM_SHIFT:	        .SPACE 2		
+
+
 
 I32BUF:		        .SPACE 2		
 I50BUF:		        .SPACE 2		
@@ -756,8 +791,8 @@ END_REG:		.SPACE 2
 .EQU YES_F_P		,11
 .EQU U2RX_CON_F		,FLAGA
 .EQU U2RX_CON_F_P  	,12
-;.EQU MASTER_U1RX_F	,FLAGA
-;.EQU MASTER_U1RX_F_P 	,13
+.EQU AD_START_TRIG_F 	,FLAGA
+.EQU AD_START_TRIG_F_P 	,13
 ;.EQU MASTER_U2RX_F	,FLAGA
 ;.EQU MASTER_U2RX_F_P 	,14
 ;.EQU WAIT_DUTX_F	,FLAGA
@@ -1094,7 +1129,8 @@ INIT_AD:				;;
 	;MOV #0x0100,W0			;;2 CHANNEL	
 	;MOV #0x0000,W0			;;	
 	MOV W0,AD1CON2			;;
-	MOV #0x800F,W0			;;	
+	MOV #0x800F,W0			;;RC	
+	MOV #0x0003,W0			;;RC	
 	MOV W0,AD1CON3			;;
 	MOV #0x0000,W0			;;	
 	MOV W0,AD1CON4			;;
@@ -1205,12 +1241,58 @@ LED_P1:
         RETURN
         
 
+EMUI_PRG:
+        BTFSC TP2_O        
+        BRA EMUI_2        
+EMUI_1:
+        MOV TP2_TIME,W0
+        SUB TMR3,WREG
+        BTSC W0,#15
+        RETURN
+        BSF TP2_O
+        MOV #80,W0
+        ADD TMR3,WREG
+        MOV W0,TP2_TIME
+        RETURN
+EMUI_2:
+        MOV TP2_TIME,W0
+        SUB TMR3,WREG
+        BTSC W0,#15
+        RETURN
+        BCF TP2_O
+        MOV #8000,W0
+        ADD TMR3,WREG
+        MOV W0,TP2_TIME
+        INC TEST_CNT
+        MOV #100,W0
+        CP TEST_CNT
+        BRA GEU,$+4
+        RETURN
+        MOVFF I32VADI,TEST_BUF
+        CLR TEST_CNT
+        NOP
+        NOP
+        RETURN
+
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 MAIN:					;;
 	BSF U1RX_EN_F			;;
 	BSF U2RX_EN_F			;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOVLF #50,I32TH_L
+        MOVLF #100,I32TH_H
+        MOVLF #5,ISUM_SHIFT
+        MOVLF #10000,IZERO_TH  
+        MOVLF #50,I50TH_L
+        MOVLF #100,I50TH_H
+        MOVLF #5,ISUM_SHIFT
+        MOVLF #10000,IZERO_TH  
+
+
         ;BSF PS_ON_F             
         ;MOV #250,W0;
         ;MOV W0,V32ON_TIM        
@@ -1221,10 +1303,10 @@ MAIN_LOOP:				;;
         CALL LED_PRG                    ;;
         .IFDEF TEST_EN_DK               ;;
         CALL TEST_PRG                   ;;
-        .ELSE
+        .ELSE                           ;;
 	CALL PS_ONOFF_PRG		;;
         .ENDIF                          ;;
-        
+        ;CALL EMUI_PRG                  ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	BSET PS_FLAG,#0 		;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1253,7 +1335,7 @@ MAIN_LOOP:				;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	CALL CONVERT_AD			;;
 	CALL TMR2PRG			;;	
-	CALL TMR3PRG			;;	
+        CALL TMR3PRG                    ;;
 	CALL CONVERT_AD			;;
 	CALL TIMEACT_PRG		;;
 	CALL CONVERT_AD			;;
@@ -1333,6 +1415,7 @@ TMR2PRG:				;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 TMR3PRG:				;;
 	CLR TMR3_FLAG			;;	
@@ -1346,7 +1429,6 @@ TMR3PRG:				;;
 	CLRWDT				;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1444,7 +1526,7 @@ CMD_NONE_PRG:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 INIT_TIMER1:				;;
         CLR TMR1                        ;;
-	MOV #0xA030,W0			;;0.13US
+	MOV #0xA030,W0			;;
 	MOV W0,T1CON			;;
         MOV #100,W0                    	;;
         MOV W0,PR1                      ;;
@@ -1455,7 +1537,7 @@ INIT_TIMER1:				;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 INIT_TIMER3:				;;
-	MOV #0xA030,W0			;;0.13US
+	MOV #0xA010,W0			;;0.13US
 	MOV W0,T3CON			;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1766,10 +1848,11 @@ INIT_IO:				;;
 	;;PIN7 				;;
 	BSF ADDR_A1_IO			;;
 	;;PIN8	 			;;
-	;BSF RS422_RX_IO		;;
+	BCF TP1_O	        	;;
+	BCF TP1_IO	        	;;
 	;;PIN9	 			;;
-	;BCF RS422_TX_O			;;
-	;BSF RS422_TX_IO		;;
+	BCF TP2_O	        	;;
+	BCF TP2_IO	        	;;
 	;;PIN11	 			;;PGD
 	;;PIN12	 			;;PGC
 	;;PIN13	 			;;
@@ -2153,6 +2236,37 @@ URXDEC_GETINF_J0:			;;
         ADD TMR2,WREG                   ;;
         MOV W0,DELAY_ACT_TIM            ;;
         MOVLF #1,DELAY_ACT              ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV RX_ADDR,W1                  ;;      
+        ADD #18,W1                      ;;
+        MOV [W1++],W0                   ;;
+        MOV #0x08B0,W2                  ;;
+        CP W0,W2                        ;;
+        BRA Z,$+4                       ;;
+        RETURN                          ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV [W1++],W0                   ;;
+        MOV W0,IZERO_TH                 ;;
+        MOV [W1++],W0                   ;;
+        MOV W0,ISUM_SHIFT               ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV [W1++],W0                   ;;
+        PUSH W0                         ;;
+        AND #255,W0                     ;;
+        MOV W0,I32TH_L                  ;;
+        POP W0                          ;;
+        SWAP W0                         ;;
+        AND #255,W0                     ;;
+        MOV W0,I32TH_H                  ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        MOV [W1++],W0                   ;;
+        PUSH W0                         ;;
+        AND #255,W0                     ;;
+        MOV W0,I50TH_L                  ;;
+        POP W0                          ;;
+        SWAP W0                         ;;
+        AND #255,W0                     ;;
+        MOV W0,I50TH_H                  ;;
 	RETURN				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 URXDEC_CMD_ACT:			        ;;
@@ -2995,7 +3109,7 @@ DLYUX:
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-SIM_CSDFSDFONVERT_AD:				;;
+SIM_CSDFSDFONVERT_AD:			;;
 	MOV CONVAD_CNT,W0 		;;
 	BRA W0				;;
 	BRA SIM_CONV_J0			;;
@@ -3151,15 +3265,31 @@ FILTER_5:
 	ADD R1,WREG
 	LSR W0,#1,W0
 	RETURN
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+AD_START_TRIG:                          ;;
+        BCF YES_F                       ;;
+	MOV W0,AD1CHS0			;;TAD IN RC MODE IS 250 NS
+	BSET AD1CON1,#SAMP		;;MUST OVER 3 TIMES TAD
+        CALL I50PRG                     ;;
+        CALL I32PRG                     ;;
+        BCLR AD1CON1,#SAMP              ;;    
+        BSF AD_START_TRIG_F             ;;
+        CLR ADWAIT_TIM                  ;;                     
+        RETURN                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 AD_STARTX:                              ;;
         BCF YES_F                       ;;
 	MOV W0,AD1CHS0			;;TAD IN RC MODE IS 250 NS
 	BSET AD1CON1,#SAMP		;;MUST OVER 3 TIMES TAD
-        MOV #20,W0                       ;;
-        CALL DLYUXI                     ;;                        
+        CALL I50_PRG
+        CALL I32PRG
         BCLR AD1CON1,#SAMP              ;;    
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+        BSF TP1_O
         CLR ADWAIT_TIM                  ;;                     
 AD_STARTX_1:                            ;;
         INC ADWAIT_TIM                  ;;
@@ -3167,9 +3297,32 @@ AD_STARTX_1:                            ;;
         RETURN                          ;;
  	BTSS AD1CON1,#DONE		;;      
  	BRA AD_STARTX_1                 ;;
+        BCF TP1_O
         BSF YES_F                       ;;
         RETURN                          ;;              
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+AD_TRIGX:                              ;;
+	MOV W0,AD1CHS0			;;TAD IN RC MODE IS 250 NS
+	BSET AD1CON1,#SAMP		;;MUST OVER 3 TIMES TAD
+        RETURN
+
+WAIT_AD_END:                            ;;
+        BCF YES_F                       ;;
+        BCLR AD1CON1,#SAMP              ;;    
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    
+        CLR ADWAIT_TIM                  ;;                     
+WAIT_AD_END_1:                           ;;
+        INC ADWAIT_TIM                  ;;
+        BTSC ADWAIT_TIM,#8              ;;              
+        RETURN                          ;;
+ 	BTSS AD1CON1,#DONE		;;      
+ 	BRA WAIT_AD_END_1               ;;
+        BSF YES_F                       ;;
+        RETURN                          ;;              
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3184,11 +3337,144 @@ FASTAD_PRG:                             ;;
         MOV W0,I50BUF                   ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         CALL I50_PRG                    ;;
-        CALL I32_PRG                    ;;
+        CALL I32PRG                     ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 FASTAD_END:                             ;;
         RETURN                          ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+I32PRG:                                 ;;
+	MOV I32TH_H,W0         	        ;;
+        CP I32BUF                       ;;
+        BRA GEU,I32BIG                  ;;
+I32LESS:                                ;;
+	MOV I32TH_L,W0         	        ;;
+        CP I32BUF                       ;;
+        BRA LTU,I32ZERO                 ;;
+        RETURN                          ;;
+I32ZERO:                                ;;
+        INC I32ZERO_CNT0                ;;
+        BTSS I32ZERO_CNT0,#2            ;;
+        RETURN                          ;;
+        CLR I32ZERO_CNT0                ;;
+        INC I32ZERO_CNT1                ;;
+        MOV IZERO_TH,W0                 ;;
+        CP I32ZERO_CNT1                 ;;
+        BRA LTU,$+4                     ;;
+        CLR I32VADI                     ;;
+        RETURN                          ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+I32BIG:                                 ;;
+        MOV #I32BUF0,W1                 ;;
+        MOV I32CNT,W2                   ;;
+        ADD W2,W1,W1                    ;;
+        ADD W2,W1,W1                    ;;
+        MOV I32BUF,W0                   ;;
+        MOV W0,[W1]                     ;;
+        INC I32CNT                      ;;
+        MOV #4,W0                       ;;      
+        CP I32CNT                       ;;
+        BRA GEU,$+4                     ;;
+        RETURN                          ;;
+        CLR I32CNT                      ;;
+	MOVFF I32BUF0,R0		;;
+	MOVFF I32BUF1,R1		;;
+	MOVFF I32BUF2,R2		;;	
+	MOVFF I32BUF3,R3		;;
+	CALL FILTER			;;
+	ADD I32SUM			;;
+        INC I32SUM_CNT                  ;;
+        MOV #1,W2                       ;;
+        MOV ISUM_SHIFT,W0               ;;
+        SL W2,W0,W0                     ;;
+        CP I32SUM_CNT                   ;;
+        BRA GEU,$+4                     ;;
+        RETURN                          ;;
+        CLR I32SUM_CNT                  ;;
+        MOV I32SUM,W2                   ;;
+        MOV ISUM_SHIFT,W0               ;;
+        LSR W2,W0,W2                    ;;
+        CLR I32SUM                      ;;
+        MOV I32TH_H,W0                  ;;
+        CP W2,W0                        ;;
+        BRA GEU,$+4                     ;;
+        RETURN                          ;;
+        MOV W2,I32VADI                  ;;
+        CLR I32ZERO_CNT0                ;;
+        CLR I32ZERO_CNT1                ;;
+        RETURN                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+I50PRG:                                 ;;
+	MOV I50TH_H,W0         	        ;;
+        CP I50BUF                       ;;
+        BRA GEU,I50BIG                  ;;
+I50LESS:                                ;;
+	MOV I50TH_L,W0         	        ;;
+        CP I50BUF                       ;;
+        BRA LTU,I50ZERO                 ;;
+        RETURN                          ;;
+I50ZERO:                                ;;
+        INC I50ZERO_CNT0                ;;
+        BTSS I50ZERO_CNT0,#2            ;;
+        RETURN                          ;;
+        CLR I50ZERO_CNT0                ;;
+        INC I50ZERO_CNT1                ;;
+        MOV IZERO_TH,W0                 ;;
+        CP I50ZERO_CNT1                 ;;
+        BRA LTU,$+4                     ;;
+        CLR I50VADI                     ;;
+        RETURN                          ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+I50BIG:                                 ;;
+        MOV #I50BUF0,W1                 ;;
+        MOV I50CNT,W2                   ;;
+        ADD W2,W1,W1                    ;;
+        ADD W2,W1,W1                    ;;
+        MOV I50BUF,W0                   ;;
+        MOV W0,[W1]                     ;;
+        INC I50CNT                      ;;
+        MOV #4,W0                       ;;      
+        CP I50CNT                       ;;
+        BRA GEU,$+4                     ;;
+        RETURN                          ;;
+        CLR I50CNT                      ;;
+	MOVFF I50BUF0,R0		;;
+	MOVFF I50BUF1,R1		;;
+	MOVFF I50BUF2,R2		;;	
+	MOVFF I50BUF3,R3		;;
+	CALL FILTER			;;
+	ADD I50SUM			;;
+        INC I50SUM_CNT                  ;;
+        MOV #1,W2                       ;;
+        MOV ISUM_SHIFT,W0               ;;
+        SL W2,W0,W0                     ;;
+        CP I50SUM_CNT                   ;;
+        BRA GEU,$+4                     ;;
+        RETURN                          ;;
+        CLR I50SUM_CNT                  ;;
+        MOV I50SUM,W2                   ;;
+        MOV ISUM_SHIFT,W0               ;;
+        LSR W2,W0,W2                    ;;
+        CLR I50SUM                      ;;
+        MOV I50TH_H,W0                  ;;
+        CP W2,W0                        ;;
+        BRA GEU,$+4                     ;;
+        RETURN                          ;;
+        MOV W2,I50VADI                  ;;
+        CLR I50ZERO_CNT0                ;;
+        CLR I50ZERO_CNT1                ;;
+        RETURN                          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 I32_PRG:                                ;;
@@ -3222,7 +3508,7 @@ I32_LESS_1:                             ;;
         RETURN                          ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
+;INPUT I50BUF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 I50_PRG:                                ;;
 	MOV I50VADI,W0          	;;
@@ -3283,10 +3569,23 @@ CONVAD_TBL:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CONVERT_AD:				;;
+        CALL EMUI_PRG                   ;;
+        BTFSC AD_START_TRIG_F           ;;
+        BRA CONVERT_AD_1                ;;
+        TG TP1_O                        ;;
 	MOV CONVAD_CNT,W0 		;;
         LSR W0,#2,W0                    ;;
         CALL CONVAD_TBL                 ;;
-        CALL AD_STARTX                  ;;
+        CALL AD_START_TRIG              ;;
+        RETURN                          ;;
+CONVERT_AD_1:                           ;;                        
+        INC ADWAIT_TIM                  ;;
+        BTSC ADWAIT_TIM,#15             ;;
+        BCF AD_START_TRIG_F             ;;
+ 	BTSS AD1CON1,#DONE		;;      
+        RETURN                          ;;
+        BCF AD_START_TRIG_F             ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         MOV #ADXBUF00,W1                ;;
 	MOV CONVAD_CNT,W0 		;;
         ADD W0,W1,W1                    ;;
@@ -3299,20 +3598,17 @@ CONVERT_AD:				;;
 	MOV ADC1BUF2,W0			;;
         MOV W0,I32BUF                   ;;
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-        NOP
-        NOP
-        NOP
-        NOP
-        NOP
-        CALL I50_PRG                    ;;
-        CALL I32_PRG                    ;;
-        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         INC CONVAD_CNT                  ;;
         MOV #16,W0                      ;;
         CP CONVAD_CNT                   ;;
-        BRA GEU,$+4                     ;;
-        RETURN                          ;;
+        BRA LTU,$+4                     ;;
         CLR CONVAD_CNT                  ;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        BCF TP1_O
+        RETURN
+        CP0 CONVAD_CNT
+        BRA Z,$+4
+        RETURN  
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	MOVFF ADXBUF00,R0		;;
 	MOVFF ADXBUF01,R1		;;
@@ -3346,72 +3642,6 @@ CONVERT_AD:				;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         
         
-	AND #3,W0                       ;;
-	BRA W0				;;
-	BRA CONV_J0			;;
-	BRA CONV_J1			;;
-	BRA CONV_J2			;;
-	CLR CONVAD_CNT                  ;;
-	RETURN                          ;;
-CONV_J0:	
-	CLR ADTEST			;;
-	MOV ADCH_CNT,W0			;;
-	MOV W0,AD1CHS0			;;
-	BSET AD1CON1,#SAMP		;;
-	MOV #10,W0			;;
-	CALL DLYUX			;;
-	INC CONVAD_CNT			;;
-	RETURN				;;
-	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-CONV_J1:				;;
-	BCLR AD1CON1,#SAMP		;;
-	INC CONVAD_CNT
-	RETURN				;;
-CONV_J2:				;;
-	BTSC AD1CON1,#DONE		;;
-	BRA CONV_J21
-	INC ADTEST
-	MOV #10000,W0
-	CP ADTEST
-	BRA GEU,$+4
-	RETURN	
-	NOP
-	CLR CONVAD_CNT
-	RETURN
-CONV_J21:				;;
-	CLR CONVAD_CNT			;;
-	MOV #ADBUF0,W1			;;
-	MOV ADBUF_CNT,W0		;;
-	SL W0,#1,W0			;;
-	ADD W0,W1,W1			;;
-	MOV ADC1BUF0,W0			;;
-	MOV W0,[W1]			;;
-	INC ADBUF_CNT			;;
-	MOV #4,W0			;;
-	CP ADBUF_CNT			;;
-	BRA GEU,$+4			;;
-	RETURN 				;;
-	CLR ADBUF_CNT			;;
-	MOVFF ADBUF0,R0			;;
-	MOVFF ADBUF1,R1			;;
-	MOVFF ADBUF2,R2			;;	
-	MOVFF ADBUF3,R3			;;
-	CALL FILTER			;;
-	MOV #I50VADI,W1			;;
-	MOV ADCH_CNT,W2			;;
-	ADD W2,W1,W1			;;
-	ADD W2,W1,W1			;;
-	MOV W0,[W1]			;;
-	INC ADCH_CNT			;;
-	MOV #6,W0			;;
-	CP ADCH_CNT			;;
-	BRA GEU,$+4			;;
-	RETURN				;;
-	CLR ADCH_CNT			;;
-	RETURN				;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
 
 
 
