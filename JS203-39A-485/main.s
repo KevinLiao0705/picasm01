@@ -18,12 +18,12 @@ fiber
         .include "p24ep64gp206.inc"
 
 ;BY DEFINE=============================
-	.EQU JS203_39A_F01_02	,1      ;SSPA DRIVER
+;	.EQU JS203_39A_F01_02	,1      ;SSPA DRIVER
 ;	.EQU JS203_39A_L01_02	,1      ;LA
 ;        .EQU JS203_39A_C01_04  ,1       ;FIBER
 ;       .EQU JS203_39A_K01_01   ,1      ;io
 ;        .EQU JS203_39A_K01_02   ,1      ;io
-;        .EQU JS203_39A_M01_01   ,1      ;RF
+        .EQU JS203_39A_M01_01   ,1      ;RF
 ;       .EQU JS203_39A_A01_03   ,1      ;IPC
 ;
 ;	.EQU DEBUG_SLOT_ID_K	        ,0x0001
@@ -5614,7 +5614,7 @@ DEBUG_PRG:
 
 ;$1 DRV
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-MAIN:	                                ;;
+MAIN:	          
         CALL INIT_RAM   		;;
         CALL INIT_SIO_SSPA_DRIVER       ;;        
         CALL INIT_UART2_460800          ;;
